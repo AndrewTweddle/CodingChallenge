@@ -1,5 +1,5 @@
 # ===============================
-# Load input data in JSon format:
+# STEP 1: Load input data in JSon format:
 import json
 
 inputPath = 'data/input/'
@@ -15,14 +15,39 @@ listings = DataFrame(listingData)
 products = DataFrame(productData)
 
 # ======================================================================
-# Level 1 filtering: BY MANUFACTURER
+# STEP 2: Level 1 filtering: BY MANUFACTURER
 
-# Get lists of unique manufacturers in the 2 files (for matching them up):
+# 2.1 Get lists of unique manufacturers in the 2 files (for matching them up):
 lManufs = np.sort(listings['manufacturer']).unique()
 pManufs = np.sort(products['manufacturer']).unique()
     # Note: inspecting the above will give encoding errors if using an older versions of Pandas. Ensure you have version 0.11 or more recent.
 
 lManufsSeries = Series(lManufs)
+pManufsSeries = Series(pManufs)
+
+# pManufsSeries:
+# 0               Agfa
+# 1              Canon
+# 2              Casio
+# 3             Contax
+# 4              Epson
+# 5           Fujifilm
+# 6                 HP
+# 7              Kodak
+# 8     Konica Minolta
+# 9            Kyocera
+# 10             Leica
+# 11             Nikon
+# 12           Olympus
+# 13         Panasonic
+# 14            Pentax
+# 15             Ricoh
+# 16           Samsung
+# 17             Sanyo
+# 18             Sigma
+# 19              Sony
+# 20           Toshiba
+
 
 # ----------------------------------------------------------------------
 # Data discoveries:
@@ -31,9 +56,27 @@ lManufsSeries = Series(lManufs)
 #   3. Others are, but aren't on main list of products e.g. listings[listings['manufacturer'] == u'Roots']
 #   4. In some cases, the listing manufacturer is a subsidiary of the products manufacturer e.g. 'Canon Canada' under 'Canon'
 #   5. At least one typo: 'Canoon' instead of 'Canon': listings[listings['manufacturer'] == u'Canoon']
+#   6. Product manufacturer gotchas to avoid:
+#      6.1 Konica Minolta is two words, but it's simpler to match on single words rather than bigrams. 
+#          So match on each word, not the combination. This will also catch cases where either word is used alone.
+#      6.2 HP could also match Hewlett Packard. But that's two words. So match on "HP" or "Hewlett" or "Packard".
+#      6.3 Fujifilm could also match Fuji or "Fuji film". So rather just match on "Fuji" not "Fujifilm"
 
 # ----------------------------------------------------------------------
-# Experiment with Levenshtein distances between various similar strings:
+# 2.2 Generate and clean up manufacturer mappings in products data:
+pManufsMapping = DataFrame( 
+    { 'pManuf': pManufsSeries, 'Keyword': pManufsSeries.str.lower() } 
+) # By default map each word to itself
+pManufsMapping['Keyword'][pManufsMapping['pManuf'] == 'Konica Minolta'] = 'konica'
+pManufsMapping = pManufsMapping.append( { 'pManuf': 'Konica Minolta', 'Keyword': 'minolta' }, ignore_index = True )
+pManufsMapping = pManufsMapping.append( { 'pManuf': 'HP', 'Keyword': 'hewlett' }, ignore_index = True )
+pManufsMapping = pManufsMapping.append( { 'pManuf': 'HP', 'Keyword': 'packard' }, ignore_index = True )
+pManufsMapping['Keyword'][pManufsMapping['pManuf'] == 'Fujifilm'] = 'fuji'
+
+pManufKeywords = pManufsMapping['Keyword']
+
+# ----------------------------------------------------------------------
+# 2.3 Experiment with Levenshtein distances between various similar strings:
 from nltk.metrics import *
 
 s1 = 'Canon'
@@ -60,7 +103,7 @@ edit_distance_threshold = 2
 min_manuf_word_len = 4
 
 # ----------------------------------------------------------------------
-# Match lManufs to pManufs:
+# 2.4 Match lManufs to pManufs:
 # 
 # Precedence:
 # 1. Exact match on entire string
@@ -69,31 +112,36 @@ min_manuf_word_len = 4
 # 4. Sufficiently small Levenshtein distance to a single word in the string
 def matchManuf(lManuf):
     splits = lManuf.lower().split()
-    for pManuf in pManufs:
-        pManufLower = pManuf.lower()
-        if pManufLower == lManuf.lower():
-            return pManuf
-        if pManufLower in splits:
-            return pManuf
+    for pManufKeyword in pManufKeywords:
+        if pManufKeyword in splits:
+            return pManufKeyword
     foundPManufs = [ p for s in splits
-                       for p in pManufs 
+                       for p in pManufKeywords
                        if s.find(p.lower()) >= 0
                    ]
     if len(foundPManufs) > 0:
         return foundPManufs[0]
-    levenPManufs = [ p for s in splits
-                       for p in pManufs 
-                       if len(s) > min_manuf_word_len and edit_distance(s, p.lower()) <= edit_distance_threshold
-                   ]
-    if len(levenPManufs) > 0:
-        return levenPManufs[0]
+    levenshteinPManufs = [ p for s in splits
+                             for p in pManufKeywords
+                             if len(s) > min_manuf_word_len 
+                             and edit_distance(s, p.lower()) <= edit_distance_threshold
+                         ]
+    if len(levenshteinPManufs) > 0:
+        return levenshteinPManufs[0]
     return ''
 
 mapData = { 'lManuf': lManufsSeries,
-            'pManuf': lManufsSeries.apply( matchManuf )
+            'pManufKeyword': lManufsSeries.apply( matchManuf )
           }
 lManufMap = DataFrame( mapData )
+lManufMap = pd.merge( lManufMap, pManufsMapping, how='left', left_on='pManufKeyword', right_on='Keyword')
+del lManufMap['Keyword']
+lManufMap['pManuf'] = lManufMap['pManuf'].fillna('')
+lManufMap
 
+# ----------------------------------------------------------------------
+# 2.5 Output intermediate data to check the accuracy of the manufacturer matching:
+# 
 #Possible mismatches:
 def isPossibleMismatch(row):
     return row['pManuf'] != '' and (row['lManuf'].lower().find(row['pManuf'].lower()) == -1)
@@ -104,35 +152,53 @@ possibleMismatches = lManufMap.apply(isPossibleMismatch, axis=1)
 # An alternate approach would have been to modify matchManuf to also return the type of match, as described here: 
 #   http://stackoverflow.com/questions/12356501/pandas-create-two-new-columns-in-a-dataframe-with-values-calculated-from-a-pre?rq=1
 
+lManufMap[lManufMap['pManuf'] == ''].to_csv('data/intermediate/unmatched_manufs.csv', encoding='utf-8')
+lManufMap[lManufMap['pManuf'] != ''].to_csv('data/intermediate/matched_manufs.csv', encoding='utf-8')
+lManufMap[possibleMismatches].to_csv('data/intermediate/possible_mismatched_manufs.csv', encoding='utf-8')
+# ASSUMPTION: using utf-8 encodings will be sufficient. 
+# Note that Excel may show some less common letters as a "?". Nut in a text editor they are correct.
+
 lManufMap[possibleMismatches]
 
-                     # lManuf   pManuf
-# 57               CANAL TOYS    Canon
-# 76                   Canoon    Canon
-# 86    Clip Sonic Technology     Sony
-# 134                 Epsilon    Epson
-# 242                   LESCA    Leica
-# 253                   Leitz    Leica
-# 254                   Lenco    Leica
-# 292  Midland Consumer Radio    Casio
-# 312                 OPYMPUS  Olympus
-# 315                 Olmypus  Olympus
-# 321                Olymypus  Olympus
-# 378                 SAMYANG  Samsung
-# 435      Syntax Corporation   Contax
+#                           lManuf pManufKeyword          pManuf
+# 428                   CANAL TOYS         canon           Canon
+# 435                       Canoon         canon           Canon
+# 439       Midland Consumer Radio         casio           Casio
+# 440        Clip Sonic Technology        konica  Konica Minolta
+# 441                       Konica        konica  Konica Minolta
+# 447                      Epsilon         epson           Epson
+# 451                         Fuji          fuji        Fujifilm
+# 452                Fuji Film USA          fuji        Fujifilm
+# 453                 Fuji FinePix          fuji        Fujifilm
+# 454  Fuji Photo Film Europe GmbH          fuji        Fujifilm
+# 455    Fuji Photo Film Usa, Inc.          fuji        Fujifilm
+# 460              Hewlett Packard       hewlett              HP
+# 461         Hewlett Packard GmbH       hewlett              HP
+# 464                        LESCA         leica           Leica
+# 466                        Leitz         leica           Leica
+# 467                        Lenco         leica           Leica
+# 469                      Minolta       minolta  Konica Minolta
+# 475                      OPYMPUS       olympus         Olympus
+# 476                      Olmypus       olympus         Olympus
+# 482                     Olymypus       olympus         Olympus
+# 498                      SAMYANG       samsung         Samsung
+# 521           Syntax Corporation        contax          Contax
 
-# DECISION: Most of the above are mismatches. 
+# DECISION: Quite a few of the above are mismatches. 
 #           However the various olympus mappings and (possibly) canoon are correctly matched.
 #           So rather allow all of these through and let the next layer of matching eliminate them.
+#           
+#           The alternative is to hard-code their elimination.
+#           But rather avoid unnecessary customizations.
 
+# DISCOVERIES:
+# 1. Inspecting the 3 csv files showed up some anomalies.
+#    This led to the new step 2.2 and subsequent refactorings.
 
 # ----------------------------------------------------------------------
-# Map to manufacturers
+# 2.6 Map to manufacturers
+# 
 
 listingsByPManufAll = pd.merge( listings, lManufMap, how='inner', left_on='manufacturer', right_on='lManuf')
 listingsByPManuf = listingsByPManufAll[listingsByPManufAll['pManuf'] != ''].reindex(columns = ['pManuf','lManuf', 'title','currency','price'])
-
-# checking:
-# listingsByPManuf[listingsByPManuf['pManuf'] != ''][9001:9050]
-# listingsByPManuf[listingsByPManuf['lManuf'] == 'Olymypus']
-# 
+listingsByPManuf.to_csv('data/intermediate/filtered_listings_by_pmanuf.csv', encoding='utf-8')
