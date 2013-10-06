@@ -1,0 +1,94 @@
+# This is the test regex for matching to sections started with the words "for" (applicability) or "with" (additional) or their equivalents in various languages
+# Note that this uses .Net regex'es as I can test these easily with the RegexWorkbench tool.
+# TODO: Modify for Python perl5 regex compatibility
+^
+\s*
+(?<description>
+  (?:
+    (?!
+      (?<!\w)
+      (?:for   # Add other equivalents of "for" here
+        |with  # Add other equivalents of "with" here
+      )
+      (?!\w)
+    )
+    .
+  )+
+  # Ensure the last character is non-whitespace:
+  (?:
+    (?!
+      (?<!\w)
+      (?:for   # Add other equivalents of "for" here
+        |with  # Add other equivalents of "with" here
+      )
+      (?!\w)
+    )
+    \S
+  )
+)
+\s*
+(?:
+  (?:
+    (?<applicabilitySection>
+      (?:
+        (?:for) # Add other equivalents of "for" here
+        \W*
+      )
+      (?<applicability>
+        (?:
+          (?!
+            (?<!\w)
+            (?:for   # Add other equivalents of "for" here
+              |with  # Add other equivalents of "with" here
+            )
+            (?!\w)
+          )
+          .
+        )+
+        # Ensure the last character is non-whitespace:
+        (?:
+          (?!
+            (?<!\w)
+            (?:for   # Add other equivalents of "for" here
+              |with  # Add other equivalents of "with" here
+            )
+            (?!\w)
+          )
+          \S
+        )
+      )
+    )
+    |
+    (?<additionalSection>
+      (?:
+        (?:with) # Add other equivalents of "with" here
+        \W*
+      )
+      (?<additional>
+        (?:
+          (?!
+            (?<!\w)
+            (?:for   # Add other equivalents of "for" here
+              |with  # Add other equivalents of "with" here
+            )
+            (?!\w)
+          )
+          .
+        )+
+        # Ensure the last character is non-whitespace:
+        (?:
+          (?!
+            (?<!\w)
+            (?:for   # Add other equivalents of "for" here
+              |with  # Add other equivalents of "with" here
+            )
+            (?!\w)
+          )
+          \S
+        )
+      )
+    )
+  )
+  \s*
+)*
+$
