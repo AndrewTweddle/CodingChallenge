@@ -202,3 +202,115 @@ lManufMap[possibleMismatches]
 listingsByPManufAll = pd.merge( listings, lManufMap, how='inner', left_on='manufacturer', right_on='lManuf')
 listingsByPManuf = listingsByPManufAll[listingsByPManufAll['pManuf'] != ''].reindex(columns = ['pManuf','lManuf', 'title','currency','price'])
 listingsByPManuf.to_csv('data/intermediate/filtered_listings_by_pmanuf.csv', encoding='utf-8')
+
+
+# ==============================================================================
+# 3. Match listings to products by product number
+# 
+
+# ----------------------------------------------------------------------
+# 3.1 Define terms that filter the product info from ancillary info
+# 
+import re
+from string import Template
+
+# Languages found by inspecting csv files: English, French, German...
+applicabilitySplitTerms = [ u'for', u'pour', u'für', u'fur', u'fuer' ]
+additionalSplitTerms = [ 'with',  'w/', 'avec', 'mit' ]
+
+applicabilityPatterns = '|'.join([ re.escape(term) for term in applicabilitySplitTerms ])
+additionalPatterns = '|'.join([ re.escape(term) for term in additionalSplitTerms ])
+allTermPatterns = applicabilityPatterns + '|' + additionalPatterns
+
+patternToExpand = ur'''
+^
+\s*
+(?P<description>
+  (?:
+    (?!
+      (?<!\w)
+      (?:$allTermPatterns)
+      (?!\w)
+    )
+    .
+  )+
+  # Ensure the last character is non-whitespace:
+  (?:
+    (?!
+      (?<!\w)
+      (?:$allTermPatterns)
+      (?!\w)
+    )
+    \S
+  )
+)
+\s*
+(?:
+  (?:
+    (?P<applicabilitySection>
+      (?:
+        (?:$applicabilityPatterns)
+        \W*
+      )
+      (?P<applicability>
+        (?:
+          (?!
+            (?<!\w)
+            (?:$allTermPatterns)
+            (?!\w)
+          )
+          .
+        )+
+        # Ensure the last character is non-whitespace:
+        (?:
+          (?!
+            (?<!\w)
+            (?:$allTermPatterns)
+            (?!\w)
+          )
+          \S
+        )
+      )
+    )
+    |
+    (?P<additionalSection>
+      (?:
+        (?:$additionalPatterns)
+        \W*
+      )
+      (?P<additional>
+        (?:
+          (?!
+            (?<!\w)
+            (?:$allTermPatterns)
+            (?!\w)
+          )
+          .
+        )+
+        # Ensure the last character is non-whitespace:
+        (?:
+          (?!
+            (?<!\w)
+            (?:$allTermPatterns)
+            (?!\w)
+          )
+          \S
+        )
+      )
+    )
+  )
+  \s*
+)*
+$$
+'''
+
+patternTemplate = Template(patternToExpand)
+titleSplitRegexPattern = patternTemplate.substitute(applicabilityPatterns = applicabilityPatterns, additionalPatterns=additionalPatterns, allTermPatterns=allTermPatterns)
+titleSplitRegex = re.compile( titleSplitRegexPattern, re.IGNORECASE | re.UNICODE | re.VERBOSE )
+
+#testing regex matches...
+regexTestString = '   Nikon EN-EL9a 1080mAh Ultra High Capacity Li-ion Battery Pack   with love  for Nikon D40, D40x, D60, D3000, & D5000 Digital SLR Cameras for ever   with   salt and pepper'
+testMatch = titleSplitRegex.match(regexTestString)
+if testMatch:
+  testMatch.group('description')
+  # Discovery: Python provides no way to access all the captures for a named capture group if there is more than one (e.g. the text "for" is repeated)
