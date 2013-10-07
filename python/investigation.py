@@ -216,7 +216,7 @@ from string import Template
 
 # Languages found by inspecting csv files: English, French, German...
 applicabilitySplitTerms = [ u'for', u'pour', u'für', u'fur', u'fuer' ]
-additionalSplitTerms = [ 'with',  'w/', 'avec', 'mit' ]
+additionalSplitTerms = [ 'with',  'w/', 'avec', 'mit', '+' ]
 
 applicabilityPatterns = '|'.join([ re.escape(term) for term in applicabilitySplitTerms ])
 additionalPatterns = '|'.join([ re.escape(term) for term in additionalSplitTerms ])
@@ -294,3 +294,4 @@ listingsByPManuf.to_csv('data/intermediate/filtered_by_pmanuf_with_split_title.c
 # listingsByPManuf[pd.isnull(listingsByPManuf['productDesc'])]
 # listingsByPManuf[listingsByPManuf['productDesc'] == '']
 
+  
