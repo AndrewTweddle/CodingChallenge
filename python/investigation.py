@@ -273,3 +273,17 @@ if testMatch:
   testMatch.group('extraProdDetails')
   # Discovery: Python provides no way to access all the captures for a named capture group if there is more than one (e.g. the text "for" is repeated)
   # Action: Simplify the regex to have a named captured group for extraProdDetails, instead of multiple ones
+
+  
+# ----------------------------------------------------------------------
+# 3.2 Split the product titles into a product description and ancillary information
+# 
+
+def splitTitle(title):
+    titleMatch = titleSplitRegex.match(title)
+    return titleMatch.group('productDesc'), titleMatch.group('extraProdDetails')
+
+title_regex_pairs = listingsByPManuf['title'].apply(splitTitle)
+productDescs, extraProdDetails = zip(* title_regex_pairs )
+listingsByPManuf['productDesc'] = productDescs
+listingsByPManuf['extraProdDetails'] = extraProdDetails
