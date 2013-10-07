@@ -225,7 +225,7 @@ allTermPatterns = applicabilityPatterns + '|' + additionalPatterns
 patternToExpand = ur'''
 ^
 \s*
-(?P<description>
+(?P<productDesc>
   (?:
     (?!
       (?<!\w)
@@ -246,71 +246,30 @@ patternToExpand = ur'''
 )
 \s*
 (?:
-  (?:
-    (?P<applicabilitySection>
-      (?:
-        (?:$applicabilityPatterns)
-        \W*
-      )
-      (?P<applicability>
-        (?:
-          (?!
-            (?<!\w)
-            (?:$allTermPatterns)
-            (?!\w)
-          )
-          .
-        )+
-        # Ensure the last character is non-whitespace:
-        (?:
-          (?!
-            (?<!\w)
-            (?:$allTermPatterns)
-            (?!\w)
-          )
-          \S
-        )
-      )
+  (?P<extraProdDetailsSection>
+    (?:
+      (?:$allTermPatterns)
+      \W*
     )
-    |
-    (?P<additionalSection>
-      (?:
-        (?:$additionalPatterns)
-        \W*
-      )
-      (?P<additional>
-        (?:
-          (?!
-            (?<!\w)
-            (?:$allTermPatterns)
-            (?!\w)
-          )
-          .
-        )+
-        # Ensure the last character is non-whitespace:
-        (?:
-          (?!
-            (?<!\w)
-            (?:$allTermPatterns)
-            (?!\w)
-          )
-          \S
-        )
-      )
+    (?P<extraProdDetails>
+      .+
+      \S # Ensure the last character is non-whitespace:
     )
   )
   \s*
-)*
+)?
 $$
 '''
 
 patternTemplate = Template(patternToExpand)
-titleSplitRegexPattern = patternTemplate.substitute(applicabilityPatterns = applicabilityPatterns, additionalPatterns=additionalPatterns, allTermPatterns=allTermPatterns)
+titleSplitRegexPattern = patternTemplate.substitute(allTermPatterns=allTermPatterns)
 titleSplitRegex = re.compile( titleSplitRegexPattern, re.IGNORECASE | re.UNICODE | re.VERBOSE )
 
 #testing regex matches...
-regexTestString = '   Nikon EN-EL9a 1080mAh Ultra High Capacity Li-ion Battery Pack   with love  for Nikon D40, D40x, D60, D3000, & D5000 Digital SLR Cameras for ever   with   salt and pepper'
+regexTestString = '   Nikon EN-EL9a 1080mAh Ultra High Capacity Li-ion Battery Pack   for Nikon D40, D40x, D60, D3000, & D5000 Digital SLR Cameras with love  for ever   with   salt and pepper'
 testMatch = titleSplitRegex.match(regexTestString)
 if testMatch:
-  testMatch.group('description')
+  testMatch.group('productDesc')
+  testMatch.group('extraProdDetails')
   # Discovery: Python provides no way to access all the captures for a named capture group if there is more than one (e.g. the text "for" is repeated)
+  # Action: Simplify the regex to have a named captured group for extraProdDetails, instead of multiple ones
