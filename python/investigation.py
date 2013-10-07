@@ -287,3 +287,10 @@ title_regex_pairs = listingsByPManuf['title'].apply(splitTitle)
 productDescs, extraProdDetails = zip(* title_regex_pairs )
 listingsByPManuf['productDesc'] = productDescs
 listingsByPManuf['extraProdDetails'] = extraProdDetails
+
+listingsByPManuf.to_csv('data/intermediate/filtered_by_pmanuf_with_split_title.csv', encoding='utf-8')
+
+# Check that the following give empty data frames:
+# listingsByPManuf[pd.isnull(listingsByPManuf['productDesc'])]
+# listingsByPManuf[listingsByPManuf['productDesc'] == '']
+
