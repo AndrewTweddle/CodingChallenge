@@ -295,3 +295,52 @@ listingsByPManuf.to_csv('data/intermediate/filtered_by_pmanuf_with_split_title.c
 # listingsByPManuf[listingsByPManuf['productDesc'] == '']
 
   
+# ----------------------------------------------------------------------
+# 3.3 Group by the product descriptions to reduce the amount of matching required
+# 
+
+productDescGrouping = listingsByPManuf.groupby(['pManuf', 'productDesc'])
+
+
+# ----------------------------------------------------------------------
+# 3.4 Investigate the quality of the model column in the product listings:
+# 
+
+# ------------------------------------------
+# Find duplicate models:
+prod_model_counts = products.model.value_counts()
+dup_models = prod_model_counts[prod_model_counts > 1]
+dup_models = products.duplicated['model']  
+#                     announced-date      family manufacturer   model
+# 226  2011-02-15T19:00:00.000-05:00  Cybershot          Sony    T110
+# 257  2009-02-16T19:00:00.000-05:00         NaN      Samsung   SL202
+# 288  2011-02-15T19:00:00.000-05:00     FinePix     Fujifilm   S4000
+# 370  2011-02-06T19:00:00.000-05:00        ELPH        Canon  300 HS
+# 510  1998-11-01T19:00:00.000-05:00         NaN      Olympus   C900Z
+# 517  1998-02-02T19:00:00.000-05:00     FinePix     Fujifilm     700
+# 653  1999-04-15T20:00:00.000-04:00     PhotoPC        Epson     800
+# 711  1998-03-15T19:00:00.000-05:00     Coolpix        Nikon     600
+# 718  1999-02-14T19:00:00.000-05:00     Coolpix        Nikon     700
+# 722  1996-05-12T20:00:00.000-04:00   PowerShot        Canon     600
+
+# ------------------------------------------
+# Find duplicates by manufacturer and model:
+
+products[products.duplicated(['manufacturer', 'model'])]
+#                     announced-date family manufacturer   model
+# 257  2009-02-16T19:00:00.000-05:00    NaN      Samsung   SL202
+# 370  2011-02-06T19:00:00.000-05:00   ELPH        Canon  300 HS
+
+# The problem with duplicated() is that it omits the first duplicate found.
+# The following code allows us to examine the 'family' values for all records:
+manuf_model_groups = products.groupby(['manufacturer', 'model'])
+manuf_model_group_sizes = manuf_model_groups.size()
+manuf_model_sizes = DataFrame({'group_count' : manuf_model_group_sizes}).reset_index()
+manuf_model_dup_groups = manuf_model_sizes[manuf_model_sizes.group_count > 1]
+manuf_model_dups = pd.merge(products, manuf_model_dup_groups, on=['manufacturer','model'], sort=True)[['manufacturer','family','model','announced-date']]
+manuf_model_dups
+#   manufacturer family   model                 announced-date
+# 0        Canon   IXUS  300 HS  2010-05-10T20:00:00.000-04:00
+# 1        Canon   ELPH  300 HS  2011-02-06T19:00:00.000-05:00
+# 2      Samsung    NaN   SL202  2009-02-16T19:00:00.000-05:00
+# 3      Samsung    NaN   SL202  2009-02-16T19:00:00.000-05:00
