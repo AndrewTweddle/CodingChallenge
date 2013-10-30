@@ -310,7 +310,6 @@ productDescGrouping = listingsByPManuf.groupby(['pManuf', 'productDesc'])
 # Find duplicate models:
 prod_model_counts = products.model.value_counts()
 dup_models = prod_model_counts[prod_model_counts > 1]
-dup_models = products.duplicated['model']  
 #                     announced-date      family manufacturer   model
 # 226  2011-02-15T19:00:00.000-05:00  Cybershot          Sony    T110
 # 257  2009-02-16T19:00:00.000-05:00         NaN      Samsung   SL202
