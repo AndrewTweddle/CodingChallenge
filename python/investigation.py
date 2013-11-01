@@ -406,3 +406,4 @@ alphaNumRegexPattern = '(?:\w+|\W+)'
 alphaNumRegex = re.compile( alphaNumRegexPattern, re.IGNORECASE | re.UNICODE | re.VERBOSE )
 alphaNumRegex.findall(regexTestString)
 alphaNumRegex.findall('aaa-bbb-ccc::ddd   ')
+alphaNumRegex.findall('    aaa-bbb-ccc::ddd   ')
