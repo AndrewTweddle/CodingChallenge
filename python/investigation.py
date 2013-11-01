@@ -343,3 +343,37 @@ manuf_model_dups
 # 1        Canon   ELPH  300 HS  2011-02-06T19:00:00.000-05:00
 # 2      Samsung    NaN   SL202  2009-02-16T19:00:00.000-05:00
 # 3      Samsung    NaN   SL202  2009-02-16T19:00:00.000-05:00
+
+
+# ----------------------------------------------------------------------
+# 3.5 Set the required matching action on the duplicates:
+# 
+# Note: A new text column named 'matchRule' will be added to the data frame.
+#       Its value will guide the behaviour of the matching algorithm.
+# 
+
+# Ignore products which match on all 3 fields: manufacturer, family and model
+manFamModel_dups = DataFrame({'isDup': products.duplicated(['manufacturer', 'family', 'model'])})
+manFamModel_dups['matchRule'] = ''
+manFamModel_dups.matchRule[manFamModel_dups.isDup] = 'ignore'
+
+products['matchRule'] = manFamModel_dups.matchRule[manFamModel_dups.isDup]
+
+# Match on family and model if the manufacturer and model are duplicated (but not the family):
+manuf_model_groups = products[products.matchRule.isnull()].groupby(['manufacturer', 'model'])
+manuf_model_group_sizes = manuf_model_groups.size()
+manuf_model_sizes = DataFrame({'group_count' : manuf_model_group_sizes}).reset_index()  # reset_index() will copy the index into a column named 'index'
+manuf_model_dup_groups = manuf_model_sizes[manuf_model_sizes.group_count > 1]
+
+products2 = products.reset_index()  
+    # products2 now has its index copied to a column named 'index'
+    # This will be useful for matching up to the original index after the merge below...
+manuf_model_dups = pd.merge(products2, manuf_model_dup_groups, on=['manufacturer','model'], sort=True).set_index('index')[['manufacturer','family','model']]
+manuf_model_dups['matchRule'] = 'familyAndModel'
+products = products.combine_first(manuf_model_dups[['matchRule']])  
+    # Note: combine_first() is like a vectorized coalesce.
+    #       It matches rows based on index.
+    #       For each row and each column it takes the first non-null value
+    #       in the two data frames (products and manuf_model_dups).
+
+# test: products[products.matchRule.notnull()]
