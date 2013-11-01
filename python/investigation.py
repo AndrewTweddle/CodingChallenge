@@ -377,3 +377,32 @@ products = products.combine_first(manuf_model_dups[['matchRule']])
     #       in the two data frames (products and manuf_model_dups).
 
 # test: products[products.matchRule.notnull()]
+
+
+# ----------------------------------------------------------------------
+# 3.6 Set up test regex for splitting the model into an array
+#     of alphanumeric and non-alphanumeric sections
+# 
+
+regexTestString = ':::aaa-bb def   ghi   '
+
+# Following regex pattern works to split with .Net, but not Python:
+alphaNumSplitRegexPattern = r'(?<!^)\b'
+alphaNumSplitRegex = re.compile( alphaNumSplitRegexPattern, re.IGNORECASE | re.UNICODE | re.VERBOSE )
+alphaNumSplitRegex.split(regexTestString)
+
+# This doesn't work either:
+alphaNumSplitRegexPattern = '\b'
+alphaNumSplitRegex = re.compile( alphaNumSplitRegexPattern, re.IGNORECASE | re.UNICODE | re.VERBOSE )
+alphaNumSplitRegex.split(regexTestString)
+
+# This also only works with .Net (\b seems to work differently)...
+alphaNumRegexPattern = '(?:^|\b)(?:\w+|\W+)'
+alphaNumRegex = re.compile( alphaNumRegexPattern, re.IGNORECASE | re.UNICODE | re.VERBOSE )
+alphaNumRegex.findall(regexTestString)
+
+# This works:
+alphaNumRegexPattern = '(?:\w+|\W+)'
+alphaNumRegex = re.compile( alphaNumRegexPattern, re.IGNORECASE | re.UNICODE | re.VERBOSE )
+alphaNumRegex.findall(regexTestString)
+alphaNumRegex.findall('aaa-bbb-ccc::ddd   ')
