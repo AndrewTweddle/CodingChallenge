@@ -205,7 +205,7 @@ listingsByPManuf.to_csv('data/intermediate/filtered_listings_by_pmanuf.csv', enc
 
 
 # ==============================================================================
-# 3. Match listings to products by product number
+# 3. Prepare the listings data for matching to products
 # 
 
 # ----------------------------------------------------------------------
@@ -302,12 +302,12 @@ listingsByPManuf.to_csv('data/intermediate/filtered_by_pmanuf_with_split_title.c
 productDescGrouping = listingsByPManuf.groupby(['pManuf', 'productDesc'])
 
 
-# ----------------------------------------------------------------------
-# 3.4 Investigate the quality of the model column in the product listings:
+# ==============================================================================
+# 4. Prepare the products for matching to listings by finding duplicates:
 # 
 
-# ------------------------------------------
-# Find duplicate models:
+# ----------------------------------------------------------------------
+# 4.1 Find duplicate models:
 prod_model_counts = products.model.value_counts()
 dup_models = prod_model_counts[prod_model_counts > 1]
 #                     announced-date      family manufacturer   model
@@ -323,7 +323,7 @@ dup_models = prod_model_counts[prod_model_counts > 1]
 # 722  1996-05-12T20:00:00.000-04:00   PowerShot        Canon     600
 
 # ------------------------------------------
-# Find duplicates by manufacturer and model:
+# 4.2 Find duplicates by manufacturer and model:
 
 products[products.duplicated(['manufacturer', 'model'])]
 #                     announced-date family manufacturer   model
@@ -346,7 +346,7 @@ manuf_model_dups
 
 
 # ----------------------------------------------------------------------
-# 3.5 Set the required matching action on the duplicates:
+# 4.3 Set the required matching action on the duplicates:
 # 
 # Note: A new text column named 'matchRule' will be added to the data frame.
 #       Its value will guide the behaviour of the matching algorithm.
@@ -379,8 +379,13 @@ products = products.combine_first(manuf_model_dups[['matchRule']])
 # test: products[products.matchRule.notnull()]
 
 
+# ==============================================================================
+# 5. Analyze the model column in the products data set in preparation 
+#    for setting up rules for matching listings to products
+# 
+
 # ----------------------------------------------------------------------
-# 3.6 Set up test regex for splitting the model into an array
+# 5.1 Set up test regex for splitting the model into an array
 #     of alphanumeric and non-alphanumeric sections
 # 
 
