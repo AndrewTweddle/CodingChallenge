@@ -441,8 +441,9 @@ blockClassifications = [
         ('a', r'^[A-Za-z]+$'),
         ('n', r'^\d+$'),
         ('w', r'^\w+$'),
-        ('s', r'^\s+$'),
-        ('-', r'^\s*\-\s*$'),
+        ('_', r'^\s+$'),
+        ('-', r'^\-$'),
+        ('~', r'^\s*\-\s*$'),  # Allow spaces on either side of the dash
         ('x', r'^.+$')
     ]
 blockClassificationRegexes = [(classifier, re.compile(pattern, re.IGNORECASE | re.UNICODE | re.VERBOSE )) for (classifier,pattern) in blockClassifications]
@@ -451,7 +452,7 @@ def derive_classification(blockToClassify):
     for (classifier, regex) in blockClassificationRegexes:
         if regex.match(blockToClassify):
             return classifier
-    return '?'
+    return '$'
 
 # Test classification function
 # 
@@ -470,12 +471,12 @@ test_classification('abcd', 'test_failure')
 test_classification('abcd', 'a')
 test_classification('1234', 'n')
 test_classification('a12b', 'w')
-test_classification(' \t ', 's')
+test_classification(' \t ', '_')
 test_classification('-', '-')
-test_classification('   -  ', '-')
+test_classification('   -  ', '~')
 test_classification(':', 'x')
 test_classification(':-)', 'x')
-test_classification('', '?')
+test_classification('', '$')
 
 
 # ----------------------------------------------------------------------
@@ -496,8 +497,8 @@ def test_derive_classifications(blocksToClassify, expected):
 test_derive_classifications(['abc12','-','abc',':','12', '  ','IS'], 'test_failure')
 
 # Expect these to succeed:
-test_derive_classifications(['abc12','-','abc',':','12', '  ','IS'], 'w-axnsa')
-test_derive_classifications(['  :  ','  -  ','12','.','1MP', '','IS'], 'x-nxw?a')
+test_derive_classifications(['abc12','-','abc',':','12', '  ','IS'], 'w-axn_a')
+test_derive_classifications(['  :  ','  -  ','12','.','1MP', '','IS'], 'x~nxw$a')
 test_derive_classifications([],'')
 
 
@@ -548,25 +549,25 @@ for pattern, group in classification_patterns:
 # 
 # Pattern: a             example: Digilux
 # Pattern: a-a           example: K-r
-# Pattern: a-asn         example: V-LUX 20
+# Pattern: a-a_n         example: V-LUX 20
 # Pattern: a-n           example: NEX-3
-# Pattern: a-nsa         example: C-2500 L
+# Pattern: a-n_a         example: C-2500 L
 # Pattern: a-w           example: DSC-W310
-# Pattern: a-wsasa       example: EOS-1D Mark IV
+# Pattern: a-w_a_a       example: EOS-1D Mark IV
 # Pattern: a-wxw         example: DSC-V100 / X100
-# Pattern: asa           example: N Digital
-# Pattern: asa-w         example: PEN E-P2
-# Pattern: asasa         example: GR Digital III
-# Pattern: asasn         example: mju Tough 8010
-# Pattern: asasw         example: Kiss Digital X3
-# Pattern: asn           example: mju 9010
-# Pattern: asnsa         example: EX 1500 Zoom
-# Pattern: asw           example: Mini M200
+# Pattern: a_a           example: N Digital
+# Pattern: a_a-w         example: PEN E-P2
+# Pattern: a_a_a         example: GR Digital III
+# Pattern: a_a_n         example: mju Tough 8010
+# Pattern: a_a_w         example: Kiss Digital X3
+# Pattern: a_n           example: mju 9010
+# Pattern: a_n_a         example: EX 1500 Zoom
+# Pattern: a_w           example: Mini M200
 # Pattern: axwx          example: GXR (A12)
 # Pattern: n             example: 1500
-# Pattern: nsa           example: 130 IS
+# Pattern: n_a           example: 130 IS
 # Pattern: nxn           example: 4.3
 # Pattern: w             example: TL240
-# Pattern: wsa           example: SD980 IS
-# Pattern: wsax          example: CL30 Clik!
+# Pattern: w_a           example: SD980 IS
+# Pattern: w_ax          example: CL30 Clik!
 # 
