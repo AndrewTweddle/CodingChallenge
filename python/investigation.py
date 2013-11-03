@@ -412,3 +412,81 @@ alphaNumRegex = re.compile( alphaNumRegexPattern, re.IGNORECASE | re.UNICODE | r
 alphaNumRegex.findall(regexTestString)
 alphaNumRegex.findall('aaa-bbb-ccc::ddd   ')
 alphaNumRegex.findall('    aaa-bbb-ccc::ddd   ')
+
+def split_into_blocks_by_alpha_num(stringToSplit):
+    return alphaNumRegex.findall(stringToSplit)
+
+
+# ----------------------------------------------------------------------
+# 5.2 Categorize each block into one of the following:
+#     a = alphabetic only
+#     n = numeric only
+#     w = alphanumeric, with both alphabetic and numeric characters
+#     s = white space (1 or more i.e. \s+)
+#     - = a dash (preceded or succeeded by zero or more whitespace characters),
+#         since this is likely to be a common character in product codes.
+#     x = any other non-alphanumeric sequences
+#
+
+# Use a list of tuples (instead of a dictionary) to control order of checking (dictionaries are unordered):
+blockClassifications = [
+        ('a', r'^[A-Za-z]+$'),
+        ('n', r'^\d+$'),
+        ('w', r'^\w+$'),
+        ('s', r'^\s+$'),
+        ('-', r'^\s*\-\s*$'),
+        ('x', r'^.+$')
+    ]
+blockClassificationRegexes = [(classifier, re.compile(pattern, re.IGNORECASE | re.UNICODE | re.VERBOSE )) for (classifier,pattern) in blockClassifications]
+
+def derive_classification(blockToClassify):
+    for (classifier, regex) in blockClassificationRegexes:
+        if regex.match(blockToClassify):
+            return classifier
+    return '?'
+
+# Test classification function
+# 
+# Note: These should be moved into a unit test class 
+#       when converting this exploratory script into an application
+# 
+def test_classification(blockToClassify, expected):
+    classification = derive_classification(blockToClassify)
+    if classification != expected:
+        print '"{0}" classified as "{1}". But "{2}" expected!'.format(blockToClassify, classification, expected)
+
+#Expect following to fail (test that test_classification works properly):
+test_classification('abcd', 'test_failure')
+
+# Expect these to succeed:
+test_classification('abcd', 'a')
+test_classification('1234', 'n')
+test_classification('a12b', 'w')
+test_classification(' \t ', 's')
+test_classification('-', '-')
+test_classification('   -  ', '-')
+test_classification(':', 'x')
+test_classification(':-)', 'x')
+test_classification('', '?')
+
+
+# ----------------------------------------------------------------------
+# 5.3 Categorize a list of blocks into a 
+#     single concatenated string of classifications:
+#
+
+def derive_classifications(blocksToClassify):
+    block_classifications = [derive_classification(block) for block in blocksToClassify]
+    return ''.join(block_classifications)
+
+def test_derive_classifications(blocksToClassify, expected):
+    classification = derive_classifications(blocksToClassify)
+    if classification != expected:
+        print '"{0}" classified as "{1}". But "{2}" expected!'.format(','.join(blocksToClassify), classification, expected)
+
+# test that test_derive_classifications works by giving an incorrect expectation:
+test_derive_classifications(['abc12','-','abc',':','12', '  ','IS'], 'test_failure')
+
+# Expect these to succeed:
+test_derive_classifications(['abc12','-','abc',':','12', '  ','IS'], 'w-axnsa')
+test_derive_classifications(['  :  ','  -  ','12','.','1MP', '','IS'], 'x-nxw?a')
