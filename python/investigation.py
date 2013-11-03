@@ -1,3 +1,11 @@
+import os
+
+folder_data_intermediate = '/data/intermediate'
+
+if not os.path.exists(folder_data_intermediate):
+    os.makedirs(folder_data_intermediate)
+
+
 # ===============================
 # STEP 1: Load input data in JSon format:
 import json
@@ -490,3 +498,75 @@ test_derive_classifications(['abc12','-','abc',':','12', '  ','IS'], 'test_failu
 # Expect these to succeed:
 test_derive_classifications(['abc12','-','abc',':','12', '  ','IS'], 'w-axnsa')
 test_derive_classifications(['  :  ','  -  ','12','.','1MP', '','IS'], 'x-nxw?a')
+test_derive_classifications([],'')
+
+
+# ----------------------------------------------------------------------
+# 5.4 Convert a string into a list of tuples, where each tuple contains:
+#     a. A list of the various alphanumeric and non-alphanumeric blocks
+#     b. The classification string for the list of blocks
+#
+
+def get_blocks_and_classification_tuple(text_to_classify):
+    blocks = split_into_blocks_by_alpha_num(text_to_classify)
+    classification = derive_classifications(blocks)
+    return blocks, classification
+
+model_block_pairs = products['model'].apply(get_blocks_and_classification_tuple)
+model_blocks, model_classifications = zip(* model_block_pairs )
+products['model_blocks'] = model_blocks
+products['model_classification'] = model_classifications
+
+# See how many patterns there are:
+# 
+# Quick way...
+# products.model_classification.value_counts()
+# 
+# Better way (can get examples too)...
+classification_patterns = products.groupby('model_classification')
+for pattern, group in classification_patterns:
+    #if len(group.index) > 0:
+    example = group.iloc[0]['model']
+    #else:
+    #    example = '<None>'
+    # print 'Pattern: {0}'.format(pattern)
+    print 'Pattern: {0:<10}    example: {1}'.format(pattern, example)
+
+pattern_folder_path = r'data/intermediate/model_classifications'
+    
+if not os.path.exists(pattern_folder_path):
+    os.makedirs(pattern_folder_path)
+    
+for pattern, group in classification_patterns:
+    example = group.iloc[0]['model']
+    print 'Pattern: {0:<10}    example: {1}'.format(pattern, example)
+    # Write to an intermediate file for further investigation:
+    pattern_file_path = r'{0}/{1}.csv'.format(pattern_folder_path, pattern)
+    group[['manufacturer','family','model','model_classification','model_blocks']].to_csv(pattern_file_path, encoding='utf-8')
+
+# Classification patterns found in 'model' column:
+# 
+# Pattern: a             example: Digilux
+# Pattern: a-a           example: K-r
+# Pattern: a-asn         example: V-LUX 20
+# Pattern: a-n           example: NEX-3
+# Pattern: a-nsa         example: C-2500 L
+# Pattern: a-w           example: DSC-W310
+# Pattern: a-wsasa       example: EOS-1D Mark IV
+# Pattern: a-wxw         example: DSC-V100 / X100
+# Pattern: asa           example: N Digital
+# Pattern: asa-w         example: PEN E-P2
+# Pattern: asasa         example: GR Digital III
+# Pattern: asasn         example: mju Tough 8010
+# Pattern: asasw         example: Kiss Digital X3
+# Pattern: asn           example: mju 9010
+# Pattern: asnsa         example: EX 1500 Zoom
+# Pattern: asw           example: Mini M200
+# Pattern: axwx          example: GXR (A12)
+# Pattern: n             example: 1500
+# Pattern: nsa           example: 130 IS
+# Pattern: nxn           example: 4.3
+# Pattern: w             example: TL240
+# Pattern: wsa           example: SD980 IS
+# Pattern: wsax          example: CL30 Clik!
+# 
