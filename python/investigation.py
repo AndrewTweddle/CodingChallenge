@@ -524,14 +524,14 @@ products['model_classification'] = model_classifications
 # products.model_classification.value_counts()
 # 
 # Better way (can get examples too)...
+
 classification_patterns = products.groupby('model_classification')
+model_classification_record_counts = products.model_classification.value_counts()
+
 for pattern, group in classification_patterns:
-    #if len(group.index) > 0:
     example = group.iloc[0]['model']
-    #else:
-    #    example = '<None>'
-    # print 'Pattern: {0}'.format(pattern)
-    print 'Pattern: {0:<10}    example: {1}'.format(pattern, example)
+    record_count = model_classification_record_counts[pattern]
+    print 'Pattern: {0:<10}    count: {1:<5} example: {2}'.format(pattern, record_count, example)
 
 pattern_folder_path = r'data/intermediate/model_classifications'
     
@@ -547,27 +547,27 @@ for pattern, group in classification_patterns:
 
 # Classification patterns found in 'model' column:
 # 
-# Pattern: a             example: Digilux
-# Pattern: a-a           example: K-r
-# Pattern: a-a_n         example: V-LUX 20
-# Pattern: a-n           example: NEX-3
-# Pattern: a-n_a         example: C-2500 L
-# Pattern: a-w           example: DSC-W310
-# Pattern: a-w_a_a       example: EOS-1D Mark IV
-# Pattern: a-wxw         example: DSC-V100 / X100
-# Pattern: a_a           example: N Digital
-# Pattern: a_a-w         example: PEN E-P2
-# Pattern: a_a_a         example: GR Digital III
-# Pattern: a_a_n         example: mju Tough 8010
-# Pattern: a_a_w         example: Kiss Digital X3
-# Pattern: a_n           example: mju 9010
-# Pattern: a_n_a         example: EX 1500 Zoom
-# Pattern: a_w           example: Mini M200
-# Pattern: axwx          example: GXR (A12)
-# Pattern: n             example: 1500
-# Pattern: n_a           example: 130 IS
-# Pattern: nxn           example: 4.3
-# Pattern: w             example: TL240
-# Pattern: w_a           example: SD980 IS
-# Pattern: w_ax          example: CL30 Clik!
+# Pattern: a             count: 4     example: Digilux
+# Pattern: a-a           count: 2     example: K-r
+# Pattern: a-a_n         count: 2     example: V-LUX 20
+# Pattern: a-n           count: 56    example: NEX-3
+# Pattern: a-n_a         count: 20    example: C-2500 L
+# Pattern: a-w           count: 198   example: DSC-W310
+# Pattern: a-w_a_a       count: 1     example: EOS-1D Mark IV
+# Pattern: a-wxw         count: 1     example: DSC-V100 / X100
+# Pattern: a_a           count: 1     example: N Digital
+# Pattern: a_a-w         count: 5     example: PEN E-P2
+# Pattern: a_a_a         count: 1     example: GR Digital III
+# Pattern: a_a_n         count: 7     example: mju Tough 8010
+# Pattern: a_a_w         count: 1     example: Kiss Digital X3
+# Pattern: a_n           count: 12    example: mju 9010
+# Pattern: a_n_a         count: 2     example: EX 1500 Zoom
+# Pattern: a_w           count: 4     example: Mini M200
+# Pattern: axwx          count: 1     example: GXR (A12)
+# Pattern: n             count: 36    example: 1500
+# Pattern: n_a           count: 24    example: 130 IS
+# Pattern: nxn           count: 1     example: 4.3
+# Pattern: w             count: 329   example: TL240
+# Pattern: w_a           count: 34    example: SD980 IS
+# Pattern: w_ax          count: 1     example: CL30 Clik!
 # 
