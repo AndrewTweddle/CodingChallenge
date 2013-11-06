@@ -421,31 +421,55 @@ alphaNumRegex.findall(regexTestString)
 alphaNumRegex.findall('aaa-bbb-ccc::ddd   ')
 alphaNumRegex.findall('    aaa-bbb-ccc::ddd   ')
 
+# Improve this to differentiate alphabetic blocks from numeric blocks as well
+alphaNumRegexPattern = '(?:[A-Za-z]+|\d+|\W+)'
+alphaNumRegex = re.compile( alphaNumRegexPattern, re.IGNORECASE | re.UNICODE | re.VERBOSE )
+alphaNumRegex.findall(regexTestString)
+alphaNumRegex.findall('aaa15-10bbb-ccc::ddd   ')
+alphaNumRegex.findall('    aaa-bbb-ccc::ddd   ')
+
+
 def split_into_blocks_by_alpha_num(stringToSplit):
     return alphaNumRegex.findall(stringToSplit)
 
 
 # ----------------------------------------------------------------------
 # 5.2 Categorize each block into one of the following:
+#     c = consonants only
 #     a = alphabetic only
 #     n = numeric only
-#     w = alphanumeric, with both alphabetic and numeric characters
-#     s = white space (1 or more i.e. \s+)
-#     - = a dash (preceded or succeeded by zero or more whitespace characters),
-#         since this is likely to be a common character in product codes.
+#     _ = white space (1 or more i.e. \s+)
+#     - = a dash only, since this is likely to be a common character in product codes
+#     ~ = a dash preceded or succeeded by whitespace characters
+#     ( = a left bracket, possibly with whitespace on either side
+#     ) = a right bracket, possibly with whitespace on either side
+#     ! = a division symbol (/), possibly with whitespace on either side
+#         Note: an exclamation mark is used since this character can be part of a file name
+#     . = a single dot (no white space)
 #     x = any other non-alphanumeric sequences
+#
+# SUBSEQUENTLY REMOVED: 
+#     w = a combination of alphabetic and numeric characters
 #
 
 # Use a list of tuples (instead of a dictionary) to control order of checking (dictionaries are unordered):
 blockClassifications = [
+        ('c', r'^[B-DF-HJ-NP-TV-XZb-df-hj-np-tv-xz]+$'),
         ('a', r'^[A-Za-z]+$'),
         ('n', r'^\d+$'),
-        ('w', r'^\w+$'),
         ('_', r'^\s+$'),
         ('-', r'^\-$'),
         ('~', r'^\s*\-\s*$'),  # Allow spaces on either side of the dash
+        ('(', r'^\s*\(\s*$'),  # To cater for "GXR (A12)"
+        (')', r'^\s*\)\s*$'),  # To cater for "GXR (A12)"
+        ('!', r'^\s*\/\s*$'),  # To cater for "DSC-V100 / X100"
+        ('.', r'^\.$'),  # To cater for "4.3"
         ('x', r'^.+$')
     ]
+    # A potential issue here is that the regex patterns assume ANSI characters.
+    # However it seems that all the products listed are English, so this shouldn't matter.
+    # Some of the listings are in other languages though, so 
+    
 blockClassificationRegexes = [(classifier, re.compile(pattern, re.IGNORECASE | re.UNICODE | re.VERBOSE )) for (classifier,pattern) in blockClassifications]
 
 def derive_classification(blockToClassify):
@@ -470,14 +494,19 @@ test_classification('abcd', 'test_failure')
 # Expect these to succeed:
 test_classification('abcd', 'a')
 test_classification('1234', 'n')
-test_classification('a12b', 'w')
+test_classification('bcd', 'c')
 test_classification(' \t ', '_')
 test_classification('-', '-')
 test_classification('   -  ', '~')
 test_classification(':', 'x')
 test_classification(':-)', 'x')
 test_classification('', '$')
-
+test_classification('.', '.')
+test_classification('/', '!')
+test_classification('  /  ', '!')
+test_classification('(', '(')
+test_classification('  (  ', '(')
+test_classification('  )  ', ')')
 
 # ----------------------------------------------------------------------
 # 5.3 Categorize a list of blocks into a 
@@ -486,7 +515,13 @@ test_classification('', '$')
 
 def derive_classifications(blocksToClassify):
     block_classifications = [derive_classification(block) for block in blocksToClassify]
-    return ''.join(block_classifications)
+    classification = ''.join(block_classifications)
+    # There is no need to differentiate consonant blocks from other alphabetic blocks 
+    # if a dash or number precedes or succeeds the consonant block 
+    # (since that already indicates a product code pattern)...
+    classification = re.sub(r'(?<=\-|n)c', 'a', classification)
+    classification = re.sub(r'c(?=\-|n)', 'a', classification)
+    return classification
 
 def test_derive_classifications(blocksToClassify, expected):
     classification = derive_classifications(blocksToClassify)
@@ -494,13 +529,16 @@ def test_derive_classifications(blocksToClassify, expected):
         print '"{0}" classified as "{1}". But "{2}" expected!'.format(','.join(blocksToClassify), classification, expected)
 
 # test that test_derive_classifications works by giving an incorrect expectation:
-test_derive_classifications(['abc12','-','abc',':','12', '  ','IS'], 'test_failure')
+test_derive_classifications(['abc','12','-','abc',':','12', '  ','MP'], 'test_failure')
 
 # Expect these to succeed:
-test_derive_classifications(['abc12','-','abc',':','12', '  ','IS'], 'w-axn_a')
-test_derive_classifications(['  :  ','  -  ','12','.','1MP', '','IS'], 'x~nxw$a')
+test_derive_classifications(['abc', '12','-','abc',':','12', '  ','MP'], 'an-axn_c')
+test_derive_classifications(['  :  ','  -  ','12','.','1','MP', '','IS'], 'x~n.na$a')
 test_derive_classifications([],'')
-
+test_derive_classifications(['jklmn'],'c')
+test_derive_classifications(['jklmn',' '],'c_')
+test_derive_classifications(['jklmn','15'],'an')
+test_derive_classifications(['15', 'jklmn'],'na')
 
 # ----------------------------------------------------------------------
 # 5.4 Convert a string into a list of tuples, where each tuple contains:
@@ -528,11 +566,6 @@ products['model_classification'] = model_classifications
 classification_patterns = products.groupby('model_classification')
 model_classification_record_counts = products.model_classification.value_counts()
 
-for pattern, group in classification_patterns:
-    example = group.iloc[0]['model']
-    record_count = model_classification_record_counts[pattern]
-    print 'Pattern: {0:<10}    count: {1:<5} example: {2}'.format(pattern, record_count, example)
-
 pattern_folder_path = r'data/intermediate/model_classifications'
     
 if not os.path.exists(pattern_folder_path):
@@ -540,7 +573,8 @@ if not os.path.exists(pattern_folder_path):
     
 for pattern, group in classification_patterns:
     example = group.iloc[0]['model']
-    print 'Pattern: {0:<10}    example: {1}'.format(pattern, example)
+    record_count = model_classification_record_counts[pattern]
+    print 'Pattern: {0:<10}    count: {1:<5} example: {2}'.format(pattern, record_count, example)
     # Write to an intermediate file for further investigation:
     pattern_file_path = r'{0}/{1}.csv'.format(pattern_folder_path, pattern)
     group[['manufacturer','family','model','model_classification','model_blocks']].to_csv(pattern_file_path, encoding='utf-8')
@@ -571,3 +605,33 @@ for pattern, group in classification_patterns:
 # Pattern: w_a           count: 34    example: SD980 IS
 # Pattern: w_ax          count: 1     example: CL30 Clik!
 # 
+
+# ----------------------------------------------------------------------
+# Notes based on above matches:
+# 
+# 1. At this point there are only 4 patterns (with 1 record each) using the unmatched 'x' characters.
+#    These could just be ignored. However there is a risk, because we don't know how how many matching *listings* there might be.
+#    Alternatively, 3 of these can be handled by adding support for: /.()
+#    Adding custom support for the '!' in "CL30 Clik!" doesn't seem worth it, and the CL30 product code might be good enough.
+# 
+# 2. There are 329 'w' patterns which are pieces of text with both alphabetic and numberic characters.
+#    These are likely to all be product codes.. Consider the example: "TL240".
+#    It would be better to match this on all of: "TL240", "TL-240", "TL 240".
+#    So rather remove the 'w' block and always differentiate alphabetic from numeric.
+# 
+# 3. Consider the GXR. This consists only of consonants, indicating that it is also a product code.
+#    So add a new match on words that are all consonants.
+#    
+#    But bear in mind the following:
+#    
+#    a. Consonant blocks that are preceded or succeeded by a dash or number, are clearly product codes because of the dash / number.
+#       So 'normalize' classification codes by replacing 'c' codes with 'a' codes if preceded or succeeded by a dash or number.
+#       This will reduce the total number of classification patterns to deal with.
+#
+#    b. They may not be product codes. They could also be domain-specific abbreviations or units of measure.
+#       For example, "MP" for mega-pixels.
+#       
+#       Let's list all the consonant blocks first to see if this is really an issue.
+#       If it is a problem, then only add a list of all consonant strings to convert to 'a' classifications.
+#
+# ----------------------------------------------------------------------
