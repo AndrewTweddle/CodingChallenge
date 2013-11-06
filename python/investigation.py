@@ -635,3 +635,43 @@ for pattern, group in classification_patterns:
 #       If it is a problem, then only add a list of all consonant strings to convert to 'a' classifications.
 #
 # ----------------------------------------------------------------------
+
+
+# ----------------------------------------------------------------------
+# Classification patterns found in 'model' column after these changes:
+# 
+# Pattern: a             count: 4     example: Digilux
+# Pattern: a-a           count: 2     example: K-r
+# Pattern: a-a_n         count: 2     example: V-LUX 20
+# Pattern: a-an          count: 167   example: DSC-W310
+# Pattern: a-an!an       count: 1     example: DSC-V100 / X100
+# Pattern: a-ana         count: 10    example: DSC-HX100v
+# Pattern: a-n           count: 56    example: NEX-3
+# Pattern: a-n_a         count: 17    example: C-2000 Zoom
+# Pattern: a-n_c         count: 3     example: C-2500 L
+# Pattern: a-na          count: 21    example: QV-5000SX
+# Pattern: a-na_a_a      count: 1     example: EOS-1D Mark IV
+# Pattern: a_a-an        count: 4     example: PEN E-P2
+# Pattern: a_a-ana       count: 1     example: PEN E-PL1s
+# Pattern: a_a_an        count: 1     example: Kiss Digital X3
+# Pattern: a_a_n         count: 7     example: mju Tough 8010
+# Pattern: a_an          count: 3     example: Mini M200
+# Pattern: a_n           count: 12    example: mju 9010
+# Pattern: a_n_a         count: 2     example: EX 1500 Zoom
+# Pattern: a_na          count: 1     example: mju 550WP
+# Pattern: an            count: 277   example: TL240
+# Pattern: an_a          count: 31    example: SD980 IS
+# Pattern: an_ax         count: 1     example: CL30 Clik!
+# Pattern: an_c          count: 3     example: SX220 HS
+# Pattern: ana           count: 37    example: Z900EXR
+# Pattern: c(an)         count: 1     example: GXR (A12)
+# Pattern: c_a           count: 1     example: N Digital
+# Pattern: c_a_a         count: 1     example: GR Digital III
+# Pattern: n             count: 36    example: 1500
+# Pattern: n.n           count: 1     example: 4.3
+# Pattern: n_a           count: 16    example: 130 IS
+# Pattern: n_c           count: 8     example: 310 HS
+# Pattern: na            count: 15    example: 900S
+#
+# Note: 32 classification patterns after the refactoring, compared to 23 before. So not untractable.
+#
