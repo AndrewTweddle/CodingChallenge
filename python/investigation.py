@@ -675,3 +675,79 @@ for pattern, group in classification_patterns:
 #
 # Note: 32 classification patterns after the refactoring, compared to 23 before. So not untractable.
 #
+
+
+
+# ==============================================================================
+# 6. Analyze the family column in the products data set
+#    to decide how to combine it with the model search patterns:
+# 
+
+# ----------------------------------------------------------------------
+# 6.1 See how much variability there is in the family column:
+# 
+
+products.family.fillna('').value_counts().sort_index()
+
+#                 258
+# Alpha            13
+# Coolpix          43
+# Cyber-shot       42
+# Cybershot         8
+# Cybershot         6
+# D-LUX             1
+# DiMAGE            4
+# Digilux           2
+# Digital IXUS      9
+# ELPH              3
+# EOS               8
+# EasyShare        24
+# Easyshare         2
+# Exilim           30
+# FinePix          85
+# Finecam           1
+# Finepix           1
+# IXUS              5
+# IXY               5
+# Lumix            80
+# Mavica           10
+# Optio            16
+# PhotoPC           9
+# Photosmart        7
+# PowerShot        46
+# Rebel             4
+# Stylus           14
+# Tough             1
+# ePhoto            6
+
+# Notes based on above:
+# 
+# 1. Some duplication:
+#       a. Cybershot, " Cybershot", Cyber-shot
+#            TIP: above diagnosed using... products[products.family.str.startswith('Cyber').fillna(False)]
+#       b. Digital IXUS, IXUS
+#       c. EasyShare, Easyshare
+#       d. FinePix, Finepix
+# 
+# 2. Many records don't have a family. Of the remainder, all are pure alphabetic, except for:
+#       a. A space to be trimmed from " Cybershot"
+#       b. A dash in Cyber-shot and D-Lux
+#       c. A space in "Digital IXUS"
+# 
+# Conclusions: 
+# 
+# 1. The data looks cleaner than expected.
+#    Even the extra dash in Cyber-shot shouldn't matter, as 
+#    the pattern matching regex will probably treat the dash as optional anyway.
+# 
+# 2. The classification patterns will be fairly uniform.
+#    So a composite classification code comprising family and model may be tractable.
+#    So there is merit in investigating this.
+#    
+# 3. The benefit of doing so, is that there are 36 model records which are purely numeric.
+#    The family column will be needed to avoid spurious matches.
+# 
+# 4. To think about... 
+#    Can the family and model simply be concatenated (with a space between them)?
+#    Or should there be a special separate character? e.g. '+'
+#
