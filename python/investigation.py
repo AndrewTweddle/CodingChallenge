@@ -751,3 +751,23 @@ products.family.fillna('').value_counts().sort_index()
 #    Can the family and model simply be concatenated (with a space between them)?
 #    Or should there be a special separate character? e.g. '+'
 #
+
+
+# ----------------------------------------------------------------------
+# 6.2 Perform the classification on the family column:
+# 
+
+family_block_pairs = products['family'].fillna('').apply(get_blocks_and_classification_tuple)
+family_blocks, family_classifications = zip(* family_block_pairs )
+products['family_blocks'] = family_blocks
+products['family_classification'] = family_classifications
+
+# check:
+products.family_classification.value_counts()
+
+# a      427
+#        258
+# a-a     43
+# a_a      9
+# a_       6
+
