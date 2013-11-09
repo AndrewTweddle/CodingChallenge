@@ -964,7 +964,7 @@ listingsByPManuf[listingsByPManuf.productDesc.str.contains('1D\s+MARK\s+IV', fla
 # 6348    Canon - EOS-1D Mark IV - Appareil photo reflex...
 
 # Example of extracting a specification:
-mpPattern = '(\d+(?:\.\d+)?)\s*MP(?:$|\s)'
+mpPattern = '(\d+(?:\.\d+)?)\s*(?:\-\s*)?(?:MP|mega(?:|\-|\s+)pixels?)(?:$|\s)'
 
 listingsByPManuf[
     listingsByPManuf.productDesc.str.contains('1D\s+MARK\s+IV', flags=re.IGNORECASE)
@@ -1009,3 +1009,38 @@ listingsByPManuf[
 #
 # 6. What technical specifications make the most sense to match on?
 #    
+
+
+# --------------------------------------------------------------------------
+# 7.3 Determine mega-pixel specifications
+# 
+listingsByPManuf[listingsByPManuf.productDesc.str.contains('meg')].productDesc
+
+# 87             SAMSUNG ES15 10.2 megapixel camera (SILVER)
+# 341      Samsung ST80 Black 14.2-megapixel Digital Came...
+# 615      Samsung D1070 10.2 mega-pixels 3x optical zoom...
+# 9253     Panasonic DMC-FX07EB Digital Camera [7.2 megap...
+# 11055    Sony DSCV1 Digital Camera 5megapixel 4 X Zm Night
+# 19845       HP Photosmart R717 Digitalkamera (6 megapixel)
+
+# Action: Updated mpPattern above
+
+listingsByPManuf['resolution_in_MP'] = \
+    listingsByPManuf.productDesc.str.findall(mpPattern, flags=re.IGNORECASE).str.get(0).apply(lambda s: float(s))
+    
+# listingsByPManuf
+# 
+# <class 'pandas.core.frame.DataFrame'>
+# Int64Index: 16785 entries, 5 to 20195
+# Data columns (total 8 columns):
+# pManuf              16785  non-null values
+# lManuf              16785  non-null values
+# title               16785  non-null values
+# currency            16785  non-null values
+# price               16785  non-null values
+# productDesc         16785  non-null values
+# extraProdDetails    7587  non-null values
+# resolution_in_MP    6720  non-null values
+# dtypes: float64(1), object(7)
+#
+# Result: 40% of listings have a MP resolution field (6720 / 16785)
