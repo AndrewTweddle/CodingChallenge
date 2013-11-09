@@ -907,3 +907,32 @@ group_and_save_classification_patterns('family_and_model', 'composite_classifica
 # 6. Would a functional language work better?
 #    (e.g. due to the pattern matching capabilities, or through using a parser-combinator library)
 # 
+
+
+# ----------------------------------------------------------------------
+# 7.1 Can we match on product code only?
+#
+
+# An example where this is not sufficient...
+products[products.model.str.contains('EOS-1D')][['manufacturer','family','model']]
+#     manufacturer family           model
+# 624        Canon    NaN  EOS-1D Mark IV
+
+listings[listings.title.str.contains('EOS-1D')].title.head()
+# 1505    Canon EOS-1D 4.15MP Digital SLR Camera (Body O...
+# 1550    Canon EOS-1D Mark II 8.2MP Digital SLR Camera ...
+# 1551    Canon EOS-1D Mark II 8.2MP Digital SLR Camera ...
+# 1629    Canon EOS-1Ds 11.1MP Digital SLR Camera (Body ...
+# 8639              Canon EOS-1D MARK IV Digital SLR Camera
+
+# So in this case there are multiple products sharing the same base product code.
+
+# This particular example can be fixed by an exception condition, as there is only one product with Mark in its title...
+products[products.model.str.contains('mark')][['manufacturer','family','model']]
+products[products.model.str.contains('Mark')][['manufacturer','family','model']]
+#     manufacturer family           model
+# 624        Canon    NaN  EOS-1D Mark IV
+
+
+# To think about: are there other exceptions? How can we identify them?
+
