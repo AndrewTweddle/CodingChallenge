@@ -936,3 +936,76 @@ products[products.model.str.contains('Mark')][['manufacturer','family','model']]
 
 # To think about: are there other exceptions? How can we identify them?
 
+
+# --------------------------------------------------------------------------
+# 7.2 Further thoughts on the EOS1-D issue:
+# 
+# After a wonderful Saturday afternoon sleep, I had a possible epiphany:
+# 
+# Look at the listings for the EOS1-D above.
+# It's easy to see that they are different products - they have different mega-pixel ratings.
+# This suggests a way to address the issue of multiple products sharing a product code
+# without resorting to product-specific rules (and improve the algorithm at the same time) ...
+# 
+# For each listing, extract product specifications (such as the Megapixel rating).
+# For each product, find a listing which is an exact or very close match, 
+# and use its specifications as the product's specifications.
+# Reject any listings which have different specifications.
+
+# Let's see if this would work for the EOS 1-D Mark IV:
+
+# After some fiddling, the following pattern found a few listings...
+listingsByPManuf[listingsByPManuf.productDesc.str.contains('1D\s+MARK\s+IV', flags=re.IGNORECASE)].title
+
+# 4149    Canon EOS 1D Mark IV 16.1 MP CMOS Digital SLR ...
+# 5245              Canon EOS-1D MARK IV Digital SLR Camera
+# 5246              Canon EOS-1D MARK IV Digital SLR Camera
+# 6347    Canon - EOS-1D Mark IV - Appareil photo reflex...
+# 6348    Canon - EOS-1D Mark IV - Appareil photo reflex...
+
+# Example of extracting a specification:
+mpPattern = '(\d+(?:\.\d+)?)\s*MP(?:$|\s)'
+
+listingsByPManuf[
+    listingsByPManuf.productDesc.str.contains('1D\s+MARK\s+IV', flags=re.IGNORECASE)
+].productDesc.str.findall(mpPattern, flags=re.IGNORECASE)
+# 4149    [16.1]
+# 5245        []
+# 5246        []
+# 6347        []
+# 6348        []
+
+listingsByPManuf[
+    listingsByPManuf.productDesc.str.contains('1D\s+MARK\s+IV', flags=re.IGNORECASE)
+].productDesc.str.findall(mpPattern, flags=re.IGNORECASE).str.get(0)
+# 4149    16.1
+# 5245     NaN
+# 5246     NaN
+# 6347     NaN
+# 6348     NaN
+
+# Conclusions:
+# 
+# 1. This approach appears feasible. A listing can be automatically excluded 
+#    if any of its specifications don't match the product's corresponding specification.
+#    
+# 2. Don't use the closest match - it may not have a specification. 
+#    Instead use any sufficiently close match which has the specification.
+#    
+# 3. Many listings don't have a mega-pixel specification, so:
+#    a. It may not be possible to determine a particular specification for the product 
+#       i.e. no sufficiently close match had the specification
+#    b. Many listings may not have the specification.
+#       How to decide whether to exclude them or include them?
+#       What is a sufficiently close match to not require the specification?
+#    
+# 4. This is getting pretty complex.
+#    Could this be a rabbit-hole?
+#    Or is the complexity essential?
+#    
+# 5. My original strategy was to match on product codes, since these are 
+#    fairly domain-agnostic. Building in some domain logic does make some sense,
+#    but it can be a rabbit-hole. Beware of diminishing returns!
+#
+# 6. What technical specifications make the most sense to match on?
+#    
