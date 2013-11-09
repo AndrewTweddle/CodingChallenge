@@ -837,3 +837,72 @@ group_and_save_classification_patterns('family_and_model', 'composite_classifica
 # 
 # Note: Now we're at 49 classification patterns (up from 32).
 # 
+
+
+
+# ==============================================================================
+# 7. Design matching rules based on the classification patterns:
+# 
+# Goal: 
+# -----
+# 
+# Create a small set of rules that can be used to match these 49 patterns 
+#       (and others that could arise with a different data set).
+# ______________________________________________________________________________
+# 
+# Envisioned approach: 
+# --------------------
+# 
+#   1. Create a number of matching regular expressions, 
+#      with a numerical value for each, based on the value of that match.
+#      
+#   2. Some patterns are alternatives to each other, with the highest value being chosen:
+#      e.g. match on family + model
+#               then model only
+#               then exact product code only
+#               then alternative product code with optional dashes or spaces between parts of the code
+#               then a product code and the next word 
+#                   (so that 130IS can be matched as well as "130 IS").
+#               then a product code and the first character of the next word 
+#                   (so that "4700z" can be matched as well as "4700 Zoom").
+#      
+#   3. Others are additive
+#      e.g. value of product code
+#         + value/s of finding other words in the title (such as IS or Zoom or the Family)
+#      
+#      NB: A complication here is that the additive value will only be applicable 
+#          for some of the previous patterns.
+#      
+#   4. For each listing:
+#        For each product (filtered by the listing's manufacturer):
+#          Calculate the highest value match (if any)
+#            Notes:
+#                i. A threshold can be chosen with values below the threshold being ignored.
+#               ii. Match against the listing's productDesc first, 
+#                   then against extraProdDetails (with very low value)
+#        Sort the list matching products
+#        If exactly one match, or one match that is sufficiently above the rest, make this the final match.
+#        Otherwise, if there are multiple matches, flag for further investigation (to identify possible new rules).
+#        
+#   5. Use flagged listings to generate new matching rules. 
+#      Repeat this process until further improvement is either not possible or not desirable.
+#      
+#   6. Invert the relationship between listings and chosen products.
+#        Group listings by the chosen products for each listing.
+#        Add a listings columns to the products data frame and populate it from the grouped data.
+#      
+#   7. Output the list of products with their listings.
+# ______________________________________________________________________________
+# 
+# Reality check:
+# --------------
+# 
+# But first...
+# 1. Is this the right approach? 
+# 2. Are there reasons why it won't work?
+# 3. Is there a way to test the approach cheaply
+# 4. Is Python the best way to build the rules engine?
+# 5. Would a functional language work better?
+#    (e.g. due to the pattern matching capabilities, or through using a parser-combinator library)
+# 
+
