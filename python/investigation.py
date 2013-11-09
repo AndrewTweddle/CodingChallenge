@@ -563,23 +563,25 @@ products['model_classification'] = model_classifications
 # 
 # Better way (can get examples too)...
 
-classification_patterns = products.groupby('model_classification')
-model_classification_record_counts = products.model_classification.value_counts()
+def group_and_save_classification_patterns(source_column, classification_column, columns_to_export, classification_folder):
+  classification_patterns = products.groupby(classification_column)
+  classification_record_counts = products[classification_column].value_counts()
+  #Ensure the folder path exists:   
+  pattern_folder_path = r'data/intermediate/' + classification_folder
+  if not os.path.exists(pattern_folder_path):
+      os.makedirs(pattern_folder_path)
+  # Save a csv file per pattern, and write a summary record to the console:
+  for pattern, group in classification_patterns:
+      example = group.iloc[0][source_column]
+      record_count = classification_record_counts[pattern]
+      print 'Pattern: {0:<15} count: {1:<6} example: {2}'.format(pattern, record_count, example)
+      # Write to an intermediate file for further investigation:
+      pattern_file_path = r'{0}/{1}.csv'.format(pattern_folder_path, pattern)
+      group[columns_to_export].to_csv(pattern_file_path, encoding='utf-8')
 
-pattern_folder_path = r'data/intermediate/model_classifications'
-    
-if not os.path.exists(pattern_folder_path):
-    os.makedirs(pattern_folder_path)
-    
-for pattern, group in classification_patterns:
-    example = group.iloc[0]['model']
-    record_count = model_classification_record_counts[pattern]
-    print 'Pattern: {0:<10}    count: {1:<5} example: {2}'.format(pattern, record_count, example)
-    # Write to an intermediate file for further investigation:
-    pattern_file_path = r'{0}/{1}.csv'.format(pattern_folder_path, pattern)
-    group[['manufacturer','family','model','model_classification','model_blocks']].to_csv(pattern_file_path, encoding='utf-8')
+group_and_save_classification_patterns('model', 'model_classification', ['manufacturer','family','model','model_classification','model_blocks'], 'model_classifications')
 
-# Classification patterns found in 'model' column:
+# Original classification patterns found in 'model' column BEFORE REFACTORING:
 # 
 # Pattern: a             count: 4     example: Digilux
 # Pattern: a-a           count: 2     example: K-r
@@ -638,40 +640,40 @@ for pattern, group in classification_patterns:
 
 
 # ----------------------------------------------------------------------
-# Classification patterns found in 'model' column after these changes:
+# Classification patterns found in 'model' column after refactoring:
 # 
-# Pattern: a             count: 4     example: Digilux
-# Pattern: a-a           count: 2     example: K-r
-# Pattern: a-a_n         count: 2     example: V-LUX 20
-# Pattern: a-an          count: 167   example: DSC-W310
-# Pattern: a-an!an       count: 1     example: DSC-V100 / X100
-# Pattern: a-ana         count: 10    example: DSC-HX100v
-# Pattern: a-n           count: 56    example: NEX-3
-# Pattern: a-n_a         count: 17    example: C-2000 Zoom
-# Pattern: a-n_c         count: 3     example: C-2500 L
-# Pattern: a-na          count: 21    example: QV-5000SX
-# Pattern: a-na_a_a      count: 1     example: EOS-1D Mark IV
-# Pattern: a_a-an        count: 4     example: PEN E-P2
-# Pattern: a_a-ana       count: 1     example: PEN E-PL1s
-# Pattern: a_a_an        count: 1     example: Kiss Digital X3
-# Pattern: a_a_n         count: 7     example: mju Tough 8010
-# Pattern: a_an          count: 3     example: Mini M200
-# Pattern: a_n           count: 12    example: mju 9010
-# Pattern: a_n_a         count: 2     example: EX 1500 Zoom
-# Pattern: a_na          count: 1     example: mju 550WP
-# Pattern: an            count: 277   example: TL240
-# Pattern: an_a          count: 31    example: SD980 IS
-# Pattern: an_ax         count: 1     example: CL30 Clik!
-# Pattern: an_c          count: 3     example: SX220 HS
-# Pattern: ana           count: 37    example: Z900EXR
-# Pattern: c(an)         count: 1     example: GXR (A12)
-# Pattern: c_a           count: 1     example: N Digital
-# Pattern: c_a_a         count: 1     example: GR Digital III
-# Pattern: n             count: 36    example: 1500
-# Pattern: n.n           count: 1     example: 4.3
-# Pattern: n_a           count: 16    example: 130 IS
-# Pattern: n_c           count: 8     example: 310 HS
-# Pattern: na            count: 15    example: 900S
+# Pattern: a               count: 4      example: Digilux
+# Pattern: a-a             count: 2      example: K-r
+# Pattern: a-a_n           count: 2      example: V-LUX 20
+# Pattern: a-an            count: 167    example: DSC-W310
+# Pattern: a-an!an         count: 1      example: DSC-V100 / X100
+# Pattern: a-ana           count: 10     example: DSC-HX100v
+# Pattern: a-n             count: 56     example: NEX-3
+# Pattern: a-n_a           count: 17     example: C-2000 Zoom
+# Pattern: a-n_c           count: 3      example: C-2500 L
+# Pattern: a-na            count: 21     example: QV-5000SX
+# Pattern: a-na_a_a        count: 1      example: EOS-1D Mark IV
+# Pattern: a_a-an          count: 4      example: PEN E-P2
+# Pattern: a_a-ana         count: 1      example: PEN E-PL1s
+# Pattern: a_a_an          count: 1      example: Kiss Digital X3
+# Pattern: a_a_n           count: 7      example: mju Tough 8010
+# Pattern: a_an            count: 3      example: Mini M200
+# Pattern: a_n             count: 12     example: mju 9010
+# Pattern: a_n_a           count: 2      example: EX 1500 Zoom
+# Pattern: a_na            count: 1      example: mju 550WP
+# Pattern: an              count: 277    example: TL240
+# Pattern: an_a            count: 31     example: SD980 IS
+# Pattern: an_ax           count: 1      example: CL30 Clik!
+# Pattern: an_c            count: 3      example: SX220 HS
+# Pattern: ana             count: 37     example: Z900EXR
+# Pattern: c(an)           count: 1      example: GXR (A12)
+# Pattern: c_a             count: 1      example: N Digital
+# Pattern: c_a_a           count: 1      example: GR Digital III
+# Pattern: n               count: 36     example: 1500
+# Pattern: n.n             count: 1      example: 4.3
+# Pattern: n_a             count: 16     example: 130 IS
+# Pattern: n_c             count: 8      example: 310 HS
+# Pattern: na              count: 15     example: 900S
 #
 # Note: 32 classification patterns after the refactoring, compared to 23 before. So not untractable.
 #
@@ -723,7 +725,7 @@ products.family.fillna('').value_counts().sort_index()
 # Notes based on above:
 # 
 # 1. Some duplication:
-#       a. Cybershot, " Cybershot", Cyber-shot
+#       a. Cybershot, "Cybershot ", Cyber-shot
 #            TIP: above diagnosed using... products[products.family.str.startswith('Cyber').fillna(False)]
 #       b. Digital IXUS, IXUS
 #       c. EasyShare, Easyshare
@@ -771,3 +773,67 @@ products.family_classification.value_counts()
 # a_a      9
 # a_       6
 
+
+# ----------------------------------------------------------------------
+# 6.3 Create a composite classification:
+# 
+
+products['family_and_model'] = products.family.fillna('') + ' + ' + products.model.fillna('')
+products['composite_classification'] = products.family_classification + '+' + products.model_classification
+
+group_and_save_classification_patterns('family_and_model', 'composite_classification', ['manufacturer','family','model','composite_classification','family_blocks','model_blocks'], 'composite_classifications')
+
+# All composite classifications:
+# 
+# Pattern: +a              count: 2      example:  + Digilux
+# Pattern: +a-a            count: 2      example:  + K-r
+# Pattern: +a-a_n          count: 2      example:  + V-LUX 20
+# Pattern: +a-an           count: 11     example:  + PDR-M60
+# Pattern: +a-an!an        count: 1      example:  + DSC-V100 / X100
+# Pattern: +a-ana          count: 2      example:  + R-D1x
+# Pattern: +a-n            count: 41     example:  + FE-5010
+# Pattern: +a-n_a          count: 17     example:  + C-2000 Zoom
+# Pattern: +a-n_c          count: 2      example:  + C-2500 L
+# Pattern: +a-na           count: 21     example:  + QV-5000SX
+# Pattern: +a-na_a_a       count: 1      example:  + EOS-1D Mark IV
+# Pattern: +a_a-an         count: 4      example:  + PEN E-P2
+# Pattern: +a_a-ana        count: 1      example:  + PEN E-PL1s
+# Pattern: +a_a_n          count: 7      example:  + mju Tough 8010
+# Pattern: +a_an           count: 1      example:  + Kiss X4
+# Pattern: +a_n            count: 7      example:  + mju 9010
+# Pattern: +a_na           count: 1      example:  + mju 550WP
+# Pattern: +an             count: 112    example:  + TL240
+# Pattern: +an_a           count: 2      example:  + DC200 plus
+# Pattern: +an_c           count: 1      example:  + X560 WP
+# Pattern: +ana            count: 17     example:  + HZ15W
+# Pattern: +c(an)          count: 1      example:  + GXR (A12)
+# Pattern: +c_a            count: 1      example:  + N Digital
+# Pattern: +c_a_a          count: 1      example:  + GR Digital III
+# Pattern: a+a             count: 2      example: Digilux + Zoom
+# Pattern: a+a-an          count: 119    example: Exilim + EX-Z29
+# Pattern: a+a-ana         count: 3      example: Cybershot + DSC-HX100v
+# Pattern: a+a-n           count: 15     example: Alpha + NEX-3
+# Pattern: a+a-n_c         count: 1      example: Optio + WG-1 GPS
+# Pattern: a+a_a_an        count: 1      example: EOS + Kiss Digital X3
+# Pattern: a+a_an          count: 2      example: EasyShare + Mini M200
+# Pattern: a+a_n           count: 5      example: Stylus + Tough 6000
+# Pattern: a+a_n_a         count: 2      example: DiMAGE + EX 1500 Zoom
+# Pattern: a+an            count: 159    example: Coolpix + S6100
+# Pattern: a+an_a          count: 29     example: PowerShot + SD980 IS
+# Pattern: a+an_ax         count: 1      example: ePhoto + CL30 Clik!
+# Pattern: a+an_c          count: 2      example: PowerShot + SX220 HS
+# Pattern: a+ana           count: 20     example: Finepix + Z900EXR
+# Pattern: a+n             count: 35     example: FinePix + 1500
+# Pattern: a+n.n           count: 1      example: Digilux + 4.3
+# Pattern: a+n_a           count: 8      example: FinePix + 4700 Zoom
+# Pattern: a+n_c           count: 7      example: IXUS + 310 HS
+# Pattern: a+na            count: 15     example: Coolpix + 900S
+# Pattern: a-a+a-an        count: 37     example: Cyber-shot + DSC-W310
+# Pattern: a-a+a-ana       count: 5      example: Cyber-shot + DSC-HX7v
+# Pattern: a-a+n           count: 1      example: D-LUX + 5
+# Pattern: a_+an           count: 6      example: Cybershot  + W580
+# Pattern: a_a+n_a         count: 8      example: Digital IXUS + 130 IS
+# Pattern: a_a+n_c         count: 1      example: Digital IXUS + 1000 HS
+# 
+# Note: Now we're at 49 classification patterns (up from 32).
+# 
