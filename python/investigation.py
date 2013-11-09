@@ -900,9 +900,10 @@ group_and_save_classification_patterns('family_and_model', 'composite_classifica
 # But first...
 # 1. Is this the right approach? 
 # 2. Are there reasons why it won't work?
-# 3. Is there a way to test the approach cheaply
-# 4. Is Python the best way to build the rules engine?
-# 5. Would a functional language work better?
+# 3. Is there a way to test the approach cheaply?
+# 4. Is there a simpler way?
+#    e.g. match on product code only
+# 5. Is Python the best way to build the rules engine?
+# 6. Would a functional language work better?
 #    (e.g. due to the pattern matching capabilities, or through using a parser-combinator library)
 # 
-
