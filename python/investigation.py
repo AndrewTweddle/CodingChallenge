@@ -1086,3 +1086,19 @@ def regex_escape_with_optional_dashes_and_whitespace(text):
 # Out: 'E\\s*(?:\\-\\s*)?O\\s*(?:\\-\\s*)?S\\s*(?:\\-\\s*)?1\\s*(?:\\-\\s*)?D'
 # re.search(esc_text, 'EO-S 1 - D ', flags = re.IGNORECASE or re.UNICODE) != None
 # Out: True
+
+def generate_exact_match_regex(manufacturer, family, model):
+    fam_and_model = family + model
+    fam_and_model_pattern = regex_escape_with_optional_dashes_and_whitespace(fam_and_model)
+    manuf_pattern = regex_escape_with_optional_dashes_and_whitespace( manufacturer )
+    regex_pattern = '(?:' + manuf_pattern + ')?' + fam_and_model_pattern
+    return regex_pattern
+
+def generate_prod_row_exact_match_regex(products_row):
+    'Assumption: null/na values in the family column have been converted to empty strings'
+    manufacturer = products_row['manufacturer']
+    family = products_row['family']
+    model = products_row['model']
+    return generate_exact_match_regex( manufacturer, family, model)
+
+products['exact_match_pattern'] = products.fillna({'family': ''}).apply(generate_prod_row_exact_match_regex, axis=1)
