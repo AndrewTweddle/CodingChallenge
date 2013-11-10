@@ -1061,3 +1061,40 @@ listingsByPManuf['resolution_in_MP'] = \
 # 8. Decide on this basis whether there is value in extracting other technical specifications to filter matches.
 
 
+# --------------------------------------------------------------------------
+# 7.4 Find "exact" matches
+# 
+# These have all the alphanumeric characters from manufacturer (optional), family and model
+# in sequence, but with optional whitespace and dashes between every pair of adjacent characters.
+
+def insert_dashes_between_letters(text):
+    char_pairs = zip(text[0:len(text)], text[1:(len(text)+1)])
+    dashed_chars = [(ch + '-' if ch != '-' and next_ch != '-' else ch) for (ch, next_ch) in char_pairs] 
+    dashed_text = ''.join(dashed_chars) + text[-1]
+    return dashed_text
+
+def reduce_multiple_whitespace_chars(text):
+    return re.sub(r'\s+', ' ', text)
+
+def regex_escape_with_optional_dashes_and_whitespace(text):
+    'Assumption: multiple whitespace characters have already been collapsed to a single space:'
+    escaped_text = re.escape(text)
+    escaped_text = re.sub(r'\\\ ', r'\s*', escaped_text)
+    escaped_text = re.sub(r'\\\-', r'\-?', escaped_text)
+    return escaped_text
+
+# This is not general enough. The following test case fails:
+# 
+# text = 'EOS   -\t1-D'
+# t1 = reduce_multiple_whitespace_chars(text)
+# t1
+# Out: 'EOS - 1-D'
+# t2 = insert_dashes_between_letters(t1)
+# t2
+# Out: 'E-O-S- - -1-D'
+# t3 = regex_escape_with_optional_dashes_and_whitespace(t2)
+# t3
+# Out: 'E\\-?O\\-?S\\-?\\s*\\-?\\s*\\-?1\\-?D'
+# re.findall(t3, 'EO-S 1 - D ', flags = re.IGNORECASE)
+# Out: []
+# 
