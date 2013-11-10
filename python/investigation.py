@@ -1044,3 +1044,20 @@ listingsByPManuf['resolution_in_MP'] = \
 # dtypes: float64(1), object(7)
 #
 # Result: 40% of listings have a MP resolution field (6720 / 16785)
+
+
+# -----------------------------------------------------------------------------------------------
+# Strategy to evaluate the technical specification approach without "going down the rabbit-hole":
+# 
+# 1. Don't generate any other specifications yet.
+# 2. Add code to get "exact" matches on entire product name
+#    (but with optional whitespace and dashes between the characters).
+# 3. Add code to get a list of "exact match" listings per product.
+# 4. See if any products have conflicting technical specifications (mega-pixels) amongst their exact match listings.
+#    If so, investigate and adjust the approach.
+# 5. Add code to use the exact matches to determine mega-pixel specifications for products.
+# 6. Develop algorithm to match on product codes, and get listings per product based on product code matches.
+# 7. See how many of these listings would get rejected due to mismatched technical specifications.
+# 8. Decide on this basis whether there is value in extracting other technical specifications to filter matches.
+
+
