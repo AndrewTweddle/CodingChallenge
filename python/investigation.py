@@ -1087,19 +1087,17 @@ def regex_escape_with_optional_dashes_and_whitespace(text):
 # re.search(esc_text, 'EO-S 1 - D ', flags = re.IGNORECASE or re.UNICODE) != None
 # Out: True
 
-def generate_exact_match_pattern(manufacturer, family, model):
+def generate_exact_match_pattern(family, model):
     fam_and_model = family + model
     fam_and_model_pattern = regex_escape_with_optional_dashes_and_whitespace(fam_and_model)
-    manuf_pattern = regex_escape_with_optional_dashes_and_whitespace( manufacturer )
-    regex_pattern = '(?:' + manuf_pattern + ')?' + fam_and_model_pattern + r'(?:$|\W)'
+    regex_pattern = fam_and_model_pattern + r'(?!\w|\-)'
     return regex_pattern
 
 def generate_exact_match_regex_and_pattern(products_row):
     'Assumption: null/na values in the family column have been converted to empty strings'
-    manufacturer = products_row['manufacturer']
     family = products_row['family']
     model = products_row['model']
-    pattern = generate_exact_match_pattern( manufacturer, family, model)
+    pattern = generate_exact_match_pattern( family, model)
     regex = re.compile( pattern, flags = re.IGNORECASE or re.UNICODE )
     return regex, pattern
 
@@ -1123,8 +1121,8 @@ def is_exact_match(p_and_l_row):
 products_and_listings['is_exact_match'] = products_and_listings.apply(is_exact_match, axis=1)
 # NB: This is slow... duration measured with %time:
 #
-# CPU times: user 24.30 s, sys: 0.00 s, total: 24.30 s
-# Wall time: 24.31 s
+# CPU times: user 21.35 s, sys: 0.00 s, total: 21.35 s
+# Wall time: 21.36 s
 # 
 
 exact_match_columns = ['index_l', 'productDesc', 'resolution_in_MP', 'index_p', 'manufacturer', 'family', 'model']
