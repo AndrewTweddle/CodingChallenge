@@ -1087,18 +1087,45 @@ def regex_escape_with_optional_dashes_and_whitespace(text):
 # re.search(esc_text, 'EO-S 1 - D ', flags = re.IGNORECASE or re.UNICODE) != None
 # Out: True
 
-def generate_exact_match_regex(manufacturer, family, model):
+def generate_exact_match_pattern(manufacturer, family, model):
     fam_and_model = family + model
     fam_and_model_pattern = regex_escape_with_optional_dashes_and_whitespace(fam_and_model)
     manuf_pattern = regex_escape_with_optional_dashes_and_whitespace( manufacturer )
-    regex_pattern = '(?:' + manuf_pattern + ')?' + fam_and_model_pattern
+    regex_pattern = '(?:' + manuf_pattern + ')?' + fam_and_model_pattern + r'(?:$|\W)'
     return regex_pattern
 
-def generate_prod_row_exact_match_regex(products_row):
+def generate_exact_match_regex_and_pattern(products_row):
     'Assumption: null/na values in the family column have been converted to empty strings'
     manufacturer = products_row['manufacturer']
     family = products_row['family']
     model = products_row['model']
-    return generate_exact_match_regex( manufacturer, family, model)
+    pattern = generate_exact_match_pattern( manufacturer, family, model)
+    regex = re.compile( pattern, flags = re.IGNORECASE or re.UNICODE )
+    return regex, pattern
 
-products['exact_match_pattern'] = products.fillna({'family': ''}).apply(generate_prod_row_exact_match_regex, axis=1)
+regex_pattern_pairs = products.fillna({'family': ''}).apply(generate_exact_match_regex_and_pattern, axis=1)
+exact_match_regexes, exact_match_patterns = zip(* regex_pattern_pairs )
+
+products['exact_match_regex'] = exact_match_regexes
+products['exact_match_pattern'] = exact_match_patterns
+
+# Perform join between products and listings by product:
+products_to_match = products.reset_index()[['index', 'manufacturer', 'family', 'model', 'exact_match_regex']]
+listings_to_match = listingsByPManuf.reset_index()[['index', 'pManuf', 'productDesc', 'resolution_in_MP']]
+
+products_and_listings = pd.merge(left=listings_to_match, right=products_to_match, how='inner', left_on='pManuf', right_on='manufacturer', suffixes=('_l','_p'))
+
+def is_exact_match(p_and_l_row):
+    product_desc = p_and_l_row['productDesc']
+    regex = p_and_l_row['exact_match_regex']
+    return regex.search(product_desc) != None
+
+products_and_listings['is_exact_match'] = products_and_listings.apply(is_exact_match, axis=1)
+# NB: This is slow... duration measured with %time:
+#
+# CPU times: user 24.30 s, sys: 0.00 s, total: 24.30 s
+# Wall time: 24.31 s
+# 
+
+exact_match_columns = ['index_l', 'productDesc', 'resolution_in_MP', 'index_p', 'manufacturer', 'family', 'model']
+exact_matches = products_and_listings[products_and_listings.is_exact_match][exact_match_columns]
