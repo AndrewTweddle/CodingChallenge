@@ -1127,3 +1127,35 @@ products_and_listings['is_exact_match'] = products_and_listings.apply(is_exact_m
 
 exact_match_columns = ['index_l', 'productDesc', 'resolution_in_MP', 'index_p', 'manufacturer', 'family', 'model']
 exact_matches = products_and_listings[products_and_listings.is_exact_match][exact_match_columns]
+
+
+# --------------------------------------------------------------------------
+# 7.5 Determine technical specification (resolution in MP) 
+#     for the product from the exact matches:
+# 
+
+def analyze_matches(grp):
+    ind_p = grp.iloc[0]['index_p']
+    vc = grp.resolution_in_MP.value_counts()
+    unique_count = vc.count()
+    if unique_count > 0:
+        product_resolution = vc.order(ascending=False).index[0]
+    else:
+        product_resolution = np.NaN
+    return ind_p, unique_count, product_resolution
+
+exact_match_groups = exact_matches.groupby('index_p')
+product_resolution_tuples = exact_match_groups.apply(analyze_matches)
+
+ind_ps, product_resolution_unique_counts, product_resolutions = zip(* product_resolution_tuples )
+
+exact_match_df = DataFrame( 
+    { 'resolution_in_MP_unique_count': product_resolution_unique_counts, 
+      'product_resolution_in_MP': product_resolutions
+    }, index = ind_ps)
+
+products = pd.merge(products, exact_match_df, how='outer', left_index=True, right_index=True)
+
+# Check:
+# products[products.resolution_in_MP_unique_count > 1][['manufacturer', 'family', 'model', 'product_resolution_in_MP', 'resolution_in_MP_unique_count']]
+
