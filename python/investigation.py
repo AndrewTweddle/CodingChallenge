@@ -1159,3 +1159,13 @@ products = pd.merge(products, exact_match_df, how='outer', left_index=True, righ
 # Check:
 # products[products.resolution_in_MP_unique_count > 1][['manufacturer', 'family', 'model', 'product_resolution_in_MP', 'resolution_in_MP_unique_count']]
 
+
+
+# --------------------------------------------------------------------------
+# 7.6 Investigate exact matches with conflicting mega-pixel specifications:
+# 
+
+# Write conflicting matches to a data file for further investigation:
+conflicting_spec_prod_indexes = exact_match_df[exact_match_df.resolution_in_MP_unique_count > 1]
+conflicting_exact_matches = pd.merge(conflicting_spec_prod_indexes, exact_matches, left_index=True, right_on='index_p', how='inner')
+conflicting_exact_matches[['manufacturer', 'family', 'model', 'productDesc', 'resolution_in_MP']].to_csv('data/intermediate/conflicting_exact_matches.csv', encoding='utf-8')
