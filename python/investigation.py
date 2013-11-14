@@ -964,7 +964,7 @@ listingsByPManuf[listingsByPManuf.productDesc.str.contains('1D\s+MARK\s+IV', fla
 # 6348    Canon - EOS-1D Mark IV - Appareil photo reflex...
 
 # Example of extracting a specification:
-mpPattern = '(\d+(?:\.\d+)?)\s*(?:\-\s*)?(?:MP|mega(?:|\-|\s+)pixels?)(?:$|\s)'
+mpPattern = '(\d+(?:[.,]\d+)?)\s*(?:\-\s*)?(?:MP|MPixe?l?s?|mega?(?:|\-|\s+)pix?e?l?s?)(?:$|\W)'
 
 listingsByPManuf[
     listingsByPManuf.productDesc.str.contains('1D\s+MARK\s+IV', flags=re.IGNORECASE)
@@ -1024,10 +1024,15 @@ listingsByPManuf[listingsByPManuf.productDesc.str.contains('meg')].productDesc
 # 19845       HP Photosmart R717 Digitalkamera (6 megapixel)
 
 # Action: Updated mpPattern above
+def convert_mp_to_float(s):
+    if isinstance(s, float):
+        return s 
+    else:
+        return float(s.replace(',','.'))
 
 listingsByPManuf['resolution_in_MP'] = \
-    listingsByPManuf.productDesc.str.findall(mpPattern, flags=re.IGNORECASE).str.get(0).apply(lambda s: float(s))
-    
+    listingsByPManuf.productDesc.str.findall(mpPattern, flags=re.IGNORECASE).str.get(0).apply(convert_mp_to_float)
+
 # listingsByPManuf
 # 
 # <class 'pandas.core.frame.DataFrame'>
@@ -1040,10 +1045,10 @@ listingsByPManuf['resolution_in_MP'] = \
 # price               16785  non-null values
 # productDesc         16785  non-null values
 # extraProdDetails    7587  non-null values
-# resolution_in_MP    6720  non-null values
+# resolution_in_MP    13366  non-null values
 # dtypes: float64(1), object(7)
 #
-# Result: 40% of listings have a MP resolution field (6720 / 16785)
+# Result: 80% of listings have a MP resolution field (13366 / 16785)
 
 
 # -----------------------------------------------------------------------------------------------
@@ -1173,7 +1178,7 @@ conflicting_exact_matches[['manufacturer', 'family', 'model', 'productDesc', 're
 # Some discoveries from looking at the data file:
 # 
 # 1. MPix is also a shortening for Megapixels.
-# 2. Megapixel ratings are being filtered out if the preceding character is '(', ';', etc.
+# 2. Megapixel ratings are being filtered out if the succeeding character is '(', ';', etc.
 # 3. Megapixel ratings can contain a ',' as a radix point as well.
 # 4. Some listings round down the mega-pixel rating. Rather compare on the rounded figure.
 # 5. Filter out listings without a mega-pixel rating when reporting deviations.
@@ -1189,4 +1194,11 @@ conflicting_exact_matches[['manufacturer', 'family', 'model', 'productDesc', 're
 # Leica 'Digilux 2' 5MP Digital Camera     5
 # Leica Digilux 4.3 2.4MP Digital Camera   2.4
 # Leica Digilux 1 3.9MP Digital Camera     3.9
+# 
+
+# ------------------------------------------------------
+# Further discoveries after fixing some of these issues:
+# 8. Some unmatched values use "mio"/"mio." pixels (mostly German listings). Is this the same as mega-pixels? 
+# 9. Sometimes just an M is used to indicated mega-pixels
+#    e.g. Canon PowerShot SX30 IS - 1/2.3 type CCD; 14.1M; DIGIC 4; 35x zoom; IS; (2.7) PureColor II VA (TFT)Hi-Speed USB (MTP; PTP) (4344B009AA)
 # 
