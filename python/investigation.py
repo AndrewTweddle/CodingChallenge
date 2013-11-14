@@ -1,4 +1,12 @@
 import os
+import json
+from pandas import DataFrame, Series
+import pandas as pd
+import numpy as np
+from nltk.metrics import *
+import re
+from string import Template
+from math import floor
 
 folder_data_intermediate = '/data/intermediate'
 
@@ -8,16 +16,12 @@ if not os.path.exists(folder_data_intermediate):
 
 # ===============================
 # STEP 1: Load input data in JSon format:
-import json
 
 inputPath = 'data/input/'
 listingData = [json.loads(line) for line in open(inputPath + 'listings.txt')]
 productData = [json.loads(line) for line in open(inputPath + 'products.txt')]
 
 # Convert input data into Pandas data frames:
-from pandas import DataFrame, Series
-import pandas as pd
-import numpy as np
 
 listings = DataFrame(listingData)
 products = DataFrame(productData)
@@ -85,8 +89,6 @@ pManufKeywords = pManufsMapping['Keyword']
 
 # ----------------------------------------------------------------------
 # 2.3 Experiment with Levenshtein distances between various similar strings:
-from nltk.metrics import *
-
 s1 = 'Canon'
 s2 = 'Canoon'
 s3 = 'Cannon'
@@ -219,8 +221,6 @@ listingsByPManuf.to_csv('data/intermediate/filtered_listings_by_pmanuf.csv', enc
 # ----------------------------------------------------------------------
 # 3.1 Define terms that filter the product info from ancillary info
 # 
-import re
-from string import Template
 
 # Languages found by inspecting csv files: English, French, German...
 applicabilitySplitTerms = [ u'for', u'pour', u'für', u'fur', u'fuer' ]
@@ -1032,12 +1032,14 @@ def convert_mp_to_float(s):
 
 listingsByPManuf['resolution_in_MP'] = \
     listingsByPManuf.productDesc.str.findall(mpPattern, flags=re.IGNORECASE).str.get(0).apply(convert_mp_to_float)
+listingsByPManuf['rounded_MP'] \
+    = listingsByPManuf.resolution_in_MP[listingsByPManuf.resolution_in_MP.notnull()].apply(lambda mp: floor(mp))
 
 # listingsByPManuf
 # 
 # <class 'pandas.core.frame.DataFrame'>
 # Int64Index: 16785 entries, 5 to 20195
-# Data columns (total 8 columns):
+# Data columns (total 9 columns):
 # pManuf              16785  non-null values
 # lManuf              16785  non-null values
 # title               16785  non-null values
@@ -1046,7 +1048,8 @@ listingsByPManuf['resolution_in_MP'] = \
 # productDesc         16785  non-null values
 # extraProdDetails    7587  non-null values
 # resolution_in_MP    13366  non-null values
-# dtypes: float64(1), object(7)
+# rounded_MP          13366  non-null values
+# dtypes: float64(2), object(7)
 #
 # Result: 80% of listings have a MP resolution field (13366 / 16785)
 
@@ -1114,7 +1117,7 @@ products['exact_match_pattern'] = exact_match_patterns
 
 # Perform join between products and listings by product:
 products_to_match = products.reset_index()[['index', 'manufacturer', 'family', 'model', 'exact_match_regex']]
-listings_to_match = listingsByPManuf.reset_index()[['index', 'pManuf', 'productDesc', 'resolution_in_MP']]
+listings_to_match = listingsByPManuf.reset_index()[['index', 'pManuf', 'productDesc', 'rounded_MP']]
 
 products_and_listings = pd.merge(left=listings_to_match, right=products_to_match, how='inner', left_on='pManuf', right_on='manufacturer', suffixes=('_l','_p'))
 
@@ -1130,7 +1133,7 @@ products_and_listings['is_exact_match'] = products_and_listings.apply(is_exact_m
 # Wall time: 21.36 s
 # 
 
-exact_match_columns = ['index_l', 'productDesc', 'resolution_in_MP', 'index_p', 'manufacturer', 'family', 'model']
+exact_match_columns = ['index_l', 'productDesc', 'resolution_in_MP', 'rounded_MP', 'index_p', 'manufacturer', 'family', 'model']
 exact_matches = products_and_listings[products_and_listings.is_exact_match][exact_match_columns]
 
 
@@ -1141,7 +1144,7 @@ exact_matches = products_and_listings[products_and_listings.is_exact_match][exac
 
 def analyze_matches(grp):
     ind_p = grp.iloc[0]['index_p']
-    vc = grp.resolution_in_MP.value_counts()
+    vc = grp.rounded_MP.value_counts()
     unique_count = vc.count()
     if unique_count > 0:
         product_resolution = vc.order(ascending=False).index[0]
@@ -1173,7 +1176,7 @@ products = pd.merge(products, exact_match_df, how='outer', left_index=True, righ
 # Write conflicting matches to a data file for further investigation:
 conflicting_spec_prod_indexes = exact_match_df[exact_match_df.resolution_in_MP_unique_count > 1]
 conflicting_exact_matches = pd.merge(conflicting_spec_prod_indexes, exact_matches, left_index=True, right_on='index_p', how='inner')
-conflicting_exact_matches[['manufacturer', 'family', 'model', 'productDesc', 'resolution_in_MP']].to_csv('data/intermediate/conflicting_exact_matches.csv', encoding='utf-8')
+conflicting_exact_matches[['manufacturer', 'family', 'model', 'productDesc', 'rounded_MP', 'resolution_in_MP']].to_csv('data/intermediate/conflicting_exact_matches.csv', encoding='utf-8')
 
 # Some discoveries from looking at the data file:
 # 
