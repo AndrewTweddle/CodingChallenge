@@ -1234,3 +1234,16 @@ conflicting_exact_matches[['manufacturer', 'family', 'model', 'product_resolutio
 #    Consideration: This could still be incorrect. 
 #                   The records that contribute the 75% could be matching to another product as well.
 #                   TODO: Develop an algorithm/approach for dealing with listings that match multiple products.
+
+
+# --------------------------------------------------------------------
+# Records which higlight some problems with the "exact match" pattern:
+# 
+# manufacturer  family  model   productDesc
+# Casio         Exilim  EX-Z33  Casio Exilim EX-Z3 3.2MP Digital Camera
+# Leica                 X1      Leica V-Lux-1 10 Megapixel Digital Camera
+# Leica                 X1      Leica C-LUX 1 6MP Digital Camera
+# Leica                 X1      Leica V-Lux-1 10 Megapixel Digital Camera
+# Leica                 X1      Leica Digilux 1 3.9MP Digital Camera
+# Fujifilm      FinePix Z35     Fujifilm Finepix Z3 5.1MP Digital Camera
+# 
