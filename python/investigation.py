@@ -7,6 +7,7 @@ from nltk.metrics import *
 import re
 from string import Template
 from math import floor
+from operator import truediv
 
 folder_data_intermediate = '/data/intermediate'
 
@@ -1142,14 +1143,26 @@ exact_matches = products_and_listings[products_and_listings.is_exact_match][exac
 #     for the product from the exact matches:
 # 
 
+# Arbitrary rule: 
+#     75% of listings must share the same resolution (megapixels) for it to become the product's resolution:
+THRESHOLD_PRODUCT_RESOLUTION_RATIO = 0.75
+
 def analyze_matches(grp):
     ind_p = grp.iloc[0]['index_p']
     vc = grp.rounded_MP.value_counts()
     unique_count = vc.count()
-    if unique_count > 0:
-        product_resolution = vc.order(ascending=False).index[0]
-    else:
+    
+    if unique_count == 0:
         product_resolution = np.NaN
+    else:
+        total_count = vc.sum()
+        most_common_count = vc.order(ascending=False).iget_value(0)
+        
+        if (unique_count > 0) and (truediv(most_common_count, total_count) >= THRESHOLD_PRODUCT_RESOLUTION_RATIO):
+            product_resolution = vc.order(ascending=False).index[0]
+        else:
+            product_resolution = np.NaN
+    
     return ind_p, unique_count, product_resolution
 
 exact_match_groups = exact_matches.groupby('index_p')
@@ -1212,4 +1225,12 @@ conflicting_exact_matches[['manufacturer', 'family', 'model', 'product_resolutio
 # Answers:
 # 8. mio is short for millions in Germany. Added to regex pattern.
 # 9. Ignore patterns like 14.1M. Better than risking an incorrect match.
-
+# 10. Some data records are clearly errors. Others are because the data is not selective enough.
+#    Consider the Leica DigiLux records shown above. 
+#    Choosing the most common resolution as the product's resolution is not correct.
+#    
+#    Action: Only set the product's resolution if at least 75% of the records have that resolution.
+#
+#    Consideration: This could still be incorrect. 
+#                   The records that contribute the 75% could be matching to another product as well.
+#                   TODO: Develop an algorithm/approach for dealing with listings that match multiple products.
