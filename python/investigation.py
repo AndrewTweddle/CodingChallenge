@@ -1117,7 +1117,7 @@ products['exact_match_pattern'] = exact_match_patterns
 
 # Perform join between products and listings by product:
 products_to_match = products.reset_index()[['index', 'manufacturer', 'family', 'model', 'exact_match_regex']]
-listings_to_match = listingsByPManuf.reset_index()[['index', 'pManuf', 'productDesc', 'rounded_MP']]
+listings_to_match = listingsByPManuf.reset_index()[['index', 'pManuf', 'productDesc', 'resolution_in_MP', 'rounded_MP']]
 
 products_and_listings = pd.merge(left=listings_to_match, right=products_to_match, how='inner', left_on='pManuf', right_on='manufacturer', suffixes=('_l','_p'))
 
@@ -1205,3 +1205,4 @@ conflicting_exact_matches[['manufacturer', 'family', 'model', 'productDesc', 'ro
 # 9. Sometimes just an M is used to indicated mega-pixels
 #    e.g. Canon PowerShot SX30 IS - 1/2.3 type CCD; 14.1M; DIGIC 4; 35x zoom; IS; (2.7) PureColor II VA (TFT)Hi-Speed USB (MTP; PTP) (4344B009AA)
 # 
+
