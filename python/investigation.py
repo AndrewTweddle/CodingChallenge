@@ -964,7 +964,7 @@ listingsByPManuf[listingsByPManuf.productDesc.str.contains('1D\s+MARK\s+IV', fla
 # 6348    Canon - EOS-1D Mark IV - Appareil photo reflex...
 
 # Example of extracting a specification:
-mpPattern = '(\d+(?:[.,]\d+)?)\s*(?:\-\s*)?(?:MP|MPixe?l?s?|mega?(?:|\-|\s+)pix?e?l?s?)(?:$|\W)'
+mpPattern = '(\d+(?:[.,]\d+)?)\s*(?:\-\s*)?(?:MP|MPixe?l?s?|(?:(?:mega?|mio\.?)(?:|\-|\s+)pix?e?l?s?))(?:$|\W)'
 
 listingsByPManuf[
     listingsByPManuf.productDesc.str.contains('1D\s+MARK\s+IV', flags=re.IGNORECASE)
@@ -1176,7 +1176,9 @@ products = pd.merge(products, exact_match_df, how='outer', left_index=True, righ
 # Write conflicting matches to a data file for further investigation:
 conflicting_spec_prod_indexes = exact_match_df[exact_match_df.resolution_in_MP_unique_count > 1]
 conflicting_exact_matches = pd.merge(conflicting_spec_prod_indexes, exact_matches, left_index=True, right_on='index_p', how='inner')
-conflicting_exact_matches[['manufacturer', 'family', 'model', 'productDesc', 'rounded_MP', 'resolution_in_MP']].to_csv('data/intermediate/conflicting_exact_matches.csv', encoding='utf-8')
+conflicting_exact_matches = conflicting_exact_matches[conflicting_exact_matches.resolution_in_MP.notnull()]
+conflicting_exact_matches[['manufacturer', 'family', 'model', 'product_resolution_in_MP', 'productDesc', 'rounded_MP', 'resolution_in_MP']]\
+    .to_csv('data/intermediate/conflicting_exact_matches.csv', encoding='utf-8')
 
 # Some discoveries from looking at the data file:
 # 
@@ -1201,8 +1203,13 @@ conflicting_exact_matches[['manufacturer', 'family', 'model', 'productDesc', 'ro
 
 # ------------------------------------------------------
 # Further discoveries after fixing some of these issues:
+# 
 # 8. Some unmatched values use "mio"/"mio." pixels (mostly German listings). Is this the same as mega-pixels? 
 # 9. Sometimes just an M is used to indicated mega-pixels
 #    e.g. Canon PowerShot SX30 IS - 1/2.3 type CCD; 14.1M; DIGIC 4; 35x zoom; IS; (2.7) PureColor II VA (TFT)Hi-Speed USB (MTP; PTP) (4344B009AA)
 # 
+
+# Answers:
+# 8. mio is short for millions in Germany. Added to regex pattern.
+# 9. Ignore patterns like 14.1M. Better than risking an incorrect match.
 
