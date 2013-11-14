@@ -1169,3 +1169,24 @@ products = pd.merge(products, exact_match_df, how='outer', left_index=True, righ
 conflicting_spec_prod_indexes = exact_match_df[exact_match_df.resolution_in_MP_unique_count > 1]
 conflicting_exact_matches = pd.merge(conflicting_spec_prod_indexes, exact_matches, left_index=True, right_on='index_p', how='inner')
 conflicting_exact_matches[['manufacturer', 'family', 'model', 'productDesc', 'resolution_in_MP']].to_csv('data/intermediate/conflicting_exact_matches.csv', encoding='utf-8')
+
+# Some discoveries from looking at the data file:
+# 
+# 1. MPix is also a shortening for Megapixels.
+# 2. Megapixel ratings are being filtered out if the preceding character is '(', ';', etc.
+# 3. Megapixel ratings can contain a ',' as a radix point as well.
+# 4. Some listings round down the mega-pixel rating. Rather compare on the rounded figure.
+# 5. Filter out listings without a mega-pixel rating when reporting deviations.
+# 6. Remember to check for listings that match more than 1 product, as these will show other deviations.
+# 7. What to do about the DIGILUX matches (see below)? 
+
+# An example of a listing where the MegaPixel ratings genuinely differ:
+# 
+# productDesc                              resolution_in_MP
+# Leica DIGILUX 3 7.5MP Digital SLR Camera 7.5
+# Leica DIGILUX 3 7.5MP Digital SLR Camera 7.5
+# Leica 'Digilux 2' 5MP Digital Camera     5
+# Leica 'Digilux 2' 5MP Digital Camera     5
+# Leica Digilux 4.3 2.4MP Digital Camera   2.4
+# Leica Digilux 1 3.9MP Digital Camera     3.9
+# 
