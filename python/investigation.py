@@ -1079,12 +1079,22 @@ listingsByPManuf['rounded_MP'] \
 def regex_escape_with_optional_dashes_and_whitespace(text):
     # Remove all white-space and dashes:
     escaped_text = re.sub('(\s|\-)+', '', text)
+    is_last_char_numeric = len(escaped_text) > 0 and escaped_text[-1].isdigit()
     # Insert a dash after every character.
     # Note: this is just a place-holder for where a regex will be inserted later.
     escaped_text = '-'.join(escaped_text)
     escaped_text = re.escape(escaped_text)
     # Replace the "\-" place-holder with a regex sequence matching whitespace characters and/or a single dash:
     escaped_text = re.sub(r'\\\-', r'\s*(?:\-\s*)?', escaped_text)
+    # Do negative lookbehind to ensure this is not in the middle of a word:
+    escaped_text = r'(?<!\w)' + escaped_text
+    # Do negative lookahead:
+    if is_last_char_numeric:
+        # Don't match a final numeric character if it's followed by a decimal point (or comma) and a number.
+        # This is to prevent issues like a "Casio Exilim EX-Z3 3.2MP Digital Camera" being a match for an "EX-Z33" model.
+        escaped_text = escaped_text + r'(?!\w|\-|\.\d|\,\d)'
+    else:
+        escaped_text = escaped_text + r'(?!\w|\-)'
     return escaped_text
 
 # This works better than the first attempt...
@@ -1099,8 +1109,7 @@ def regex_escape_with_optional_dashes_and_whitespace(text):
 def generate_exact_match_pattern(family, model):
     fam_and_model = family + model
     fam_and_model_pattern = regex_escape_with_optional_dashes_and_whitespace(fam_and_model)
-    regex_pattern = fam_and_model_pattern + r'(?!\w|\-)'
-    return regex_pattern
+    return fam_and_model_pattern
 
 def generate_exact_match_regex_and_pattern(products_row):
     'Assumption: null/na values in the family column have been converted to empty strings'
@@ -1246,4 +1255,17 @@ conflicting_exact_matches[['manufacturer', 'family', 'model', 'product_resolutio
 # Leica                 X1      Leica V-Lux-1 10 Megapixel Digital Camera
 # Leica                 X1      Leica Digilux 1 3.9MP Digital Camera
 # Fujifilm      FinePix Z35     Fujifilm Finepix Z3 5.1MP Digital Camera
+# 
+# ________________________________
+# 
+# Actions to address these issues:
+# 
+# 1. Modify negative lookahead pattern at the end of the exact match regex pattern.
+#    
+#    If the last character is numeric, don't allow the very next characters to be:
+#    a. '.' + a digit
+#    b. ',' + a digit
+#    
+# 2. Add a negative lookbehind to the front of the exact match regex pattern
+#    to ensure that the first matched character is not in the middle of a word (or product code).
 # 
