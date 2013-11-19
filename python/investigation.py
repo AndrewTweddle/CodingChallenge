@@ -1258,14 +1258,41 @@ conflicting_exact_matches[['manufacturer', 'family', 'model', 'product_resolutio
 # 
 # ________________________________
 # 
-# Actions to address these issues:
+# Actions taken to address these issues:
 # 
-# 1. Modify negative lookahead pattern at the end of the exact match regex pattern.
+# 1. Modified negative lookahead pattern at the end of the exact match regex pattern.
 #    
 #    If the last character is numeric, don't allow the very next characters to be:
 #    a. '.' + a digit
 #    b. ',' + a digit
 #    
-# 2. Add a negative lookbehind to the front of the exact match regex pattern
+# 2. Added a negative lookbehind to the front of the exact match regex pattern
 #    to ensure that the first matched character is not in the middle of a word (or product code).
 # 
+
+# Determine the number and proportion of exact match records which can be rejected due to mismatched resolution (mega-pixels):
+exact_matches_with_mp = pd.merge(exact_matches, exact_match_df, how='outer', left_on='index_p', right_index=True)
+
+exact_matches_with_mp.product_resolution_in_MP.count()
+# 7495 records
+
+exact_matches_with_mp[
+  exact_matches_with_mp.rounded_MP.notnull() 
+  & exact_matches_with_mp.product_resolution_in_MP.notnull()].rounded_MP.count()
+# 5795
+
+excluded_by_MP = exact_matches_with_mp[
+  exact_matches_with_mp.rounded_MP.notnull() 
+  & exact_matches_with_mp.product_resolution_in_MP.notnull() 
+  & (exact_matches_with_mp.product_resolution_in_MP != exact_matches_with_mp.rounded_MP)]
+
+excluded_by_MP[['manufacturer', 'family', 'model', 'product_resolution_in_MP', 'productDesc', 'rounded_MP', 'resolution_in_MP']]
+# 10 records
+
+# So filtering exact matches by mega-pixel resolutions has found just 10 records to reject out of almost 6 000.
+# Furthermore, most of these 10 listings ARE matched to the correct product. They just have a typo in the data.
+# 
+# This isn't very promising. However these are the products which had more than 75% consensus on the resolution.
+# The more controversial records are not included yet, and that may be where resolution matching has greater value.
+# 
+# But regardless of whether it will be useful in the final algorithm, it has already proved very useful for testing the code.
