@@ -9,7 +9,8 @@ class MatchingRule(object):
         pass
 
 class RegexMatchingRule(MatchingRule):
-    def __init__(self, regex, value_on_desc, value_on_details, value_on_desc_per_char = 0, value_on_details_per_char = 0, must_match_on_desc = False):
+    def __init__(self, regex, value_on_desc, value_on_details, value_on_desc_per_char = 0, 
+            value_on_details_per_char = 0, must_match_on_desc = False):
         self.match_regex = regex
         self.value_on_product_desc = value_on_desc
         self.value_on_extra_prod_details = value_on_details
@@ -22,15 +23,17 @@ class RegexMatchingRule(MatchingRule):
         if match_obj is None:
             return (False, 0)
         chars_matched = match_obj.end() - match_obj.start()
-        return (True, value + self.value_per_char * chars_matched)
+        return (True, value + value_per_char * chars_matched)
     
     def try_match(self, product_desc, extra_prod_details = None):
-        is_matched, value = __try_match_text(self, product_desc, self.value_on_product_desc, self.value_on_product_desc_per_char)
+        is_matched, value = RegexMatchingRule.__try_match_text(
+            self, product_desc, self.value_on_product_desc, self.value_on_product_desc_per_char)
         if not is_matched:
             if self.must_match_on_product_desc:
                 return (False, 0)
             if self.value_on_extra_prod_details != 0 or self.value_on_extra_prod_details_per_char != 0:
-                return __try_match_text(self, extra_prod_details, self.value_on_extra_prod_details, self.value_on_extra_prod_details_per_char)
+                return RegexMatchingRule.__try_match_text(
+                    self, extra_prod_details, self.value_on_extra_prod_details, self.value_on_extra_prod_details_per_char)
         return (is_matched, value)
 
 class ListingMatcher(object):

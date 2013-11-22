@@ -1,4 +1,5 @@
 import unittest
+import re
 from recordlinker.classification import *
 
 class MatchingRuleStub(MatchingRule):
@@ -14,7 +15,7 @@ class MatchingRuleStub(MatchingRule):
             return True, self.product_details_value
         return False, 0
 
-class ProductDescMatchTestCase(unittest.TestCase):
+class ListingMatcherTestCase(unittest.TestCase):
     def setUp(self):
         primary_rule_1 = MatchingRuleStub('Sample', 1000, 500)
         secondary_rule_1_1 = MatchingRuleStub('Extra1', 100, 10)
@@ -76,7 +77,28 @@ class ProductDescMatchTestCase(unittest.TestCase):
         self.assertEqual(is_match, True)
         self.assertEqual(match_value, 142)
         self.assertEqual(match_desc, 'SingleSecondaryRule')
+
         
-    
+class RegexMatchingRuleTestCase(unittest.TestCase):
+    def setUp(self):
+        pass
+        
+    def testRegexMatchingRuleOnProductDesc(self):
+        regex = re.compile('DSC\-?HX100v', flags=re.IGNORECASE)
+        product_desc = 'Cybershot DSC-HX100v'
+        product_code = 'DSC-HX100v'
+        value_on_desc = 1000000
+        value_on_details = 1000
+        value_on_desc_per_char = 10
+        value_on_details_per_char = 1
+        match_length = len(product_code)
+        expected_value = value_on_desc + match_length * value_on_desc_per_char
+        rule = RegexMatchingRule(regex, value_on_desc, value_on_details, value_on_desc_per_char, value_on_details_per_char, must_match_on_desc = True)
+        is_match, match_value = rule.try_match(product_desc, extra_prod_details = '')
+        self.assertEqual(is_match, True)
+        self.assertEqual(match_value, expected_value)
+        
+
+# Run unit tests from the command line:        
 if __name__ == '__main__':
     unittest.main()
