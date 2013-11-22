@@ -1,8 +1,5 @@
 import unittest
 from recordlinker.classification import *
-#import python.recordlinker.classification as clf
-#import CodingChallenge.python.recordlinker.classification as clf
-#from ..classification import *
 
 class MatchingRuleStub(MatchingRule):
     def __init__(self, text_to_find, desc_value, details_value):
@@ -25,17 +22,18 @@ class ProductDescMatchTestCase(unittest.TestCase):
         secondary_rule_1_3 = MatchingRuleStub('Extra3', 20, 2)
         self.listing_matcher_1 = ListingMatcher('ManySecondaryRules', primary_rule_1, [secondary_rule_1_1, secondary_rule_1_2, secondary_rule_1_3])
         
-        primary_rule_2 = MatchingRuleStub('TestProduct', 101, 21)
+        primary_rule_2 = MatchingRuleStub('Tester', 101, 21)
         secondary_rule_2_1 = MatchingRuleStub('Test', 41, 11)
         self.listing_matcher_2 = ListingMatcher('SingleSecondaryRule', primary_rule_2, [secondary_rule_2_1])
         
         primary_rule_3 = MatchingRuleStub('Taster', 82, 32)
-        self.listing_matcher_3 = ListingMatcher('NoSecondaryRules', primary_rule_3, [])
+        self.listing_matcher_3 = ListingMatcher('PrimaryOnly', primary_rule_3, [])
         
         self.listing_matchers = [self.listing_matcher_1, self.listing_matcher_2, self.listing_matcher_3]
         
         self.engine = MatchingEngine()
     
+    # Test MatchingEngine and ListingMatcher by using the MatchingRuleStub implementation instead of an actual matching rule:
     def testWithNoMatchers(self):
         is_match, match_value, match_desc = self.engine.try_match_listing('some_product_desc', 'some_extra_prod_details', [])
         self.assertEqual(is_match, False, 'There should be no match when the matchers list is empty')
@@ -71,6 +69,14 @@ class ProductDescMatchTestCase(unittest.TestCase):
         self.assertEqual(is_match, False)
         self.assertEqual(match_value, 0)
         self.assertEqual(match_desc, '')
-
+    
+    def testWithMultipleMatchers(self):
+        'Note: both the second and third matchers should match, but only the second should be used'
+        is_match, match_value, match_desc = self.engine.try_match_listing('Taster Tester', 'Rule', self.listing_matchers)
+        self.assertEqual(is_match, True)
+        self.assertEqual(match_value, 142)
+        self.assertEqual(match_desc, 'SingleSecondaryRule')
+        
+    
 if __name__ == '__main__':
     unittest.main()
