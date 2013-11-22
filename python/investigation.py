@@ -9,7 +9,7 @@ from string import Template
 from math import floor
 from operator import truediv
 
-folder_data_intermediate = '/data/intermediate'
+folder_data_intermediate = '../data/intermediate'
 
 if not os.path.exists(folder_data_intermediate):
     os.makedirs(folder_data_intermediate)
@@ -18,7 +18,7 @@ if not os.path.exists(folder_data_intermediate):
 # ===============================
 # STEP 1: Load input data in JSon format:
 
-inputPath = 'data/input/'
+inputPath = '../data/input/'
 listingData = [json.loads(line) for line in open(inputPath + 'listings.txt')]
 productData = [json.loads(line) for line in open(inputPath + 'products.txt')]
 
@@ -163,9 +163,9 @@ possibleMismatches = lManufMap.apply(isPossibleMismatch, axis=1)
 # An alternate approach would have been to modify matchManuf to also return the type of match, as described here: 
 #   http://stackoverflow.com/questions/12356501/pandas-create-two-new-columns-in-a-dataframe-with-values-calculated-from-a-pre?rq=1
 
-lManufMap[lManufMap['pManuf'] == ''].to_csv('data/intermediate/unmatched_manufs.csv', encoding='utf-8')
-lManufMap[lManufMap['pManuf'] != ''].to_csv('data/intermediate/matched_manufs.csv', encoding='utf-8')
-lManufMap[possibleMismatches].to_csv('data/intermediate/possible_mismatched_manufs.csv', encoding='utf-8')
+lManufMap[lManufMap['pManuf'] == ''].to_csv('../data/intermediate/unmatched_manufs.csv', encoding='utf-8')
+lManufMap[lManufMap['pManuf'] != ''].to_csv('../data/intermediate/matched_manufs.csv', encoding='utf-8')
+lManufMap[possibleMismatches].to_csv('../data/intermediate/possible_mismatched_manufs.csv', encoding='utf-8')
 # ASSUMPTION: using utf-8 encodings will be sufficient. 
 # Note that Excel may show some less common letters as a "?". Nut in a text editor they are correct.
 
@@ -212,7 +212,7 @@ lManufMap[possibleMismatches]
 
 listingsByPManufAll = pd.merge( listings, lManufMap, how='inner', left_on='manufacturer', right_on='lManuf')
 listingsByPManuf = listingsByPManufAll[listingsByPManufAll['pManuf'] != ''].reindex(columns = ['pManuf','lManuf', 'title','currency','price'])
-listingsByPManuf.to_csv('data/intermediate/filtered_listings_by_pmanuf.csv', encoding='utf-8')
+listingsByPManuf.to_csv('../data/intermediate/filtered_listings_by_pmanuf.csv', encoding='utf-8')
 
 
 # ==============================================================================
@@ -297,7 +297,7 @@ productDescs, extraProdDetails = zip(* title_regex_pairs )
 listingsByPManuf['productDesc'] = productDescs
 listingsByPManuf['extraProdDetails'] = extraProdDetails
 
-listingsByPManuf.to_csv('data/intermediate/filtered_by_pmanuf_with_split_title.csv', encoding='utf-8')
+listingsByPManuf.to_csv('../data/intermediate/filtered_by_pmanuf_with_split_title.csv', encoding='utf-8')
 
 # Check that the following give empty data frames:
 # listingsByPManuf[pd.isnull(listingsByPManuf['productDesc'])]
@@ -568,7 +568,7 @@ def group_and_save_classification_patterns(source_column, classification_column,
   classification_patterns = products.groupby(classification_column)
   classification_record_counts = products[classification_column].value_counts()
   #Ensure the folder path exists:   
-  pattern_folder_path = r'data/intermediate/' + classification_folder
+  pattern_folder_path = r'../data/intermediate/' + classification_folder
   if not os.path.exists(pattern_folder_path):
       os.makedirs(pattern_folder_path)
   # Save a csv file per pattern, and write a summary record to the console:
@@ -1200,7 +1200,7 @@ conflicting_spec_prod_indexes = exact_match_df[exact_match_df.resolution_in_MP_u
 conflicting_exact_matches = pd.merge(conflicting_spec_prod_indexes, exact_matches, left_index=True, right_on='index_p', how='inner')
 conflicting_exact_matches = conflicting_exact_matches[conflicting_exact_matches.resolution_in_MP.notnull()]
 conflicting_exact_matches[['manufacturer', 'family', 'model', 'product_resolution_in_MP', 'productDesc', 'rounded_MP', 'resolution_in_MP']]\
-    .to_csv('data/intermediate/conflicting_exact_matches.csv', encoding='utf-8')
+    .to_csv('../data/intermediate/conflicting_exact_matches.csv', encoding='utf-8')
 
 # Some discoveries from looking at the data file:
 # 
