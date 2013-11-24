@@ -97,20 +97,10 @@ class RegexMatchingRuleTestCase(unittest.TestCase):
         self.assertEqual(match_value, expected_value)
     
     def testRegexMatchingRuleOnProductDesc(self):
-        regex = re.compile('DSC\-?HX100v', flags=re.IGNORECASE)
         product_desc = 'Cybershot DSC-HX100v'
         extra_prod_details = ''
-        product_code = 'DSC-HX100v'
-        value_on_desc = 1000000
-        value_on_details = 1000
-        value_on_desc_per_char = 10
-        value_on_details_per_char = 1
-        match_length = len(product_code)
-        expected_value = value_on_desc + match_length * value_on_desc_per_char
-        rule = RegexMatchingRule(regex, value_on_desc, value_on_details, value_on_desc_per_char, value_on_details_per_char, must_match_on_desc = True)
-        is_match, match_value = rule.try_match(product_desc, extra_prod_details)
-        self.assertEqual(is_match, True)
-        self.assertEqual(match_value, expected_value)
+        expected_value = self.value_on_desc + self.match_length * self.value_on_desc_per_char
+        self.run_rule(product_desc, extra_prod_details, expected_value, expected_to_match = True, must_match_on_desc = True)
     
     def testRegexMatchingRuleOnProductDetailsWhenMustMatchOnDescTrue(self):
         product_desc = 'Cybershot'
