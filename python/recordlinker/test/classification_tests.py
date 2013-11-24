@@ -113,6 +113,11 @@ class RegexMatchingRuleTestCase(unittest.TestCase):
         expected_value = self.value_on_details + self.match_length * self.value_on_details_per_char
         self.run_rule(product_desc, extra_prod_details, expected_value, expected_to_match = True, must_match_on_desc = False)
         
+    def testRegexMatchingRuleOnNoMatch(self):
+        product_desc = 'Cybershot NO-HX100'
+        extra_prod_details = ''
+        self.run_rule(product_desc, extra_prod_details, expected_value = 0, expected_to_match = False, must_match_on_desc = False)
+        
 
 # Run unit tests from the command line:        
 if __name__ == '__main__':
