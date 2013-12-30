@@ -127,26 +127,42 @@ class ListingMatchersBuilderTestCase(unittest.TestCase):
         self.slice_all = slice(0, 8)
         self.slice_prod_code = slice(4, 8)
         self.slices_secondary = [slice(0,1), slice(2,3)]
-        self.value_on_desc = 1000000
-        self.value_on_details = 1000
-        self.value_on_desc_per_char = 10
-        self.value_on_details_per_char = 1
-        self.prod_code_primary_tpl = RegexMatchingRuleTemplate([self.slice_prod_code], self.value_on_desc, self.value_on_details,
-            self.value_on_desc_per_char, self.value_on_details_per_char, must_match_on_desc = True)
+        self.primary_value_on_desc = 1000000
+        self.primary_value_on_details = 10000
+        self.primary_value_on_desc_per_char = 1000
+        self.primary_value_on_details_per_char = 100
+        self.secondary_value_on_desc = 100000
+        self.secondary_value_on_details = 100
+        self.secondary_value_on_desc_per_char = 10
+        self.secondary_value_on_details_per_char = 1
+        self.prod_code_primary_tpl = RegexMatchingRuleTemplate([self.slice_prod_code], self.primary_value_on_desc, self.primary_value_on_details,
+            self.primary_value_on_desc_per_char, self.primary_value_on_details_per_char, must_match_on_desc = True)
+        self.secondary_tpl_1 = RegexMatchingRuleTemplate(self.slices_secondary[0:1], self.secondary_value_on_desc, self.secondary_value_on_details,
+            self.secondary_value_on_desc_per_char, self.secondary_value_on_details_per_char, must_match_on_desc = True)
+        self.secondary_tpl_2 = RegexMatchingRuleTemplate(self.slices_secondary[1:2], self.secondary_value_on_desc, self.secondary_value_on_details,
+            self.secondary_value_on_desc_per_char, self.secondary_value_on_details_per_char, must_match_on_desc = True)
     
     def testEmptyBuilder(self):
         builder = ListingMatchersBuilder([])
         listing_matchers = builder.generate_listing_matchers([])
         self.assert_(isinstance(listing_matchers, list) and len(listing_matchers) == 0, "list must be empty")
     
-    def testBuilderWithOneTemplate(self):
+    def testBuilderWithOnePrimaryTemplate(self):
         primary_tpl = self.prod_code_primary_tpl
         secondary_tpls = []
         lm_tpl = ListingMatcherTemplate('prod_code_primary_only', primary_tpl, secondary_tpls)
         builder = ListingMatchersBuilder([lm_tpl])
         listing_matchers = builder.generate_listing_matchers(self.blocks)
         self.assert_(isinstance(listing_matchers, list) and len(listing_matchers) > 0, "expected non-empty list of listing matchers")
-        
+    
+    def testBuilderWithMultipleSecondaryTemplates(self):
+        primary_tpl = self.prod_code_primary_tpl
+        secondary_tpls = [self.secondary_tpl_1, self.secondary_tpl_2]
+        lm_tpl = ListingMatcherTemplate('prod_code_primary_only', primary_tpl, secondary_tpls)
+        builder = ListingMatchersBuilder([lm_tpl])
+        listing_matchers = builder.generate_listing_matchers(self.blocks)
+        self.assert_(isinstance(listing_matchers, list) and len(listing_matchers) > 0, "expected non-empty list of listing matchers")
+        self.assert_(len(listing_matchers[0].secondary_matching_rules) == 2, "expected 2 secondary matching rules in first listing matcher")
 
 
 # Run unit tests from the command line:        
