@@ -3,7 +3,7 @@ import itertools
 import re
 
 # --------------------------------------------------------------------------------------------------
-# Class to represent the value function for matching a specific number of characters:
+# A class to represent the value function for matching a specific number of characters:
 # 
 class MatchValueFunction(object):
     def __init__(self, fixed_val, val_per_char):
@@ -18,6 +18,15 @@ class MatchValueFunction(object):
             return self.fixed_value + num_chars_matched * self.value_per_char
         else:
             return 0.0
+
+# --------------------------------------------------------------------------------------------------
+# A class to represent the result of a matching attempt:
+# 
+class MatchResult(object):
+    def __init__(self, is_matched, match_val = 0, desc = ""):
+        self.is_match = is_matched
+        self.match_value = match_val
+        self.description = desc
 
 # --------------------------------------------------------------------------------------------------
 # Matching rules for a given product to test whether a listing matches that product:
@@ -37,21 +46,21 @@ class RegexMatchingRule(MatchingRule):
     def __try_match_text(self, text_to_match, match_value_func):
         match_obj = self.match_regex.search(text_to_match)
         if match_obj is None:
-            return (False, 0)
+            return MatchResult(False)
         chars_matched = match_obj.end() - match_obj.start()
         match_value = match_value_func.evaluate(chars_matched)
-        return (True, match_value)
+        return MatchResult(True, match_value)
     
     def try_match(self, product_desc, extra_prod_details = None):
-        is_matched, value = RegexMatchingRule.__try_match_text(
+        match_result = RegexMatchingRule.__try_match_text(
             self, product_desc, self.value_func_on_product_desc)
-        if not is_matched:
+        if not match_result.is_match:
             if self.must_match_on_product_desc:
-                return (False, 0)
+                return MatchResult(False)
             if self.value_func_on_extra_prod_details.is_assigned():
                 return RegexMatchingRule.__try_match_text(
                     self, extra_prod_details, self.value_func_on_extra_prod_details)
-        return (is_matched, value)
+        return match_result
 
 class ListingMatcher(object):
     def __init__(self, description, primary_rule, secondary_rules):
@@ -60,14 +69,15 @@ class ListingMatcher(object):
         self.secondary_matching_rules = secondary_rules
     
     def try_match(self, product_desc, extra_prod_details):
-        is_match, match_value = self.primary_matching_rule.try_match(product_desc, extra_prod_details)
-        if is_match:
+        primary_match_result = self.primary_matching_rule.try_match(product_desc, extra_prod_details)
+        if primary_match_result.is_match:
+            primary_match_result.description = self.match_desc
             for secondary_rule in self.secondary_matching_rules:
-                is_match_2, match_value_2 = secondary_rule.try_match(product_desc, extra_prod_details)
-                if is_match_2:
-                    match_value = match_value + match_value_2
-            return (is_match, match_value, self.match_desc)
-        return (False, 0, '')
+                secondary_match_result = secondary_rule.try_match(product_desc, extra_prod_details)
+                if secondary_match_result.is_match:
+                    primary_match_result.match_value = primary_match_result.match_value + secondary_match_result.match_value
+            return primary_match_result
+        return MatchResult(False)
 
 # --------------------------------------------------------------------------------------------------
 # Matching engine to run through the ListingMatchers for a product, 
@@ -75,10 +85,10 @@ class ListingMatcher(object):
 class MatchingEngine(object):
     def try_match_listing(self, product_desc, extra_prod_details, listing_matchers):
         for matcher in listing_matchers:
-            is_match, match_value, match_desc = matcher.try_match(product_desc, extra_prod_details)
-            if is_match:
-                return (is_match, match_value, match_desc)
-        return (False, 0, '')
+            match_result = matcher.try_match(product_desc, extra_prod_details)
+            if match_result.is_match:
+                return match_result
+        return MatchResult(False)
 
 
 # --------------------------------------------------------------------------------------------------
