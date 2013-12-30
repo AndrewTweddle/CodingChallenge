@@ -117,7 +117,37 @@ class RegexMatchingRuleTestCase(unittest.TestCase):
         product_desc = 'Cybershot NO-HX100'
         extra_prod_details = ''
         self.run_rule(product_desc, extra_prod_details, expected_value = 0, expected_to_match = False, must_match_on_desc = False)
+
+
+class ListingMatchersBuilderTestCase(unittest.TestCase):
+    def setUp(self):
+        # Sample categorisation: a-a+a-an
+        # Sample camera: Cyber-shot + DSC-W310
+        self.blocks = ['Cyber', '-', 'shot', ' ', 'DSC', '-', 'W', '310']
+        self.slice_all = slice(0, 8)
+        self.slice_prod_code = slice(4, 8)
+        self.slices_secondary = [slice(0,1), slice(2,3)]
+        self.value_on_desc = 1000000
+        self.value_on_details = 1000
+        self.value_on_desc_per_char = 10
+        self.value_on_details_per_char = 1
+        self.prod_code_primary_tpl = RegexMatchingRuleTemplate([self.slice_prod_code], self.value_on_desc, self.value_on_details,
+            self.value_on_desc_per_char, self.value_on_details_per_char, must_match_on_desc = True)
+    
+    def testEmptyBuilder(self):
+        builder = ListingMatchersBuilder([])
+        listing_matchers = builder.generate_listing_matchers([])
+        self.assert_(isinstance(listing_matchers, list) and len(listing_matchers) == 0, "list must be empty")
+    
+    def testBuilderWithOneTemplate(self):
+        primary_tpl = self.prod_code_primary_tpl
+        secondary_tpls = []
+        lm_tpl = ListingMatcherTemplate('prod_code_primary_only', primary_tpl, secondary_tpls)
+        builder = ListingMatchersBuilder([lm_tpl])
+        listing_matchers = builder.generate_listing_matchers(self.blocks)
+        self.assert_(isinstance(listing_matchers, list) and len(listing_matchers) > 0, "expected non-empty list of listing matchers")
         
+
 
 # Run unit tests from the command line:        
 if __name__ == '__main__':

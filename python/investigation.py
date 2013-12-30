@@ -64,10 +64,10 @@ pManufsSeries = Series(pManufs)
 
 # ----------------------------------------------------------------------
 # Data discoveries:
-#   1. lManufs has far more manufacturers than pManufs, including some bad data which is clear a product not a manufacturer
+#   1. lManufs has far more manufacturers than pManufs, including some bad data which is clearly a product not a manufacturer
 #   2. Some aren't even camera products (e.g. UBISOFT Assassin's Creed). 
 #   3. Others are, but aren't on main list of products e.g. listings[listings['manufacturer'] == u'Roots']
-#   4. In some cases, the listing manufacturer is a subsidiary of the products manufacturer e.g. 'Canon Canada' under 'Canon'
+#   4. In some cases, the listing manufacturer is a subsidiary of the product manufacturer e.g. 'Canon Canada' under 'Canon'
 #   5. At least one typo: 'Canoon' instead of 'Canon': listings[listings['manufacturer'] == u'Canoon']
 #   6. Product manufacturer gotchas to avoid:
 #      6.1 Konica Minolta is two words, but it's simpler to match on single words rather than bigrams. 
