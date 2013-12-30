@@ -10,6 +10,9 @@ class MatchValueFunction(object):
         self.fixed_value = fixed_val
         self.value_per_char = val_per_char
     
+    def is_assigned(self):
+        return self.fixed_value <> 0 or self.value_per_char <> 0
+    
     def evaluate(self, num_chars_matched):
         if num_chars_matched > 0:
             return self.fixed_value + num_chars_matched * self.value_per_char
@@ -25,31 +28,29 @@ class MatchingRule(object):
         pass
 
 class RegexMatchingRule(MatchingRule):
-    def __init__(self, regex, value_on_desc, value_on_details, value_on_desc_per_char = 0, 
-            value_on_details_per_char = 0, must_match_on_desc = False):
+    def __init__(self, regex, value_func_on_desc, value_func_on_details, must_match_on_desc = False):
         self.match_regex = regex
-        self.value_on_product_desc = value_on_desc
-        self.value_on_extra_prod_details = value_on_details
-        self.value_on_product_desc_per_char = value_on_desc_per_char
-        self.value_on_extra_prod_details_per_char = value_on_details_per_char
+        self.value_func_on_product_desc = value_func_on_desc
+        self.value_func_on_extra_prod_details = value_func_on_details
         self.must_match_on_product_desc = must_match_on_desc  # this will be set for the primary match only
     
-    def __try_match_text(self, text_to_match, value, value_per_char):
+    def __try_match_text(self, text_to_match, match_value_func):
         match_obj = self.match_regex.search(text_to_match)
         if match_obj is None:
             return (False, 0)
         chars_matched = match_obj.end() - match_obj.start()
-        return (True, value + value_per_char * chars_matched)
+        match_value = match_value_func.evaluate(chars_matched)
+        return (True, match_value)
     
     def try_match(self, product_desc, extra_prod_details = None):
         is_matched, value = RegexMatchingRule.__try_match_text(
-            self, product_desc, self.value_on_product_desc, self.value_on_product_desc_per_char)
+            self, product_desc, self.value_func_on_product_desc)
         if not is_matched:
             if self.must_match_on_product_desc:
                 return (False, 0)
-            if self.value_on_extra_prod_details != 0 or self.value_on_extra_prod_details_per_char != 0:
+            if self.value_func_on_extra_prod_details.is_assigned():
                 return RegexMatchingRule.__try_match_text(
-                    self, extra_prod_details, self.value_on_extra_prod_details, self.value_on_extra_prod_details_per_char)
+                    self, extra_prod_details, self.value_func_on_extra_prod_details)
         return (is_matched, value)
 
 class ListingMatcher(object):
@@ -85,12 +86,10 @@ class MatchingEngine(object):
 # 
 
 class RegexMatchingRuleTemplate(object):
-    def __init__(self, slices, value_on_desc, value_on_details, value_on_desc_per_char, value_on_details_per_char, must_match_on_desc = False):
+    def __init__(self, slices, value_func_on_desc, value_func_on_details, must_match_on_desc = False):
         self.slices = slices
-        self.value_on_product_desc = value_on_desc
-        self.value_on_extra_prod_details = value_on_details
-        self.value_on_product_desc_per_char = value_on_desc_per_char
-        self.value_on_extra_prod_details_per_char = value_on_details_per_char
+        self.value_func_on_product_desc = value_func_on_desc
+        self.value_func_on_extra_prod_details = value_func_on_details
         self.must_match_on_product_desc = must_match_on_desc
     
     @staticmethod
@@ -121,8 +120,8 @@ class RegexMatchingRuleTemplate(object):
         extracted_text = ''.join(extracted_blocks)
         pattern = RegexMatchingRuleTemplate.regex_escape_with_optional_dashes_and_whitespace(extracted_text)
         regex = re.compile(pattern, flags = re.IGNORECASE or re.UNICODE )
-        return RegexMatchingRule(regex, self.value_on_product_desc, self.value_on_extra_prod_details, 
-            self.value_on_product_desc_per_char, self.value_on_extra_prod_details_per_char, self.must_match_on_product_desc)
+        return RegexMatchingRule(regex, self.value_func_on_product_desc,
+            self.value_func_on_extra_prod_details, self.must_match_on_product_desc)
 
 class ListingMatcherTemplate(object):
     def __init__(self, desc, primary_template, secondary_templates):

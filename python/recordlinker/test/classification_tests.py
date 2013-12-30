@@ -7,6 +7,18 @@ class MatchValueFunctionTestCase(unittest.TestCase):
         self.fixed_val = 1000
         self.per_char_val = 10
         self.match_valueFunc = MatchValueFunction(self.fixed_val, self.per_char_val)
+        self.match_valueFunc_withNonZeroFixedVal = MatchValueFunction(self.fixed_val, 0)
+        self.match_valueFunc_withNonZeroValPerChar = MatchValueFunction(0, self.per_char_val)
+        self.match_valueFunc_withZeroFixedAndPerCharVal = MatchValueFunction(0, 0)
+    
+    def testNonZeroFixedValFuncIsAssigned(self):
+        self.assert_(self.match_valueFunc_withNonZeroFixedVal.is_assigned())
+    
+    def testNonZeroValPerCharFuncIsAssigned(self):
+        self.assert_(self.match_valueFunc_withNonZeroValPerChar.is_assigned())
+    
+    def testZeroFixedAndPerCharValFuncIsNotAssigned(self):
+        self.assert_(not self.match_valueFunc_withZeroFixedAndPerCharVal.is_assigned())
     
     def testWithNoCharsMatched(self):
         val = self.match_valueFunc.evaluate(0)
@@ -100,14 +112,12 @@ class RegexMatchingRuleTestCase(unittest.TestCase):
         self.regex = re.compile('DSC\-?HX100v', flags=re.IGNORECASE)
         self.product_code = 'DSC-HX100v'
         self.match_length = len(self.product_code)
-        self.value_on_desc = 1000000
-        self.value_on_details = 1000
-        self.value_on_desc_per_char = 10
-        self.value_on_details_per_char = 1
+        self.value_func_on_desc = MatchValueFunction(1000000, 10)
+        self.value_func_on_details = MatchValueFunction(1000, 1)
     
     def run_rule(self, product_desc, extra_prod_details, expected_value, expected_to_match, must_match_on_desc):
-        rule = RegexMatchingRule(self.regex, self.value_on_desc, self.value_on_details, 
-            self.value_on_desc_per_char, self.value_on_details_per_char, must_match_on_desc)
+        rule = RegexMatchingRule(self.regex, self.value_func_on_desc, 
+            self.value_func_on_details, must_match_on_desc)
         is_match, match_value = rule.try_match(product_desc, extra_prod_details)
         self.assertEqual(is_match, expected_to_match)
         self.assertEqual(match_value, expected_value)
@@ -115,7 +125,7 @@ class RegexMatchingRuleTestCase(unittest.TestCase):
     def testRegexMatchingRuleOnProductDesc(self):
         product_desc = 'Cybershot DSC-HX100v'
         extra_prod_details = ''
-        expected_value = self.value_on_desc + self.match_length * self.value_on_desc_per_char
+        expected_value = self.value_func_on_desc.evaluate(self.match_length)
         self.run_rule(product_desc, extra_prod_details, expected_value, expected_to_match = True, must_match_on_desc = True)
     
     def testRegexMatchingRuleOnProductDetailsWhenMustMatchOnDescTrue(self):
@@ -126,7 +136,7 @@ class RegexMatchingRuleTestCase(unittest.TestCase):
     def testRegexMatchingRuleOnProductDetailsWhenMustMatchOnDescFalse(self):
         product_desc = 'Cybershot'
         extra_prod_details = 'DSC-HX100v'
-        expected_value = self.value_on_details + self.match_length * self.value_on_details_per_char
+        expected_value = self.value_func_on_details.evaluate(self.match_length)
         self.run_rule(product_desc, extra_prod_details, expected_value, expected_to_match = True, must_match_on_desc = False)
         
     def testRegexMatchingRuleOnNoMatch(self):
@@ -143,20 +153,16 @@ class ListingMatchersBuilderTestCase(unittest.TestCase):
         self.slice_all = slice(0, 8)
         self.slice_prod_code = slice(4, 8)
         self.slices_secondary = [slice(0,1), slice(2,3)]
-        self.primary_value_on_desc = 1000000
-        self.primary_value_on_details = 10000
-        self.primary_value_on_desc_per_char = 1000
-        self.primary_value_on_details_per_char = 100
-        self.secondary_value_on_desc = 100000
-        self.secondary_value_on_details = 100
-        self.secondary_value_on_desc_per_char = 10
-        self.secondary_value_on_details_per_char = 1
-        self.prod_code_primary_tpl = RegexMatchingRuleTemplate([self.slice_prod_code], self.primary_value_on_desc, self.primary_value_on_details,
-            self.primary_value_on_desc_per_char, self.primary_value_on_details_per_char, must_match_on_desc = True)
-        self.secondary_tpl_1 = RegexMatchingRuleTemplate(self.slices_secondary[0:1], self.secondary_value_on_desc, self.secondary_value_on_details,
-            self.secondary_value_on_desc_per_char, self.secondary_value_on_details_per_char, must_match_on_desc = True)
-        self.secondary_tpl_2 = RegexMatchingRuleTemplate(self.slices_secondary[1:2], self.secondary_value_on_desc, self.secondary_value_on_details,
-            self.secondary_value_on_desc_per_char, self.secondary_value_on_details_per_char, must_match_on_desc = True)
+        self.primary_value_func_on_desc = MatchValueFunction(1000000, 1000)
+        self.primary_value_func_on_details = MatchValueFunction(10000, 100)
+        self.secondary_value_func_on_desc = MatchValueFunction(100000, 10)
+        self.secondary_value_func_on_details = MatchValueFunction(100, 1)
+        self.prod_code_primary_tpl = RegexMatchingRuleTemplate([self.slice_prod_code],
+            self.primary_value_func_on_desc, self.primary_value_func_on_details, must_match_on_desc = True)
+        self.secondary_tpl_1 = RegexMatchingRuleTemplate(self.slices_secondary[0:1], 
+            self.secondary_value_func_on_desc, self.secondary_value_func_on_details, must_match_on_desc = True)
+        self.secondary_tpl_2 = RegexMatchingRuleTemplate(self.slices_secondary[1:2], 
+            self.secondary_value_func_on_desc, self.secondary_value_func_on_details, must_match_on_desc = True)
     
     def testEmptyBuilder(self):
         builder = ListingMatchersBuilder([])
