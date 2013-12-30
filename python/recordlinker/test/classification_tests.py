@@ -2,6 +2,22 @@ import unittest
 import re
 from recordlinker.classification import *
 
+class MatchValueFunctionTestCase(unittest.TestCase):
+    def setUp(self):
+        self.fixed_val = 1000
+        self.per_char_val = 10
+        self.match_valueFunc = MatchValueFunction(self.fixed_val, self.per_char_val)
+    
+    def testWithNoCharsMatched(self):
+        val = self.match_valueFunc.evaluate(0)
+        self.assertEqual(val, 0, 'The value should be zero when no characters matched')
+        
+    def testWithSomeCharsMatched(self):
+        matched_char_count = 10
+        val = self.match_valueFunc.evaluate(matched_char_count)
+        expected_val = self.fixed_val + self.per_char_val * matched_char_count
+        self.assertEqual(val, expected_val)
+
 class MatchingRuleStub(MatchingRule):
     def __init__(self, text_to_find, desc_value, details_value):
         self.to_find = text_to_find

@@ -3,6 +3,20 @@ import itertools
 import re
 
 # --------------------------------------------------------------------------------------------------
+# Class to represent the value function for matching a specific number of characters:
+# 
+class MatchValueFunction(object):
+    def __init__(self, fixed_val, val_per_char):
+        self.fixed_value = fixed_val
+        self.value_per_char = val_per_char
+    
+    def evaluate(self, num_chars_matched):
+        if num_chars_matched > 0:
+            return self.fixed_value + num_chars_matched * self.value_per_char
+        else:
+            return 0.0
+
+# --------------------------------------------------------------------------------------------------
 # Matching rules for a given product to test whether a listing matches that product:
 # 
 class MatchingRule(object):
