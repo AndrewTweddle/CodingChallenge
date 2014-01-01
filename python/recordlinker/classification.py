@@ -106,7 +106,7 @@ class MatchingRuleTemplate(object):
     def generate(self, all_blocks):
         pass
 
-class RegexMatchingRuleTemplate(MatchingRuleTemplate):
+class RegexRuleTemplate(MatchingRuleTemplate):
     @staticmethod
     def regex_escape_with_optional_dashes_and_whitespace(text):
         # Remove all white-space and dashes:
@@ -133,7 +133,7 @@ class RegexMatchingRuleTemplate(MatchingRuleTemplate):
         block_gen = (all_blocks[s] for s in self.slices)
         extracted_blocks = itertools.chain.from_iterable(block_gen)
         extracted_text = ''.join(extracted_blocks)
-        pattern = RegexMatchingRuleTemplate.regex_escape_with_optional_dashes_and_whitespace(extracted_text)
+        pattern = RegexRuleTemplate.regex_escape_with_optional_dashes_and_whitespace(extracted_text)
         regex = re.compile(pattern, flags = re.IGNORECASE or re.UNICODE )
         return RegexMatchingRule(regex, self.value_func_on_product_desc,
             self.value_func_on_extra_prod_details, self.must_match_on_product_desc)

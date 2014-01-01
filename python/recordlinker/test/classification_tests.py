@@ -157,11 +157,11 @@ class ListingMatchersBuilderTestCase(unittest.TestCase):
         self.primary_value_func_on_details = MatchValueFunction(10000, 100)
         self.secondary_value_func_on_desc = MatchValueFunction(100000, 10)
         self.secondary_value_func_on_details = MatchValueFunction(100, 1)
-        self.prod_code_primary_tpl = RegexMatchingRuleTemplate([self.slice_prod_code],
+        self.prod_code_primary_tpl = RegexRuleTemplate([self.slice_prod_code],
             self.primary_value_func_on_desc, self.primary_value_func_on_details, must_match_on_desc = True)
-        self.secondary_tpl_1 = RegexMatchingRuleTemplate(self.slices_secondary[0:1], 
+        self.secondary_tpl_1 = RegexRuleTemplate(self.slices_secondary[0:1], 
             self.secondary_value_func_on_desc, self.secondary_value_func_on_details, must_match_on_desc = True)
-        self.secondary_tpl_2 = RegexMatchingRuleTemplate(self.slices_secondary[1:2], 
+        self.secondary_tpl_2 = RegexRuleTemplate(self.slices_secondary[1:2], 
             self.secondary_value_func_on_desc, self.secondary_value_func_on_details, must_match_on_desc = True)
     
     def testEmptyBuilder(self):
