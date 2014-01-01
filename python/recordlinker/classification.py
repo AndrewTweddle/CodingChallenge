@@ -150,8 +150,9 @@ class ListingMatcherTemplate(object):
         listing_matcher = ListingMatcher(self.description, primary_rule, secondary_rules)
         return listing_matcher
 
-class ListingMatchersBuilder(object):
-    def __init__(self, matcher_templates):
+class MasterTemplate(object):
+    def __init__(self, classific, matcher_templates):
+        self.classification = classific
         self.listing_matcher_templates = matcher_templates
     
     def generate_listing_matchers(self, all_blocks):

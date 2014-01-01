@@ -145,7 +145,7 @@ class RegexMatchingRuleTestCase(unittest.TestCase):
         self.run_rule(product_desc, extra_prod_details, expected_value = 0, expected_to_match = False, must_match_on_desc = False)
 
 
-class ListingMatchersBuilderTestCase(unittest.TestCase):
+class MasterTemplateTestCase(unittest.TestCase):
     def setUp(self):
         # Sample categorisation: a-a+a-an
         # Sample camera: Cyber-shot + DSC-W310
@@ -164,25 +164,25 @@ class ListingMatchersBuilderTestCase(unittest.TestCase):
         self.secondary_tpl_2 = RegexRuleTemplate(self.slices_secondary[1:2], 
             self.secondary_value_func_on_desc, self.secondary_value_func_on_details, must_match_on_desc = True)
     
-    def testEmptyBuilder(self):
-        builder = ListingMatchersBuilder([])
-        listing_matchers = builder.generate_listing_matchers([])
+    def testEmptyMasterTemplate(self):
+        master = MasterTemplate("a-a+a-an", [])
+        listing_matchers = master.generate_listing_matchers([])
         self.assert_(isinstance(listing_matchers, list) and len(listing_matchers) == 0, "list must be empty")
     
-    def testBuilderWithOnePrimaryTemplate(self):
+    def testMasterTemplateWithOnePrimaryTemplate(self):
         primary_tpl = self.prod_code_primary_tpl
         secondary_tpls = []
         lm_tpl = ListingMatcherTemplate('prod_code_primary_only', primary_tpl, secondary_tpls)
-        builder = ListingMatchersBuilder([lm_tpl])
-        listing_matchers = builder.generate_listing_matchers(self.blocks)
+        master = MasterTemplate("a-a+a-an", [lm_tpl])
+        listing_matchers = master.generate_listing_matchers(self.blocks)
         self.assert_(isinstance(listing_matchers, list) and len(listing_matchers) > 0, "expected non-empty list of listing matchers")
     
-    def testBuilderWithMultipleSecondaryTemplates(self):
+    def testMasterTemplateWithMultipleSecondaryTemplates(self):
         primary_tpl = self.prod_code_primary_tpl
         secondary_tpls = [self.secondary_tpl_1, self.secondary_tpl_2]
         lm_tpl = ListingMatcherTemplate('prod_code_primary_only', primary_tpl, secondary_tpls)
-        builder = ListingMatchersBuilder([lm_tpl])
-        listing_matchers = builder.generate_listing_matchers(self.blocks)
+        master = MasterTemplate("a-a+a-an", [lm_tpl])
+        listing_matchers = master.generate_listing_matchers(self.blocks)
         self.assert_(isinstance(listing_matchers, list) and len(listing_matchers) > 0, "expected non-empty list of listing matchers")
         self.assert_(len(listing_matchers[0].secondary_matching_rules) == 2, "expected 2 secondary matching rules in first listing matcher")
 
