@@ -95,13 +95,18 @@ class MatchingEngine(object):
 # Templates to generate ListingMatchers and MatchItems:
 # 
 
-class RegexMatchingRuleTemplate(object):
+class MatchingRuleTemplate(object):
     def __init__(self, slices, value_func_on_desc, value_func_on_details, must_match_on_desc = False):
         self.slices = slices
         self.value_func_on_product_desc = value_func_on_desc
         self.value_func_on_extra_prod_details = value_func_on_details
         self.must_match_on_product_desc = must_match_on_desc
     
+    @abstractmethod
+    def generate(self, all_blocks):
+        pass
+
+class RegexMatchingRuleTemplate(MatchingRuleTemplate):
     @staticmethod
     def regex_escape_with_optional_dashes_and_whitespace(text):
         # Remove all white-space and dashes:
