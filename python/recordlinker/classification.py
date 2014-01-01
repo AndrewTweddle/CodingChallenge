@@ -63,21 +63,37 @@ class RegexMatchingRule(MatchingRule):
         return match_result
 
 class ListingMatcher(object):
-    def __init__(self, description, mandatory_rule, optional_rules):
+    def __init__(self, description, mandatory_rules, optional_rules):
         self.match_desc = description
-        self.mandatory_matching_rule = mandatory_rule
+        self.mandatory_matching_rules = mandatory_rules
         self.optional_matching_rules = optional_rules
     
     def try_match(self, product_desc, extra_prod_details):
-        mandatory_match_result = self.mandatory_matching_rule.try_match(product_desc, extra_prod_details)
-        if mandatory_match_result.is_match:
-            mandatory_match_result.description = self.match_desc
-            for optional_rule in self.optional_matching_rules:
-                optional_match_result = optional_rule.try_match(product_desc, extra_prod_details)
-                if optional_match_result.is_match:
-                    mandatory_match_result.match_value = mandatory_match_result.match_value + optional_match_result.match_value
-            return mandatory_match_result
-        return MatchResult(False)
+        # There must be at least one mandatory rule:
+        if len(self.mandatory_matching_rules) == 0:
+            return MatchResult(False)
+            
+        is_first_rule = True
+        
+        for mandatory_rule in self.mandatory_matching_rules:
+            mandatory_match_result = mandatory_rule.try_match(product_desc, extra_prod_details)
+            if mandatory_match_result.is_match:
+                if is_first_rule:
+                    final_match_result = mandatory_match_result
+                    is_first_rule = False
+                else:
+                    final_match_result.match_value = final_match_result.match_value + mandatory_match_result.match_value
+            else:
+                return MatchResult(False)
+        
+        final_match_result.description = self.match_desc
+        
+        for optional_rule in self.optional_matching_rules:
+            optional_match_result = optional_rule.try_match(product_desc, extra_prod_details)
+            if optional_match_result.is_match:
+                final_match_result.match_value = final_match_result.match_value + optional_match_result.match_value
+        
+        return final_match_result
 
 # --------------------------------------------------------------------------------------------------
 # Matching engine to run through the ListingMatchers for a product, 
@@ -139,15 +155,15 @@ class RegexRuleTemplate(MatchingRuleTemplate):
             self.value_func_on_extra_prod_details, self.must_match_on_product_desc)
 
 class ListingMatcherTemplate(object):
-    def __init__(self, desc, mandatory_template, optional_templates):
+    def __init__(self, desc, mandatory_templates, optional_templates):
         self.description = desc
-        self.mandatory_rule_template = mandatory_template
+        self.mandatory_rule_templates = mandatory_templates
         self.optional_rule_templates = optional_templates
     
     def generate(self, all_blocks):
-        mandatory_rule = self.mandatory_rule_template.generate(all_blocks)
+        mandatory_rules = [template.generate(all_blocks) for template in self.mandatory_rule_templates]
         optional_rules = [template.generate(all_blocks) for template in self.optional_rule_templates]
-        listing_matcher = ListingMatcher(self.description, mandatory_rule, optional_rules)
+        listing_matcher = ListingMatcher(self.description, mandatory_rules, optional_rules)
         return listing_matcher
 
 class MasterTemplate(object):

@@ -49,16 +49,18 @@ class ListingMatcherTestCase(unittest.TestCase):
         optional_rule_1_1 = MatchingRuleStub('Extra1', 100, 10)
         optional_rule_1_2 = MatchingRuleStub('Extra2', 50, 5)
         optional_rule_1_3 = MatchingRuleStub('Extra3', 20, 2)
-        self.listing_matcher_1 = ListingMatcher('ManyOptionalRules', mandatory_rule_1, [optional_rule_1_1, optional_rule_1_2, optional_rule_1_3])
+        self.listing_matcher_1 = ListingMatcher('ManyOptionalRules', [mandatory_rule_1], [optional_rule_1_1, optional_rule_1_2, optional_rule_1_3])
         
         mandatory_rule_2 = MatchingRuleStub('Tester', 101, 21)
         optional_rule_2_1 = MatchingRuleStub('Test', 41, 11)
-        self.listing_matcher_2 = ListingMatcher('SingleOptionalRule', mandatory_rule_2, [optional_rule_2_1])
+        self.listing_matcher_2 = ListingMatcher('SingleOptionalRule', [mandatory_rule_2], [optional_rule_2_1])
         
         mandatory_rule_3 = MatchingRuleStub('Taster', 82, 32)
-        self.listing_matcher_3 = ListingMatcher('MandatoryOnly', mandatory_rule_3, [])
+        self.listing_matcher_3 = ListingMatcher('MandatoryOnly', [mandatory_rule_3], [])
         
         self.listing_matchers = [self.listing_matcher_1, self.listing_matcher_2, self.listing_matcher_3]
+        
+        self.listing_matcher_with_two_mandatory_rules = ListingMatcher('TwoMandatoryOnly', [mandatory_rule_1, mandatory_rule_2], [])
         
         self.engine = MatchingEngine()
     
@@ -80,7 +82,22 @@ class ListingMatcherTestCase(unittest.TestCase):
         self.assertEqual(match_result.is_match, True, "There should be a match when the single matcher's product desc does match")
         self.assertEqual(match_result.match_value, 1000, 'The value should be 1000 when the single matcher matches the first product desc')
         self.assertEqual(match_result.description, 'ManyOptionalRules', 'The rule description should be "ManyOptionalRules" when the single matcher matches the rule')
-
+    
+    def testWithSingleMatcherWithTwoMandatoryRulesWhichBothMatch(self):
+        match_result = self.engine.try_match_listing('Sample Tester', 'some_extra_prod_details', [self.listing_matcher_with_two_mandatory_rules])
+        self.assertEqual(match_result.is_match, True, "There should be a match when the product desc matches both mandatory rules")
+        self.assertEqual(match_result.match_value, 1101)
+    
+    def testWithSingleMatcherWithTwoMandatoryRulesWithOnlyTheFirstMatching(self):
+        match_result = self.engine.try_match_listing('Sample', 'some_extra_prod_details', [self.listing_matcher_with_two_mandatory_rules])
+        self.assertEqual(match_result.is_match, False, "There should only be a match when the product desc matches both mandatory rules")
+        self.assertEqual(match_result.match_value, 0)
+    
+    def testWithSingleMatcherWithTwoMandatoryRulesWithOnlyTheSecondMatching(self):
+        match_result = self.engine.try_match_listing('Tester', 'some_extra_prod_details', [self.listing_matcher_with_two_mandatory_rules])
+        self.assertEqual(match_result.is_match, False, "There should only be a match when the product desc matches both mandatory rules")
+        self.assertEqual(match_result.match_value, 0)
+    
     def testWithSingleMatcherAndMultipleMatchingRules(self):
         match_result = self.engine.try_match_listing('Sample Extra2', 'Extra1 Extra3', [self.listing_matcher_1])
         self.assertEqual(match_result.is_match, True, "There should be a match when the single matcher's product desc matches the mandatory text")
@@ -159,8 +176,10 @@ class MasterTemplateTestCase(unittest.TestCase):
         self.optional_value_func_on_details = MatchValueFunction(100, 1)
         self.prod_code_mandatory_tpl = RegexRuleTemplate([self.slice_prod_code],
             self.mandatory_value_func_on_desc, self.mandatory_value_func_on_details, must_match_on_desc = True)
+        self.expected_prod_code_regex_pattern = "(?<!\\w)D\\s*(?:\\-\\s*)?S\\s*(?:\\-\\s*)?C\\s*(?:\\-\\s*)?W\\s*(?:\\-\\s*)?3\\s*(?:\\-\\s*)?1\\s*(?:\\-\\s*)?0(?!\\w|\\-|\\.\\d|\\,\\d)"
         self.optional_tpl_1 = RegexRuleTemplate(self.slices_optional[0:1], 
             self.optional_value_func_on_desc, self.optional_value_func_on_details, must_match_on_desc = True)
+        self.expected_optional_tpl_1_regex_pattern = "(?<!\\w)C\\s*(?:\\-\\s*)?y\\s*(?:\\-\\s*)?b\\s*(?:\\-\\s*)?e\\s*(?:\\-\\s*)?r(?!\\w|\\-)"
         self.optional_tpl_2 = RegexRuleTemplate(self.slices_optional[1:2], 
             self.optional_value_func_on_desc, self.optional_value_func_on_details, must_match_on_desc = True)
     
@@ -170,17 +189,32 @@ class MasterTemplateTestCase(unittest.TestCase):
         self.assert_(isinstance(listing_matchers, list) and len(listing_matchers) == 0, "list must be empty")
     
     def testMasterTemplateWithOneMandatoryTemplate(self):
-        mandatory_tpl = self.prod_code_mandatory_tpl
+        mandatory_tpls = [self.prod_code_mandatory_tpl]
         optional_tpls = []
-        lm_tpl = ListingMatcherTemplate('prod_code_mandatory_only', mandatory_tpl, optional_tpls)
+        lm_tpl = ListingMatcherTemplate('prod_code_mandatory_only', mandatory_tpls, optional_tpls)
         master = MasterTemplate("a-a+a-an", [lm_tpl])
         listing_matchers = master.generate_listing_matchers(self.blocks)
-        self.assert_(isinstance(listing_matchers, list) and len(listing_matchers) > 0, "expected non-empty list of listing matchers")
+        self.assert_(isinstance(listing_matchers, list) and len(listing_matchers) == 1, "expected non-empty list of listing matchers")
+        mandatory_tpl = listing_matchers[0].mandatory_matching_rules[0]
+        self.assertEqual(mandatory_tpl.match_regex.pattern, self.expected_prod_code_regex_pattern)
+    
+    def testMasterTemplateWithTwoMandatoryTemplates(self):
+        mandatory_tpls = [self.prod_code_mandatory_tpl, self.optional_tpl_1]
+        optional_tpls = []
+        lm_tpl = ListingMatcherTemplate('prod_code_mandatory_only', mandatory_tpls, optional_tpls)
+        master = MasterTemplate("a-a+a-an", [lm_tpl])
+        listing_matchers = master.generate_listing_matchers(self.blocks)
+        self.assert_(isinstance(listing_matchers, list) and len(listing_matchers) == 1, "expected non-empty list of listing matchers")
+        self.assertEqual(len(listing_matchers[0].mandatory_matching_rules), 2)
+        mandatory_tpl_1 = listing_matchers[0].mandatory_matching_rules[0]
+        mandatory_tpl_2 = listing_matchers[0].mandatory_matching_rules[1]
+        self.assertEqual(mandatory_tpl_1.match_regex.pattern, self.expected_prod_code_regex_pattern)
+        self.assertEqual(mandatory_tpl_2.match_regex.pattern, self.expected_optional_tpl_1_regex_pattern)
     
     def testMasterTemplateWithMultipleOptionalTemplates(self):
-        mandatory_tpl = self.prod_code_mandatory_tpl
+        mandatory_tpls = [self.prod_code_mandatory_tpl]
         optional_tpls = [self.optional_tpl_1, self.optional_tpl_2]
-        lm_tpl = ListingMatcherTemplate('prod_code_mandatory_only', mandatory_tpl, optional_tpls)
+        lm_tpl = ListingMatcherTemplate('prod_code_mandatory_only', mandatory_tpls, optional_tpls)
         master = MasterTemplate("a-a+a-an", [lm_tpl])
         listing_matchers = master.generate_listing_matchers(self.blocks)
         self.assert_(isinstance(listing_matchers, list) and len(listing_matchers) > 0, "expected non-empty list of listing matchers")
