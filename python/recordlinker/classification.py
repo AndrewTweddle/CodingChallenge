@@ -1,6 +1,7 @@
 from abc import ABCMeta, abstractmethod
 import itertools
 import re
+# from pdb import set_trace
 
 # --------------------------------------------------------------------------------------------------
 # A class to represent the value function for matching a specific number of characters:
@@ -36,6 +37,9 @@ class MatchingRule(object):
     def try_match(self, product_desc, extra_prod_details = None):
         pass
 
+# --------------------------------------------------------------------------------------------------
+# A match rule class which uses a regular expression to test for a match:
+# 
 class RegexMatchingRule(MatchingRule):
     def __init__(self, regex, value_func_on_desc, value_func_on_details, must_match_on_desc = False):
         self.match_regex = regex
@@ -62,6 +66,9 @@ class RegexMatchingRule(MatchingRule):
                     self, extra_prod_details, self.value_func_on_extra_prod_details)
         return match_result
 
+# --------------------------------------------------------------------------------------------------
+# A class which uses a set of mandatory and optional matching rules to try to match a listing:
+# 
 class ListingMatcher(object):
     def __init__(self, description, mandatory_rules, optional_rules):
         self.match_desc = description
@@ -111,6 +118,9 @@ class MatchingEngine(object):
 # Templates to generate ListingMatchers and MatchItems:
 # 
 
+# --------------------------------------------------------------------------------------------------
+# The base class for a template for a matching rule:
+# 
 class MatchingRuleTemplate(object):
     def __init__(self, slices, value_func_on_desc, value_func_on_details, must_match_on_desc = False):
         self.slices = slices
@@ -122,6 +132,9 @@ class MatchingRuleTemplate(object):
     def generate(self, all_blocks):
         pass
 
+# --------------------------------------------------------------------------------------------------
+# A class to represent the template for a RegexMatchingRule:
+# 
 class RegexRuleTemplate(MatchingRuleTemplate):
     @staticmethod
     def regex_escape_with_optional_dashes_and_whitespace(text):
@@ -146,6 +159,7 @@ class RegexRuleTemplate(MatchingRuleTemplate):
         return escaped_text
     
     def generate(self, all_blocks):
+        # set_trace()
         block_gen = (all_blocks[s] for s in self.slices)
         extracted_blocks = itertools.chain.from_iterable(block_gen)
         extracted_text = ''.join(extracted_blocks)
@@ -154,6 +168,9 @@ class RegexRuleTemplate(MatchingRuleTemplate):
         return RegexMatchingRule(regex, self.value_func_on_product_desc,
             self.value_func_on_extra_prod_details, self.must_match_on_product_desc)
 
+# --------------------------------------------------------------------------------------------------
+# A class to represent the template for a ListingMatcher:
+# 
 class ListingMatcherTemplate(object):
     def __init__(self, desc, mandatory_templates, optional_templates):
         self.description = desc
@@ -161,15 +178,23 @@ class ListingMatcherTemplate(object):
         self.optional_rule_templates = optional_templates
     
     def generate(self, all_blocks):
+        # set_trace()
         mandatory_rules = [template.generate(all_blocks) for template in self.mandatory_rule_templates]
         optional_rules = [template.generate(all_blocks) for template in self.optional_rule_templates]
         listing_matcher = ListingMatcher(self.description, mandatory_rules, optional_rules)
         return listing_matcher
 
+# --------------------------------------------------------------------------------------------------
+# A class to represent the master template containing a list of ListingMatcherTemplates:
+#
+# These are used to generate a list of ListingMatcher objects which will be tested
+# against a listing until the first match is found or no match has been found.
+# 
 class MasterTemplate(object):
     def __init__(self, classific, matcher_templates):
         self.classification = classific
         self.listing_matcher_templates = matcher_templates
     
     def generate_listing_matchers(self, all_blocks):
+        # set_trace()
         return [matcher_template.generate(all_blocks) for matcher_template in self.listing_matcher_templates]
