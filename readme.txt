@@ -37,3 +37,4 @@ python/                 - assumption: the current directory for running all Pyth
 Useful commands:
 
 Run unit tests:         python -m recordlinker.test.classification_tests
+                        python -m recordlinker.test.builder_tests
