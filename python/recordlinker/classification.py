@@ -106,9 +106,12 @@ class ListingMatcher(object):
 # Matching engine to run through the ListingMatchers for a product, 
 # and find the first one which applies to a particular listing:
 class MatchingEngine(object):
-    def try_match_listing(self, product_desc, extra_prod_details, listing_matchers):
-        for matcher in listing_matchers:
-            match_result = matcher.try_match(product_desc, extra_prod_details)
+    def __init__(self, matchers):
+        self.listing_matchers = matchers
+    
+    def try_match_listing(self, product_desc, extra_product_details):
+        for matcher in self.listing_matchers:
+            match_result = matcher.try_match(product_desc, extra_product_details)
             if match_result.is_match:
                 return match_result
         return MatchResult(False)

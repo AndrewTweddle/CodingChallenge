@@ -61,64 +61,72 @@ class ListingMatcherTestCase(unittest.TestCase):
         self.listing_matchers = [self.listing_matcher_1, self.listing_matcher_2, self.listing_matcher_3]
         
         self.listing_matcher_with_two_mandatory_rules = ListingMatcher('TwoMandatoryOnly', [mandatory_rule_1, mandatory_rule_2], [])
-        
-        self.engine = MatchingEngine()
     
     # Test MatchingEngine and ListingMatcher by using the MatchingRuleStub implementation instead of an actual matching rule:
     def testWithNoMatchers(self):
-        match_result = self.engine.try_match_listing('some_product_desc', 'some_extra_prod_details', [])
+        engine = MatchingEngine(matchers = [])
+        match_result = engine.try_match_listing('some_product_desc', 'some_extra_prod_details')
         self.assertEqual(match_result.is_match, False, 'There should be no match when the matchers list is empty')
         self.assertEqual(match_result.match_value, 0, 'The value should be zero when the matchers list is empty')
         self.assertEqual(match_result.description, '', 'The rule description should be empty when the matchers list is empty')
     
     def testWithSingleMatcherNotMatching(self):
-        match_result = self.engine.try_match_listing('some_product_desc', 'some_extra_prod_details', [self.listing_matcher_1])
+        engine = MatchingEngine(matchers = [self.listing_matcher_1])
+        match_result = engine.try_match_listing('some_product_desc', 'some_extra_prod_details')
         self.assertEqual(match_result.is_match, False, 'There should be no match when the single matcher does not match')
         self.assertEqual(match_result.match_value, 0, 'The value should be zero when the single matcher does not match')
         self.assertEqual(match_result.description, '', 'The rule description should be empty when the single matcher does not match')
     
     def testWithSingleMatcherMatchingProductDesc(self):
-        match_result = self.engine.try_match_listing('Sample', 'some_extra_prod_details', [self.listing_matcher_1])
+        engine = MatchingEngine(matchers = [self.listing_matcher_1])
+        match_result = engine.try_match_listing('Sample', 'some_extra_prod_details')
         self.assertEqual(match_result.is_match, True, "There should be a match when the single matcher's product desc does match")
         self.assertEqual(match_result.match_value, 1000, 'The value should be 1000 when the single matcher matches the first product desc')
         self.assertEqual(match_result.description, 'ManyOptionalRules', 'The rule description should be "ManyOptionalRules" when the single matcher matches the rule')
     
     def testWithSingleMatcherWithTwoMandatoryRulesWhichBothMatch(self):
-        match_result = self.engine.try_match_listing('Sample Tester', 'some_extra_prod_details', [self.listing_matcher_with_two_mandatory_rules])
+        engine = MatchingEngine(matchers = [self.listing_matcher_with_two_mandatory_rules])
+        match_result = engine.try_match_listing('Sample Tester', 'some_extra_prod_details')
         self.assertEqual(match_result.is_match, True, "There should be a match when the product desc matches both mandatory rules")
         self.assertEqual(match_result.match_value, 1101)
     
     def testWithSingleMatcherWithTwoMandatoryRulesWithOnlyTheFirstMatching(self):
-        match_result = self.engine.try_match_listing('Sample', 'some_extra_prod_details', [self.listing_matcher_with_two_mandatory_rules])
+        engine = MatchingEngine(matchers = [self.listing_matcher_with_two_mandatory_rules])
+        match_result = engine.try_match_listing('Sample', 'some_extra_prod_details')
         self.assertEqual(match_result.is_match, False, "There should only be a match when the product desc matches both mandatory rules")
         self.assertEqual(match_result.match_value, 0)
     
     def testWithSingleMatcherWithTwoMandatoryRulesWithOnlyTheSecondMatching(self):
-        match_result = self.engine.try_match_listing('Tester', 'some_extra_prod_details', [self.listing_matcher_with_two_mandatory_rules])
+        engine = MatchingEngine(matchers = [self.listing_matcher_with_two_mandatory_rules])
+        match_result = engine.try_match_listing('Tester', 'some_extra_prod_details')
         self.assertEqual(match_result.is_match, False, "There should only be a match when the product desc matches both mandatory rules")
         self.assertEqual(match_result.match_value, 0)
     
     def testWithSingleMatcherAndMultipleMatchingRules(self):
-        match_result = self.engine.try_match_listing('Sample Extra2', 'Extra1 Extra3', [self.listing_matcher_1])
+        engine = MatchingEngine(matchers = [self.listing_matcher_1])
+        match_result = engine.try_match_listing('Sample Extra2', 'Extra1 Extra3')
         self.assertEqual(match_result.is_match, True, "There should be a match when the single matcher's product desc matches the mandatory text")
         self.assertEqual(match_result.match_value, 1062)
         self.assertEqual(match_result.description, 'ManyOptionalRules')
 
     def testThatAMatchRuleIsOnlySuccessfulOnEitherProductDescOrDetails(self):
-        match_result = self.engine.try_match_listing('Sample Extra2', 'Extra2', [self.listing_matcher_1])
+        engine = MatchingEngine(matchers = [self.listing_matcher_1])
+        match_result = engine.try_match_listing('Sample Extra2', 'Extra2')
         self.assertEqual(match_result.is_match, True, "There should be a match when the single matcher's product desc matches the mandatory text")
         self.assertEqual(match_result.match_value, 1050)
         self.assertEqual(match_result.description, 'ManyOptionalRules')
 
     def testWithSingleMatcherAndMultipleMatchingRulesButNoMandatoryMatch(self):
-        match_result = self.engine.try_match_listing('Extra2', 'Extra1 Extra3', [self.listing_matcher_1])
+        engine = MatchingEngine(matchers = [self.listing_matcher_1])
+        match_result = engine.try_match_listing('Extra2', 'Extra1 Extra3')
         self.assertEqual(match_result.is_match, False)
         self.assertEqual(match_result.match_value, 0)
         self.assertEqual(match_result.description, '')
     
     def testWithMultipleMatchers(self):
         'Note: both the second and third matchers should match, but only the second should be used'
-        match_result = self.engine.try_match_listing('Taster Tester', 'Rule', self.listing_matchers)
+        engine = MatchingEngine(self.listing_matchers)
+        match_result = engine.try_match_listing('Taster Tester', 'Rule')
         self.assertEqual(match_result.is_match, True)
         self.assertEqual(match_result.match_value, 142)
         self.assertEqual(match_result.description, 'SingleOptionalRule')
