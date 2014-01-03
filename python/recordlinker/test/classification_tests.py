@@ -193,17 +193,18 @@ class MasterTemplateTestCase(unittest.TestCase):
     
     def testEmptyMasterTemplate(self):
         master = MasterTemplate("a-a+a-an", [])
-        listing_matchers = master.generate_listing_matchers([])
-        self.assert_(isinstance(listing_matchers, list) and len(listing_matchers) == 0, "list must be empty")
+        engine = master.generate([])
+        self.assert_(isinstance(engine.listing_matchers, list) and len(engine.listing_matchers) == 0, "list must be empty")
     
     def testMasterTemplateWithOneMandatoryTemplate(self):
         mandatory_tpls = [self.prod_code_mandatory_tpl]
         optional_tpls = []
         lm_tpl = ListingMatcherTemplate('prod_code_mandatory_only', mandatory_tpls, optional_tpls)
         master = MasterTemplate("a-a+a-an", [lm_tpl])
-        listing_matchers = master.generate_listing_matchers(self.blocks)
-        self.assert_(isinstance(listing_matchers, list) and len(listing_matchers) == 1, "expected non-empty list of listing matchers")
-        mandatory_tpl = listing_matchers[0].mandatory_matching_rules[0]
+        engine = master.generate(self.blocks)
+        self.assert_(isinstance(engine.listing_matchers, list) and len(engine.listing_matchers) == 1, 
+            "expected non-empty list of listing matchers")
+        mandatory_tpl = engine.listing_matchers[0].mandatory_matching_rules[0]
         self.assertEqual(mandatory_tpl.match_regex.pattern, self.expected_prod_code_regex_pattern)
     
     def testMasterTemplateWithTwoMandatoryTemplates(self):
@@ -211,11 +212,12 @@ class MasterTemplateTestCase(unittest.TestCase):
         optional_tpls = []
         lm_tpl = ListingMatcherTemplate('prod_code_mandatory_only', mandatory_tpls, optional_tpls)
         master = MasterTemplate("a-a+a-an", [lm_tpl])
-        listing_matchers = master.generate_listing_matchers(self.blocks)
-        self.assert_(isinstance(listing_matchers, list) and len(listing_matchers) == 1, "expected non-empty list of listing matchers")
-        self.assertEqual(len(listing_matchers[0].mandatory_matching_rules), 2)
-        mandatory_tpl_1 = listing_matchers[0].mandatory_matching_rules[0]
-        mandatory_tpl_2 = listing_matchers[0].mandatory_matching_rules[1]
+        engine = master.generate(self.blocks)
+        self.assert_(isinstance(engine.listing_matchers, list) and len(engine.listing_matchers) == 1, 
+            "expected non-empty list of listing matchers")
+        self.assertEqual(len(engine.listing_matchers[0].mandatory_matching_rules), 2)
+        mandatory_tpl_1 = engine.listing_matchers[0].mandatory_matching_rules[0]
+        mandatory_tpl_2 = engine.listing_matchers[0].mandatory_matching_rules[1]
         self.assertEqual(mandatory_tpl_1.match_regex.pattern, self.expected_prod_code_regex_pattern)
         self.assertEqual(mandatory_tpl_2.match_regex.pattern, self.expected_optional_tpl_1_regex_pattern)
     
@@ -224,9 +226,9 @@ class MasterTemplateTestCase(unittest.TestCase):
         optional_tpls = [self.optional_tpl_1, self.optional_tpl_2]
         lm_tpl = ListingMatcherTemplate('prod_code_mandatory_only', mandatory_tpls, optional_tpls)
         master = MasterTemplate("a-a+a-an", [lm_tpl])
-        listing_matchers = master.generate_listing_matchers(self.blocks)
-        self.assert_(isinstance(listing_matchers, list) and len(listing_matchers) > 0, "expected non-empty list of listing matchers")
-        self.assert_(len(listing_matchers[0].optional_matching_rules) == 2, "expected 2 optional matching rules in first listing matcher")
+        engine = master.generate(self.blocks)
+        self.assert_(isinstance(engine.listing_matchers, list) and len(engine.listing_matchers) > 0, "expected non-empty list of listing matchers")
+        self.assert_(len(engine.listing_matchers[0].optional_matching_rules) == 2, "expected 2 optional matching rules in first listing matcher")
 
 
 # Run unit tests from the command line:        

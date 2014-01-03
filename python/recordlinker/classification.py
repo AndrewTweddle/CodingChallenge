@@ -198,6 +198,7 @@ class MasterTemplate(object):
         self.classification = classific
         self.listing_matcher_templates = matcher_templates
     
-    def generate_listing_matchers(self, all_blocks):
+    def generate(self, all_blocks):
         # set_trace()
-        return [matcher_template.generate(all_blocks) for matcher_template in self.listing_matcher_templates]
+        listing_matchers = [matcher_template.generate(all_blocks) for matcher_template in self.listing_matcher_templates]
+        return MatchingEngine(listing_matchers)

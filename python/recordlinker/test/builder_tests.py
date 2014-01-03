@@ -28,8 +28,7 @@ class MasterTemplateBuilderTestCase(unittest.TestCase):
         
         builder = MasterTemplateBuilder(classification)
         master_tpl = builder.build()
-        listing_matchers = master_tpl.generate_listing_matchers(blocks)
-        engine = MatchingEngine(listing_matchers)
+        engine = master_tpl.generate(blocks)
         match_result = engine.try_match_listing(product_desc, extra_prod_details)
         self.assert_(match_result.is_match, 'A match should be found')
         self.assertEqual(match_result.match_value, expected_match_value)
