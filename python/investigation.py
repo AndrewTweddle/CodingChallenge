@@ -1342,3 +1342,73 @@ from recordlinker.builder import *
 
 unique_classifications = products.composite_classification.unique()
 
+
+# ==============================================================================
+# 9. Test matching engine and matching rule classes by calculating
+#    the highest value matches between products and listings
+#    using only the family-and-model approximate (regex) matching method.
+#    Then compare this to the ad hoc "exact match" algorithm used previously.
+#
+
+
+# -----------------------------------------------------------------------------
+# 9.1 Generate a test master template for each classification:
+# 
+
+class TestMasterTemplateBuilder(BaseMasterTemplateBuilder):
+    def get_listing_templates(self):
+        return self.generate_listing_templates_from_methods([BaseMasterTemplateBuilder.match_all_of_family_and_model_with_regex])
+
+test_master_template_dict = {
+    classification: TestMasterTemplateBuilder(classification).build()
+    for classification in unique_classifications 
+}
+
+# -----------------------------------------------------------------------------
+# 9.2 Generate a test matching engine for each product:
+# 
+def generate_test_matching_engine(prod_row):
+    classification = prod_row['composite_classification']
+    blocks = prod_row['blocks']
+    master_template = test_master_template_dict[classification]
+    engine = master_template.generate(blocks)
+    return engine
+
+products['test_matching_engine'] = products.apply(generate_test_matching_engine, axis=1)
+
+# -----------------------------------------------------------------------------
+# 9.3 Add engine to each row of products_and_listings:
+#       
+
+products_and_listings_test = pd.merge(products_and_listings, products[['test_matching_engine']], left_on='index_p', right_index=True, how='inner')
+    
+# -----------------------------------------------------------------------------
+# 9.4 Run the test matching engine for each product and listing combination:
+# 
+
+def run_test_matching_engine(p_and_l_row):
+    product_desc = p_and_l_row['productDesc']
+    extra_prod_details = p_and_l_row['extraProdDetails']
+    engine = p_and_l_row['test_matching_engine']
+    match_result = engine.try_match_listing(product_desc, extra_prod_details)
+    return match_result
+
+match_results = products_and_listings_test.apply(run_test_matching_engine, axis=1)
+
+products_and_listings_test['match_result'] = match_results
+products_and_listings_test['match_result_is_match'] = products_and_listings_test['match_result'].map(lambda mr: mr.is_match)
+products_and_listings_test['match_result_value'] = products_and_listings_test['match_result'].map(lambda mr: mr.match_value)
+products_and_listings_test['match_result_description'] = products_and_listings_test['match_result'].map(lambda mr: mr.description)
+
+# -----------------------------------------------------------------------------
+# 9.5 Compare the results of the test matching engine 
+#     with the original ad hoc match results:
+# 
+
+# products_and_listings_test[products_and_listings_test.match_result_is_match == True].head()
+
+test_engine_mismatches = products_and_listings_test[products_and_listings_test.match_result_is_match != products_and_listings_test.is_exact_match]
+test_engine_mismatches
+
+# Success! There are no differences. 
+# So the class-based method runs successfully and produces the same results as the original ad hoc method!
