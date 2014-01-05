@@ -1307,3 +1307,38 @@ excluded_by_MP[['manufacturer', 'family', 'model', 'product_resolution_in_MP', '
 # The more controversial records are not included yet, and that may be where resolution matching has greater value.
 # 
 # But regardless of whether it will be useful in the final algorithm, it has already proved very useful for testing the code.
+
+
+# -----------------------------------------------------------------------------
+#
+# At this point the script was becoming too cumbersome.
+# A more powerful approach was needed.
+# 
+# So create an object-oriented solution to:
+# 
+# a. Turn classifications into rule templates
+# b. Use the rule templates to generate a sequence of patterns to match 
+#    (e.g. based on regular expressions), of diminishing value.
+# c. Use a value function to estimate the quality of the match
+# d. Join listings to products to determine the value of the match between them.
+# e. Determine the highest value match for each listing to determine its product.
+# f. First check that this produces the same results as before 
+#    when doing regex matching on family + model.
+# g. Add other patterns as well
+# h. Determine how slow
+# i. If too slow, add code to interleave products' matching engine calculations
+#    in approximate value order. Then stop further matching when a product matches, 
+#    and no other product can get a higher match any more.
+#    
+
+
+# ==============================================================================
+# 8. Load matching engine and matching rule classes to calculate 
+#    highest value matches between products and listings:
+# 
+#
+from recordlinker.classification import *
+from recordlinker.builder import *
+
+unique_classifications = products.composite_classification.unique()
+
