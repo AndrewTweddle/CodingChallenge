@@ -782,7 +782,18 @@ products.family_classification.value_counts()
 products['family_and_model'] = products.family.fillna('') + ' + ' + products.model.fillna('')
 products['composite_classification'] = products.family_classification + '+' + products.model_classification
 
-group_and_save_classification_patterns('family_and_model', 'composite_classification', ['manufacturer','family','model','composite_classification','family_blocks','model_blocks'], 'composite_classifications')
+# Concatenate the family and model blocks (with a joining block so that slices match up):
+def get_composite_blocks(prod_row):
+    family_blocks = prod_row['family_blocks']
+    model_blocks = prod_row['model_blocks']
+    blocks = list(family_blocks)
+    blocks.append('+')
+    blocks.extend(model_blocks)
+    return blocks
+
+products['blocks'] = products.apply(get_composite_blocks, axis=1)
+
+group_and_save_classification_patterns('family_and_model', 'composite_classification', ['manufacturer','family','model','composite_classification','family_blocks','model_blocks', 'blocks'], 'composite_classifications')
 
 # All composite classifications:
 # 
@@ -1127,7 +1138,7 @@ products['exact_match_pattern'] = exact_match_patterns
 
 # Perform join between products and listings by product:
 products_to_match = products.reset_index()[['index', 'manufacturer', 'family', 'model', 'exact_match_regex']]
-listings_to_match = listingsByPManuf.reset_index()[['index', 'pManuf', 'productDesc', 'resolution_in_MP', 'rounded_MP']]
+listings_to_match = listingsByPManuf.reset_index()[['index', 'pManuf', 'productDesc', 'extraProdDetails', 'resolution_in_MP', 'rounded_MP']]
 
 products_and_listings = pd.merge(left=listings_to_match, right=products_to_match, how='inner', left_on='pManuf', right_on='manufacturer', suffixes=('_l','_p'))
 
