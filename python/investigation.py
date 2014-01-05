@@ -1393,9 +1393,9 @@ def run_test_matching_engine(p_and_l_row):
     match_result = engine.try_match_listing(product_desc, extra_prod_details)
     return match_result
 
-match_results = products_and_listings_test.apply(run_test_matching_engine, axis=1)
+test_match_results = products_and_listings_test.apply(run_test_matching_engine, axis=1)
 
-products_and_listings_test['match_result'] = match_results
+products_and_listings_test['match_result'] = test_match_results
 products_and_listings_test['match_result_is_match'] = products_and_listings_test['match_result'].map(lambda mr: mr.is_match)
 products_and_listings_test['match_result_value'] = products_and_listings_test['match_result'].map(lambda mr: mr.match_value)
 products_and_listings_test['match_result_description'] = products_and_listings_test['match_result'].map(lambda mr: mr.description)
@@ -1412,3 +1412,14 @@ test_engine_mismatches
 
 # Success! There are no differences. 
 # So the class-based method runs successfully and produces the same results as the original ad hoc method!
+
+
+# -----------------------------------------------------------------------------
+# 9.6 Clean up:
+#
+# Free up memory - due to occasionally getting a "MemoryError"
+# 
+del products_and_listings_test
+del test_match_results
+del test_engine_mismatches
+
