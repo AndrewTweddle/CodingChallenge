@@ -2,9 +2,9 @@ from recordlinker.classification import *
 # from pdb import set_trace
 
 # --------------------------------------------------------------------------------------------------
-# A class which is used to build a MasterTemplate from a classification string:
+# A base class for classes which build a MasterTemplate from a classification string:
 # 
-class MasterTemplateBuilder(object):
+class BaseMasterTemplateBuilder(object):
     all_of_family_and_model_with_regex_desc = 'Family and model approximately'
     family_and_model_separately_with_regex_desc = 'Family and model separately and approximately'
     
@@ -21,12 +21,16 @@ class MasterTemplateBuilder(object):
         self.model_slice = slice( sep_index + 1, len(classific))
         # TODO: Calculate long_prod_code_slices, short_prod_code_slices, alternate_prod_code_slices, secondary_prod_code_slices
     
+    @abstractmethod
+    def get_listing_templates(self):
+        pass
+    
+    def generate_listing_templates_from_methods(self, list_of_methods):
+        listing_matcher_templates = [listing_template_method(self) for listing_template_method in list_of_methods]
+        return listing_matcher_templates
+    
     def build(self):
-        tpl1 = self.match_all_of_family_and_model_with_regex()
-        tpl2 = self.match_family_and_model_separately_with_regex()
-        # TODO: Build up other listing matcher templates...
-        
-        listing_matcher_templates = [tpl1, tpl2]
+        listing_matcher_templates = self.get_listing_templates()
         master_tpl = MasterTemplate(self.classification, listing_matcher_templates)
         return master_tpl
     
@@ -55,3 +59,16 @@ class MasterTemplateBuilder(object):
             MasterTemplateBuilder.family_and_model_separately_with_regex_desc,
             [family_rule_tpl, model_rule_tpl], [])
         return listing_tpl
+
+# --------------------------------------------------------------------------------------------------
+# A derived class which is the standard way to build a MasterTemplate from a classification string:
+# 
+class MasterTemplateBuilder(BaseMasterTemplateBuilder):
+    default_listing_template_methods = [
+        BaseMasterTemplateBuilder.match_all_of_family_and_model_with_regex,
+        BaseMasterTemplateBuilder.match_family_and_model_separately_with_regex
+        # TODO: Extend with more methods
+    ]
+    
+    def get_listing_templates(self):
+        return self.generate_listing_templates_from_methods(MasterTemplateBuilder.default_listing_template_methods)
