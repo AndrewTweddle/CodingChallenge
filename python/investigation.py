@@ -1423,3 +1423,65 @@ del products_and_listings_test
 del test_match_results
 del test_engine_mismatches
 
+
+
+# ==============================================================================
+# 10. Use the matching engine and matching rule classes to calculate 
+#     highest value matches between products and listings:
+# 
+#
+
+# -----------------------------------------------------------------------------
+# 10.1 Generate a master template for each classification:
+# 
+master_template_dict = {
+    classification: MasterTemplateBuilder(classification).build() 
+    for classification in unique_classifications 
+}
+
+# -----------------------------------------------------------------------------
+# 10.2 Generate a matching engine for each product:
+# 
+def generate_matching_engine(prod_row):
+    classification = prod_row['composite_classification']
+    blocks = prod_row['blocks']
+    master_template = master_template_dict[classification]
+    engine = master_template.generate(blocks)
+    return engine
+
+products['matching_engine'] = products.apply(generate_matching_engine, axis=1)
+
+# -----------------------------------------------------------------------------
+# 10.3 Add engine to each row of products_and_listings:
+# 
+# Note: Ideally this should be done when products_and_listings is created.
+#       However we didn't have the matching engine classes then.
+#       
+#       TODO: refactor this into the correct place for the final solution.
+# 
+
+products_and_listings = pd.merge(products_and_listings, products[['matching_engine']], left_on='index_p', right_index=True, how='inner')
+    
+# -----------------------------------------------------------------------------
+# 10.4 Run the matching engine for each product and listing combination:
+# 
+
+def run_matching_engine(p_and_l_row):
+    product_desc = p_and_l_row['productDesc']
+    extra_prod_details = p_and_l_row['extraProdDetails']
+    engine = p_and_l_row['matching_engine']
+    match_result = engine.try_match_listing(product_desc, extra_prod_details)
+    return match_result
+    # Originally this was returning a tuple, but this didn't work.
+    # Why not? This approach had worked fine elsewhere in the script...
+    # return match_result.is_match, match_result.match_value, match_result.description
+
+match_results = products_and_listings.apply(run_matching_engine, axis=1)
+
+products_and_listings['match_result'] = match_results
+products_and_listings['match_result_is_match'] = products_and_listings['match_result'].map(lambda mr: mr.is_match)
+products_and_listings['match_result_value'] = products_and_listings['match_result'].map(lambda mr: mr.match_value)
+products_and_listings['match_result_description'] = products_and_listings['match_result'].map(lambda mr: mr.description)
+
+# Number of matches for each type of matching rule:
+products_and_listings.match_result_description.value_counts()
