@@ -18,7 +18,9 @@ class BaseMasterTemplateBuilder(object):
         sep_index = classific.index('+')
         self.family_model_separator_index = sep_index
         self.family_slice = slice( 0, sep_index )
+        self.family_classification = classific[self.family_slice]
         self.model_slice = slice( sep_index + 1, len(classific))
+        self.model_classification = classific[self.model_slice]
         # TODO: Calculate long_prod_code_slices, short_prod_code_slices, alternate_prod_code_slices, secondary_prod_code_slices
     
     @abstractmethod
@@ -26,7 +28,11 @@ class BaseMasterTemplateBuilder(object):
         pass
     
     def generate_listing_templates_from_methods(self, list_of_methods):
-        listing_matcher_templates = [listing_template_method(self) for listing_template_method in list_of_methods]
+        listing_matcher_templates = [
+            listing_template
+            for listing_template_method in list_of_methods
+            for listing_template in listing_template_method(self) 
+        ]
         return listing_matcher_templates
     
     def build(self):
@@ -44,9 +50,22 @@ class BaseMasterTemplateBuilder(object):
         listing_tpl = ListingMatcherTemplate(
             MasterTemplateBuilder.all_of_family_and_model_with_regex_desc, 
             [rule_tpl], [])
-        return listing_tpl
+        return [listing_tpl]
     
     def match_family_and_model_separately_with_regex(self):
+        # Check that family is not empty:
+        if len(self.family_classification) == 0:
+            return []
+        
+        # Check that model has both alphas and numerics.
+        # This is to avoid matching "Digilux" "4.3", "Digilux" "Zoom", "D-Lux" "5":
+        modelc = self.model_classification
+        has_no_alpha = modelc.find('a') == -1 and modelc.find('c') == -1
+        has_no_numeric = modelc.find('n') == -1
+        if has_no_alpha or has_no_numeric:
+            return []
+        
+        # Generate the listing template:
         family_rule_tpl = RegexRuleTemplate( [self.family_slice], 
             MasterTemplateBuilder.family_and_model_separately_with_regex_value_func_on_prod_desc,
             MasterTemplateBuilder.family_and_model_separately_with_regex_value_func_on_prod_details,
@@ -58,7 +77,7 @@ class BaseMasterTemplateBuilder(object):
         listing_tpl = ListingMatcherTemplate(
             MasterTemplateBuilder.family_and_model_separately_with_regex_desc,
             [family_rule_tpl, model_rule_tpl], [])
-        return listing_tpl
+        return [listing_tpl]
 
 # --------------------------------------------------------------------------------------------------
 # A derived class which is the standard way to build a MasterTemplate from a classification string:
