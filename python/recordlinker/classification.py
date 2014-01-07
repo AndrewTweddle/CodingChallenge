@@ -58,12 +58,17 @@ class RegexMatchingRule(MatchingRule):
     def try_match(self, product_desc, extra_prod_details = None):
         match_result = RegexMatchingRule.__try_match_text(
             self, product_desc, self.value_func_on_product_desc)
-        if not match_result.is_match:
-            if self.must_match_on_product_desc:
-                return MatchResult(False)
-            if self.value_func_on_extra_prod_details.is_assigned():
-                return RegexMatchingRule.__try_match_text(
-                    self, extra_prod_details, self.value_func_on_extra_prod_details)
+        if self.must_match_on_product_desc and not match_result.is_match:
+            return MatchResult(False)
+        if self.value_func_on_extra_prod_details.is_assigned():
+            extra_details_match_result = RegexMatchingRule.__try_match_text(
+                self, extra_prod_details, self.value_func_on_extra_prod_details)
+            if match_result.is_match:
+                if extra_details_match_result.is_match:
+                    match_result.match_value = match_result.match_value + extra_details_match_result.match_value
+                return match_result
+            else:
+                return extra_details_match_result
         return match_result
 
 # --------------------------------------------------------------------------------------------------

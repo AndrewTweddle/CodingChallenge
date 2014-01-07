@@ -168,6 +168,12 @@ class RegexMatchingRuleTestCase(unittest.TestCase):
         product_desc = 'Cybershot NO-HX100'
         extra_prod_details = ''
         self.run_rule(product_desc, extra_prod_details, expected_value = 0, expected_to_match = False, must_match_on_desc = False)
+    
+    def testRegexMatchingRuleOnProductDescAndDetailsMatching(self):
+        product_desc = 'Cybershot DSC-HX100v'
+        extra_prod_details = 'Cybershot DSC-HX100v'
+        expected_value = self.value_func_on_desc.evaluate(self.match_length) + self.value_func_on_details.evaluate(self.match_length)
+        self.run_rule(product_desc, extra_prod_details, expected_value, expected_to_match = True, must_match_on_desc = True)
 
 
 class MasterTemplateTestCase(unittest.TestCase):
