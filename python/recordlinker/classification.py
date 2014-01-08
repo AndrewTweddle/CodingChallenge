@@ -59,16 +59,14 @@ class RegexMatchingRule(MatchingRule):
         match_result = RegexMatchingRule.__try_match_text(
             self, product_desc, self.value_func_on_product_desc)
         if self.must_match_on_product_desc and not match_result.is_match:
-            return MatchResult(False)
-        if self.value_func_on_extra_prod_details.is_assigned():
+            return match_result
+        if self.value_func_on_extra_prod_details.is_assigned() and extra_prod_details != None:
             extra_details_match_result = RegexMatchingRule.__try_match_text(
                 self, extra_prod_details, self.value_func_on_extra_prod_details)
-            if match_result.is_match:
-                if extra_details_match_result.is_match:
-                    match_result.match_value = match_result.match_value + extra_details_match_result.match_value
-                return match_result
-            else:
+            if not match_result.is_match:
                 return extra_details_match_result
+            if extra_details_match_result.is_match:
+                match_result.match_value = match_result.match_value + extra_details_match_result.match_value
         return match_result
 
 # --------------------------------------------------------------------------------------------------

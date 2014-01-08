@@ -174,7 +174,12 @@ class RegexMatchingRuleTestCase(unittest.TestCase):
         extra_prod_details = 'Cybershot DSC-HX100v'
         expected_value = self.value_func_on_desc.evaluate(self.match_length) + self.value_func_on_details.evaluate(self.match_length)
         self.run_rule(product_desc, extra_prod_details, expected_value, expected_to_match = True, must_match_on_desc = True)
-
+    
+    def testRegexAMatchingRuleOnMissingExtraProdDetails(self):
+        product_desc = 'Cybershot DSC-HX100v'
+        extra_prod_details = None
+        expected_value = self.value_func_on_desc.evaluate(self.match_length)
+        self.run_rule(product_desc, extra_prod_details, expected_value, expected_to_match = True, must_match_on_desc = True)
 
 class MasterTemplateTestCase(unittest.TestCase):
     def setUp(self):
