@@ -1485,3 +1485,15 @@ products_and_listings['match_result_description'] = products_and_listings['match
 
 # Number of matches for each type of matching rule:
 products_and_listings.match_result_description.value_counts()
+
+# Results:
+#                                                  1160128
+# Family and model approximately                      7765
+# Family and model separately and approximately        343
+# Model and words in family approximately               46
+
+# Check if the matches makes sense by inspection...
+# 
+# mr_description = 'Model and words in family approximately'
+# products_and_listings[products_and_listings.match_result_description == mr_description][['productDesc','family','model','manufacturer']]
+# 
