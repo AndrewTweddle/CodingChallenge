@@ -416,19 +416,19 @@ alphaNumRegex = re.compile( alphaNumRegexPattern, re.IGNORECASE | re.UNICODE | r
 alphaNumRegex.findall(regexTestString)
 
 # This works:
-alphaNumRegexPattern = '(?:\w+|\W+)'
+alphaNumRegexPattern = '\w+|\W+'
 alphaNumRegex = re.compile( alphaNumRegexPattern, re.IGNORECASE | re.UNICODE | re.VERBOSE )
 alphaNumRegex.findall(regexTestString)
 alphaNumRegex.findall('aaa-bbb-ccc::ddd   ')
 alphaNumRegex.findall('    aaa-bbb-ccc::ddd   ')
 
 # Improve this to differentiate alphabetic blocks from numeric blocks as well
-alphaNumRegexPattern = '(?:[A-Za-z]+|\d+|\W+)'
+alphaNumRegexPattern = '[A-Za-z]+|\d+|\W+'
 alphaNumRegex = re.compile( alphaNumRegexPattern, re.IGNORECASE | re.UNICODE | re.VERBOSE )
 alphaNumRegex.findall(regexTestString)
 alphaNumRegex.findall('aaa15-10bbb-ccc::ddd   ')
-alphaNumRegex.findall('    aaa-bbb-ccc::ddd   ')
-
+alphaNumRegex.findall('    aaa-bbb-ccc::dad   ')
+alphaNumRegex.findall('DSC-V100 / X100')
 
 def split_into_blocks_by_alpha_num(stringToSplit):
     return alphaNumRegex.findall(stringToSplit)
@@ -469,7 +469,6 @@ blockClassifications = [
     ]
     # A potential issue here is that the regex patterns assume ANSI characters.
     # However it seems that all the products listed are English, so this shouldn't matter.
-    # Some of the listings are in other languages though, so 
     
 blockClassificationRegexes = [(classifier, re.compile(pattern, re.IGNORECASE | re.UNICODE | re.VERBOSE )) for (classifier,pattern) in blockClassifications]
 
@@ -490,12 +489,14 @@ def test_classification(blockToClassify, expected):
         print '"{0}" classified as "{1}". But "{2}" expected!'.format(blockToClassify, classification, expected)
 
 #Expect following to fail (test that test_classification works properly):
-test_classification('abcd', 'test_failure')
+test_classification('abcd', 'test_failure to test the test method')
 
 # Expect these to succeed:
 test_classification('abcd', 'a')
 test_classification('1234', 'n')
 test_classification('bcd', 'c')
+test_classification('d', 'c')
+test_classification('D', 'c')
 test_classification(' \t ', '_')
 test_classification('-', '-')
 test_classification('   -  ', '~')
@@ -530,10 +531,11 @@ def test_derive_classifications(blocksToClassify, expected):
         print '"{0}" classified as "{1}". But "{2}" expected!'.format(','.join(blocksToClassify), classification, expected)
 
 # test that test_derive_classifications works by giving an incorrect expectation:
-test_derive_classifications(['abc','12','-','abc',':','12', '  ','MP'], 'test_failure')
+test_derive_classifications(['abc','12','-','abc',':','12', '  ','MP'], 'test_failure to test the test method')
 
 # Expect these to succeed:
-test_derive_classifications(['abc', '12','-','abc',':','12', '  ','MP'], 'an-axn_c')
+test_derive_classifications(['abc', '12','-','bc',':','12', '  ','MP'], 'an-axn_c')
+test_derive_classifications(['abc', ' ', 'bc','-','12',':','12', '  ','MP'], 'a_a-nxn_c')
 test_derive_classifications(['  :  ','  -  ','12','.','1','MP', '','IS'], 'x~n.na$a')
 test_derive_classifications([],'')
 test_derive_classifications(['jklmn'],'c')
