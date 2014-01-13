@@ -1490,11 +1490,11 @@ products_and_listings['match_result_description'] = products_and_listings['match
 products_and_listings.match_result_description.value_counts()
 
 # Results:
-#                                                  1159910
+#                                                  1159435
 # Family and model approximately                      7765
+# Prod code with dash approximately                    472
 # Family and model separately and approximately        343
-# Prod code with dash approximately                    148
-# Prod code without a dash approximately                70
+# Prod code without a dash approximately               221
 # Model and words in family approximately               46
 
 # Check if the matches makes sense by inspection...

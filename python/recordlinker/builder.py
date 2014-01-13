@@ -39,9 +39,8 @@ class BaseMasterTemplateBuilder(object):
     prod_code_having_alpha_and_numeric_pattern = '[ac]+n[acn]*|n+[ac][acn]*'
     alt_prod_code_pattern = '(?P<prefix>[acn][-acn]*\-)(?:[acn]*[acn])\!(?P<suffix>[acn]*[acn])'
         
-    def __init__(self, classific, ignore_prod_code_if_equal_to_model = False):
+    def __init__(self, classific):
         self.classification = classific
-        self.suppress_prod_code_if_equal_to_model = ignore_prod_code_if_equal_to_model
         sep_index = classific.index('+')
         self.family_model_separator_index = sep_index
         self.family_slice = slice( 0, sep_index )
@@ -185,9 +184,6 @@ class BaseMasterTemplateBuilder(object):
         start = match_result.start()
         end = match_result.end()
         match_len = end - start
-        if self.suppress_prod_code_if_equal_to_model and (match_len == len(self.model_classification)):
-            return None
-        
         model_slice_offset = self.family_model_separator_index + 1
         
         prod_code_slices = [slice(start + model_slice_offset, end + model_slice_offset)]

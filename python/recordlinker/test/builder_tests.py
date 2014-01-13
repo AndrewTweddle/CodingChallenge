@@ -225,7 +225,6 @@ class ProdCode_MasterTemplateBuilderTestCase(unittest.TestCase):
         
         builder = SingleMethodMasterTemplateBuilder(classification, 
             BaseMasterTemplateBuilder.match_prod_code_with_regex)
-        builder.suppress_prod_code_if_equal_to_model = False  # ignore product codes which equal the model EXCEPT when testing
         master_tpl = builder.build()
         engine = master_tpl.generate(blocks)
         match_result = engine.try_match_listing(product_desc, extra_prod_details)
@@ -246,7 +245,6 @@ class ProdCode_MasterTemplateBuilderTestCase(unittest.TestCase):
         
         builder = SingleMethodMasterTemplateBuilder(classification, 
             BaseMasterTemplateBuilder.match_prod_code_with_regex)
-        builder.suppress_prod_code_if_equal_to_model = False  # ignore product codes which equal the model EXCEPT when testing
         master_tpl = builder.build()
         engine = master_tpl.generate(blocks)
         match_result = engine.try_match_listing(product_desc, extra_prod_details)
@@ -265,7 +263,6 @@ class ProdCode_MasterTemplateBuilderTestCase(unittest.TestCase):
         
         builder = SingleMethodMasterTemplateBuilder(classification, 
             BaseMasterTemplateBuilder.match_prod_code_with_regex)
-        builder.suppress_prod_code_if_equal_to_model = False  # ignore product codes which equal the model EXCEPT when testing
         master_tpl = builder.build()
         engine = master_tpl.generate(blocks)
         match_result = engine.try_match_listing(product_desc, extra_prod_details)
@@ -286,14 +283,11 @@ class ProdCode_MasterTemplateBuilderTestCase(unittest.TestCase):
         
         builder = SingleMethodMasterTemplateBuilder(classification, 
             BaseMasterTemplateBuilder.match_prod_code_with_regex)
-        builder.suppress_prod_code_if_equal_to_model = False  # ignore product codes which equal the model EXCEPT when testing
         master_tpl = builder.build()
         engine = master_tpl.generate(blocks)
         match_result = engine.try_match_listing(product_desc, extra_prod_details)
         self.assert_(match_result.is_match, 'There should be a match for a product code with no dashes')
         self.assertEqual(match_result.match_value, expected_match_value)
-    
-    
 
 # Run unit tests from the command line:        
 if __name__ == '__main__':
