@@ -581,6 +581,7 @@ def group_and_save_classification_patterns(source_column, classification_column,
       # Write to an intermediate file for further investigation:
       pattern_file_path = r'{0}/{1}.csv'.format(pattern_folder_path, pattern)
       group[columns_to_export].to_csv(pattern_file_path, encoding='utf-8')
+  print ''
 
 group_and_save_classification_patterns('model', 'model_classification', ['manufacturer','family','model','model_classification','model_blocks'], 'model_classifications')
 
@@ -1489,9 +1490,11 @@ products_and_listings['match_result_description'] = products_and_listings['match
 products_and_listings.match_result_description.value_counts()
 
 # Results:
-#                                                  1160128
+#                                                  1159910
 # Family and model approximately                      7765
 # Family and model separately and approximately        343
+# Prod code with dash approximately                    148
+# Prod code without a dash approximately                70
 # Model and words in family approximately               46
 
 # Check if the matches makes sense by inspection...
