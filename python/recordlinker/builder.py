@@ -9,19 +9,39 @@ class BaseMasterTemplateBuilder(object):
     all_of_family_and_model_with_regex_desc = 'Family and model approximately'
     family_and_model_separately_with_regex_desc = 'Family and model separately and approximately'
     model_and_words_in_family_with_regex_desc = 'Model and words in family approximately'
+    prod_code_having_alphas_around_dash_with_regex_desc = 'Prod code with alphas-dash-alphas space number approximately'
+    prod_code_having_dash_with_regex_desc = 'Prod code with dash approximately'
+    alt_prod_code_having_dash_with_regex_desc = 'Alternate prod code with dash approximately'
+    prod_code_having_no_dash_with_regex_desc = 'Prod code without a dash approximately'
     
-    all_of_family_and_model_with_regex_value_func_on_prod_desc = MatchValueFunction( 1000000, 10000)
-    all_of_family_and_model_with_regex_value_func_on_prod_details = MatchValueFunction( 10000, 100)
-    family_and_model_separately_with_regex_value_func_on_prod_desc = MatchValueFunction( 250000, 2500)  # NB: These will be added twice - once for family and once for model
-    family_and_model_separately_with_regex_value_func_on_prod_details = MatchValueFunction( 2500, 25)  # NB: These will be added twice - once for family and once for model
+    all_of_family_and_model_with_regex_value_func_on_prod_desc = MatchValueFunction( 10000000, 100000)
+    all_of_family_and_model_with_regex_value_func_on_prod_details = MatchValueFunction( 100000, 1000)
+    family_and_model_separately_with_regex_value_func_on_prod_desc = MatchValueFunction( 2500000, 25000)  # NB: These will be added twice - once for family and once for model
+    family_and_model_separately_with_regex_value_func_on_prod_details = MatchValueFunction( 25000, 250)  # NB: These will be added twice - once for family and once for model
     # model_and_words_in_family uses the value functions above for the model match, and the value functions below for each word match:
-    family_word_with_regex_value_func_on_prod_desc = MatchValueFunction( 10000, 100)  # NB: These will be added twice - once for family and once for model
-    family_word_with_regex_value_func_on_prod_details = MatchValueFunction( 100, 1)  # NB: These will be added twice - once for family and once for model
+    family_word_with_regex_value_func_on_prod_desc = MatchValueFunction( 10000, 100)
+    family_word_with_regex_value_func_on_prod_details = MatchValueFunction( 100, 1)
+    model_word_with_regex_value_func_on_prod_desc = MatchValueFunction( 100000, 1000)
+    model_word_with_regex_value_func_on_prod_details = MatchValueFunction( 1000, 10)
+    # prod code value functions:
+    prod_code_having_dash_with_regex_value_func_on_prod_desc = MatchValueFunction( 3000000, 30000)
+    prod_code_having_dash_with_regex_value_func_on_prod_details = MatchValueFunction( 30000, 300)
+    alt_prod_code_having_dash_with_regex_value_func_on_prod_desc = MatchValueFunction( 2500000, 25000)
+    alt_prod_code_having_dash_with_regex_value_func_on_prod_details = MatchValueFunction( 25000, 250)
+    prod_code_having_alphas_around_dash_with_regex_value_func_on_prod_desc = MatchValueFunction( 2000000, 20000)
+    prod_code_having_alphas_around_dash_with_regex_value_func_on_prod_details = MatchValueFunction( 20000, 200)
+    prod_code_having_no_dash_with_regex_value_func_on_prod_desc = MatchValueFunction( 1000000, 10000)
+    prod_code_having_no_dash_with_regex_value_func_on_prod_details = MatchValueFunction( 10000, 100)
     
     word_regex_pattern = '(?:[can]|\-)+'
+    prod_code_having_alpha_dash_pattern_then_a_number = 'a-a_n'
+    prod_code_having_dash_pattern = '[acn]+\-[-acn]*[acn]'
+    prod_code_having_alpha_and_numeric_pattern = '[ac]+n[acn]*|n+[ac][acn]*'
+    alt_prod_code_pattern = '(?P<prefix>[acn][-acn]*\-)(?:[acn]*[acn])\!(?P<suffix>[acn]*[acn])'
         
-    def __init__(self, classific):
+    def __init__(self, classific, ignore_prod_code_if_equal_to_model = False):
         self.classification = classific
+        self.suppress_prod_code_if_equal_to_model = ignore_prod_code_if_equal_to_model
         sep_index = classific.index('+')
         self.family_model_separator_index = sep_index
         self.family_slice = slice( 0, sep_index )
@@ -29,7 +49,6 @@ class BaseMasterTemplateBuilder(object):
         self.model_slice = slice( sep_index + 1, len(classific))
         self.model_classification = classific[self.model_slice]
         self.word_regex = re.compile( BaseMasterTemplateBuilder.word_regex_pattern, re.IGNORECASE | re.UNICODE | re.VERBOSE )
-        # TODO: Calculate long_prod_code_slices, short_prod_code_slices, alternate_prod_code_slices, secondary_prod_code_slices
     
     @abstractmethod
     def get_listing_templates(self):
@@ -86,7 +105,18 @@ class BaseMasterTemplateBuilder(object):
             MasterTemplateBuilder.family_and_model_separately_with_regex_desc,
             [family_rule_tpl, model_rule_tpl], [])
         return [listing_tpl]
-
+    
+    def find_word_slices_in_classification(self, classification_text, start_index = 0, slice_offset = 0):
+        word_slices = []
+        while True:
+            word = self.word_regex.search(classification_text, start_index)
+            if word == None:
+                break
+            word_slice = slice(word.start() + slice_offset, word.end() + slice_offset)
+            word_slices.append(word_slice)
+            start_index = word.end()
+        return word_slices
+    
     def match_model_and_words_in_family_with_regex(self):
         # Check that family is not empty:
         if len(self.family_classification) == 0:
@@ -107,15 +137,7 @@ class BaseMasterTemplateBuilder(object):
             return []
         
         # Find words in family:
-        start_index = 0
-        word_slices = []
-        while True:
-            word = self.word_regex.search(self.family_classification, start_index)
-            if word == None:
-                break
-            word_slice = slice(word.start(), word.end())
-            word_slices.append(word_slice)
-            start_index = word.end()
+        word_slices = self.find_word_slices_in_classification(self.family_classification, start_index = 0, slice_offset = 0)
         
         # Generate the listing template:
         model_rule_tpl = RegexRuleTemplate( [self.model_slice],
@@ -133,6 +155,148 @@ class BaseMasterTemplateBuilder(object):
             MasterTemplateBuilder.model_and_words_in_family_with_regex_desc,
             [model_rule_tpl], family_word_rule_tpls)
         return [listing_tpl]
+    
+    def get_family_and_model_regex_word_templates(self, family_classification_text, model_classification_text):
+        # set_trace()
+        model_slice_offset = self.family_model_separator_index + 1
+        family_word_slices = self.find_word_slices_in_classification(
+            family_classification_text, start_index = 0, slice_offset = 0)
+        model_word_slices = self.find_word_slices_in_classification(
+            model_classification_text, start_index = 0, slice_offset = model_slice_offset)
+        family_word_rule_tpls = [
+            RegexRuleTemplate( [word_slice], 
+                MasterTemplateBuilder.family_word_with_regex_value_func_on_prod_desc,
+                MasterTemplateBuilder.family_word_with_regex_value_func_on_prod_details,
+                must_match_on_desc = False)
+            for word_slice in family_word_slices
+        ]
+        model_word_rule_tpls = [
+            RegexRuleTemplate( [word_slice], 
+                MasterTemplateBuilder.model_word_with_regex_value_func_on_prod_desc,
+                MasterTemplateBuilder.model_word_with_regex_value_func_on_prod_details,
+                must_match_on_desc = False)
+            for word_slice in model_word_slices
+        ]
+        family_word_rule_tpls.extend(model_word_rule_tpls)
+        return family_word_rule_tpls
+    
+    def get_prod_code_listing_tpl_from_match_result(self, match_result, 
+        value_func_on_prod_desc, value_func_on_prod_details, listing_desc):
+        start = match_result.start()
+        end = match_result.end()
+        match_len = end - start
+        if self.suppress_prod_code_if_equal_to_model and (match_len == len(self.model_classification)):
+            return None
+        
+        model_slice_offset = self.family_model_separator_index + 1
+        
+        prod_code_slices = [slice(start + model_slice_offset, end + model_slice_offset)]
+        prod_code_rule_tpl = RegexRuleTemplate( prod_code_slices,
+            value_func_on_prod_desc, value_func_on_prod_details, must_match_on_desc = True)
+        
+        # Replace the product code with spaces to ensure that it doesn't contribute to the word matches as well:
+        model_classification_text = self.model_classification[:start] + (match_len * ' ') + self.model_classification[end:]
+        word_rule_tpls = self.get_family_and_model_regex_word_templates(self.family_classification, model_classification_text)
+        
+        listing_tpl = ListingMatcherTemplate( listing_desc, [prod_code_rule_tpl], word_rule_tpls)
+        return listing_tpl
+    
+    def get_alt_prod_code_listing_tpl_from_match_result(self, match_result, 
+        value_func_on_prod_desc, value_func_on_prod_details, listing_desc):
+        start_1 = match_result.start('prefix')
+        end_1 = match_result.end('prefix')
+        start_2 = match_result.start('suffix')
+        end_2 = match_result.end('suffix')
+        match_len_1 = end_1 - start_1
+        match_len_2 = end_2 - start_2
+        
+        model_slice_offset = self.family_model_separator_index + 1
+        
+        prod_code_slices = [
+            slice(start_1 + model_slice_offset, end_1 + model_slice_offset),
+            slice(start_2 + model_slice_offset, end_2 + model_slice_offset)
+        ]
+        prod_code_rule_tpl = RegexRuleTemplate( prod_code_slices,
+            value_func_on_prod_desc, value_func_on_prod_details, must_match_on_desc = True)
+        
+        # Replace the product code with spaces to ensure that it doesn't contribute to the word matches as well:
+        model_classification_text = self.model_classification[:start_1] + (match_len_1 * ' ') \
+            + self.model_classification[end_1:start_2] + (match_len_2 * ' ')  + self.model_classification[end_2:]
+        word_rule_tpls = self.get_family_and_model_regex_word_templates(self.family_classification, model_classification_text)
+        
+        listing_tpl = ListingMatcherTemplate( listing_desc, [prod_code_rule_tpl], word_rule_tpls)
+        return listing_tpl
+    
+    def match_prod_code_having_alphas_around_dash_then_a_number(self, match_result):
+        listing_tpl = self.get_prod_code_listing_tpl_from_match_result(match_result, 
+            MasterTemplateBuilder.prod_code_having_alphas_around_dash_with_regex_value_func_on_prod_desc, 
+            MasterTemplateBuilder.prod_code_having_alphas_around_dash_with_regex_value_func_on_prod_details, 
+            MasterTemplateBuilder.prod_code_having_alphas_around_dash_with_regex_desc)
+        if listing_tpl == None:
+            return []
+        else:
+            return [listing_tpl]
+    
+    def match_prod_code_having_dash(self, match_result):
+        listing_tpl = self.get_prod_code_listing_tpl_from_match_result(match_result, 
+            MasterTemplateBuilder.prod_code_having_dash_with_regex_value_func_on_prod_desc, 
+            MasterTemplateBuilder.prod_code_having_dash_with_regex_value_func_on_prod_details, 
+            MasterTemplateBuilder.prod_code_having_dash_with_regex_desc)
+        if listing_tpl == None:
+            return []
+        # Search for an alternate product code (indicated by a slash)
+        # For example, a 'DSC-V100 / X100' has classification 'a-an!an'
+        # In this case, create an alternate product code to match DSC-X100:
+        alt_match_result = re.search( BaseMasterTemplateBuilder.alt_prod_code_pattern, 
+            self.model_classification, re.IGNORECASE | re.UNICODE | re.VERBOSE )
+        if alt_match_result == None:
+            return [listing_tpl]
+        
+        alt_listing_tpl = self.get_alt_prod_code_listing_tpl_from_match_result(alt_match_result, 
+            MasterTemplateBuilder.alt_prod_code_having_dash_with_regex_value_func_on_prod_desc, 
+            MasterTemplateBuilder.alt_prod_code_having_dash_with_regex_value_func_on_prod_details, 
+            MasterTemplateBuilder.alt_prod_code_having_dash_with_regex_desc)
+        
+        if alt_listing_tpl == None:
+            return [listing_tpl]
+        else:
+            return [listing_tpl, alt_listing_tpl]
+    
+    def match_prod_code_with_no_dash(self, match_result):
+        listing_tpl = self.get_prod_code_listing_tpl_from_match_result(match_result, 
+            MasterTemplateBuilder.prod_code_having_no_dash_with_regex_value_func_on_prod_desc, 
+            MasterTemplateBuilder.prod_code_having_no_dash_with_regex_value_func_on_prod_details, 
+            MasterTemplateBuilder.prod_code_having_no_dash_with_regex_desc)
+        if listing_tpl == None:
+            return []
+        else:
+            return [listing_tpl]
+    
+    def match_prod_code_with_regex(self):
+        # First try to match the 'a-a_n' pattern.
+        # This addresses the case where there are only alpha characters around a dash.
+        # This may be correct (e.g. a Pentax 'K-r' camera).
+        # But when followed by a number, that should also be treated as part of the product code.
+        # e.g. 'V-LUX 20' is the product code, not just 'V-LUX'
+        match_result = re.search( BaseMasterTemplateBuilder.prod_code_having_alpha_dash_pattern_then_a_number, 
+            self.model_classification, re.IGNORECASE | re.UNICODE | re.VERBOSE )
+        if match_result != None:
+            return self.match_prod_code_having_alphas_around_dash_then_a_number(match_result)
+        
+        # Match product codes which contain a dash:
+        match_result = re.search( BaseMasterTemplateBuilder.prod_code_having_dash_pattern, 
+            self.model_classification, re.IGNORECASE | re.UNICODE | re.VERBOSE )
+        if match_result != None:
+            return self.match_prod_code_having_dash(match_result)
+            
+        # Match product codes which contain both alphabetic and numeric characters but no dash:
+        match_result = re.search( BaseMasterTemplateBuilder.prod_code_having_alpha_and_numeric_pattern, 
+            self.model_classification, re.IGNORECASE | re.UNICODE | re.VERBOSE )
+        if match_result != None:
+            return self.match_prod_code_with_no_dash(match_result)
+        
+        # No product code match found:
+        return []
 
 # --------------------------------------------------------------------------------------------------
 # A derived class which is the standard way to build a MasterTemplate from a classification string:
@@ -141,8 +305,8 @@ class MasterTemplateBuilder(BaseMasterTemplateBuilder):
     default_listing_template_methods = [
         BaseMasterTemplateBuilder.match_all_of_family_and_model_with_regex,
         BaseMasterTemplateBuilder.match_family_and_model_separately_with_regex,
-        BaseMasterTemplateBuilder.match_model_and_words_in_family_with_regex
-        # TODO: Extend with more methods
+        BaseMasterTemplateBuilder.match_model_and_words_in_family_with_regex,
+        BaseMasterTemplateBuilder.match_prod_code_with_regex
     ]
     
     def get_listing_templates(self):
