@@ -6,6 +6,7 @@ class MatchValueFunctionTestCase(unittest.TestCase):
     def setUp(self):
         self.fixed_val = 1000
         self.per_char_val = 10
+        self.family_and_model_len = 12
         self.match_valueFunc = MatchValueFunction(self.fixed_val, self.per_char_val)
         self.match_valueFunc_withNonZeroFixedVal = MatchValueFunction(self.fixed_val, 0)
         self.match_valueFunc_withNonZeroValPerChar = MatchValueFunction(0, self.per_char_val)
@@ -21,13 +22,13 @@ class MatchValueFunctionTestCase(unittest.TestCase):
         self.assert_(not self.match_valueFunc_withZeroFixedAndPerCharVal.is_assigned())
     
     def testWithNoCharsMatched(self):
-        val = self.match_valueFunc.evaluate(0)
+        val = self.match_valueFunc.evaluate(0, self.family_and_model_len)
         self.assertEqual(val, 0, 'The value should be zero when no characters matched')
         
     def testWithSomeCharsMatched(self):
         matched_char_count = 10
-        val = self.match_valueFunc.evaluate(matched_char_count)
-        expected_val = self.fixed_val + self.per_char_val * matched_char_count
+        val = self.match_valueFunc.evaluate(matched_char_count, self.family_and_model_len)
+        expected_val = self.fixed_val + self.per_char_val * matched_char_count - self.family_and_model_len
         self.assertEqual(val, expected_val)
 
 class MatchingRuleStub(MatchingRule):
@@ -139,9 +140,10 @@ class RegexMatchingRuleTestCase(unittest.TestCase):
         self.match_length = len(self.product_code)
         self.value_func_on_desc = MatchValueFunction(1000000, 10)
         self.value_func_on_details = MatchValueFunction(1000, 1)
+        self.family_and_model_len = len('Cyber-shot') + len(self.product_code)
     
     def run_rule(self, product_desc, extra_prod_details, expected_value, expected_to_match, must_match_on_desc):
-        rule = RegexMatchingRule(self.regex, self.value_func_on_desc, 
+        rule = RegexMatchingRule(self.regex, self.family_and_model_len, self.value_func_on_desc, 
             self.value_func_on_details, must_match_on_desc)
         match_result = rule.try_match(product_desc, extra_prod_details)
         self.assertEqual(match_result.is_match, expected_to_match)
@@ -150,7 +152,7 @@ class RegexMatchingRuleTestCase(unittest.TestCase):
     def testRegexMatchingRuleOnProductDesc(self):
         product_desc = 'Cybershot DSC-HX100v'
         extra_prod_details = ''
-        expected_value = self.value_func_on_desc.evaluate(self.match_length)
+        expected_value = self.value_func_on_desc.evaluate(self.match_length, self.family_and_model_len)
         self.run_rule(product_desc, extra_prod_details, expected_value, expected_to_match = True, must_match_on_desc = True)
     
     def testRegexMatchingRuleOnProductDetailsWhenMustMatchOnDescTrue(self):
@@ -161,7 +163,7 @@ class RegexMatchingRuleTestCase(unittest.TestCase):
     def testRegexMatchingRuleOnProductDetailsWhenMustMatchOnDescFalse(self):
         product_desc = 'Cybershot'
         extra_prod_details = 'DSC-HX100v'
-        expected_value = self.value_func_on_details.evaluate(self.match_length)
+        expected_value = self.value_func_on_details.evaluate(self.match_length, self.family_and_model_len)
         self.run_rule(product_desc, extra_prod_details, expected_value, expected_to_match = True, must_match_on_desc = False)
         
     def testRegexMatchingRuleOnNoMatch(self):
@@ -172,13 +174,14 @@ class RegexMatchingRuleTestCase(unittest.TestCase):
     def testRegexMatchingRuleOnProductDescAndDetailsMatching(self):
         product_desc = 'Cybershot DSC-HX100v'
         extra_prod_details = 'Cybershot DSC-HX100v'
-        expected_value = self.value_func_on_desc.evaluate(self.match_length) + self.value_func_on_details.evaluate(self.match_length)
+        expected_value = self.value_func_on_desc.evaluate(self.match_length, self.family_and_model_len) \
+            + self.value_func_on_details.evaluate(self.match_length, self.family_and_model_len)
         self.run_rule(product_desc, extra_prod_details, expected_value, expected_to_match = True, must_match_on_desc = True)
     
     def testRegexAMatchingRuleOnMissingExtraProdDetails(self):
         product_desc = 'Cybershot DSC-HX100v'
         extra_prod_details = None
-        expected_value = self.value_func_on_desc.evaluate(self.match_length)
+        expected_value = self.value_func_on_desc.evaluate(self.match_length, self.family_and_model_len)
         self.run_rule(product_desc, extra_prod_details, expected_value, expected_to_match = True, must_match_on_desc = True)
 
 class MasterTemplateTestCase(unittest.TestCase):
@@ -186,6 +189,7 @@ class MasterTemplateTestCase(unittest.TestCase):
         # Sample categorisation: a-a+a-an
         # Sample camera: Cyber-shot + DSC-W310
         self.blocks = ['Cyber', '-', 'shot', ' ', 'DSC', '-', 'W', '310']
+        self.family_and_model_len = len('Cyber-shotDSC-W310')
         self.slice_all = slice(0, 8)
         self.slice_prod_code = slice(4, 8)
         self.slices_optional = [slice(0,1), slice(2,3)]
@@ -204,7 +208,7 @@ class MasterTemplateTestCase(unittest.TestCase):
     
     def testEmptyMasterTemplate(self):
         master = MasterTemplate("a-a+a-an", [])
-        engine = master.generate([])
+        engine = master.generate([], self.family_and_model_len)
         self.assert_(isinstance(engine.listing_matchers, list) and len(engine.listing_matchers) == 0, "list must be empty")
     
     def testMasterTemplateWithOneMandatoryTemplate(self):
@@ -212,7 +216,7 @@ class MasterTemplateTestCase(unittest.TestCase):
         optional_tpls = []
         lm_tpl = ListingMatcherTemplate('prod_code_mandatory_only', mandatory_tpls, optional_tpls)
         master = MasterTemplate("a-a+a-an", [lm_tpl])
-        engine = master.generate(self.blocks)
+        engine = master.generate(self.blocks, self.family_and_model_len)
         self.assert_(isinstance(engine.listing_matchers, list) and len(engine.listing_matchers) == 1, 
             "expected non-empty list of listing matchers")
         mandatory_tpl = engine.listing_matchers[0].mandatory_matching_rules[0]
@@ -223,7 +227,7 @@ class MasterTemplateTestCase(unittest.TestCase):
         optional_tpls = []
         lm_tpl = ListingMatcherTemplate('prod_code_mandatory_only', mandatory_tpls, optional_tpls)
         master = MasterTemplate("a-a+a-an", [lm_tpl])
-        engine = master.generate(self.blocks)
+        engine = master.generate(self.blocks, self.family_and_model_len)
         self.assert_(isinstance(engine.listing_matchers, list) and len(engine.listing_matchers) == 1, 
             "expected non-empty list of listing matchers")
         self.assertEqual(len(engine.listing_matchers[0].mandatory_matching_rules), 2)
@@ -237,7 +241,7 @@ class MasterTemplateTestCase(unittest.TestCase):
         optional_tpls = [self.optional_tpl_1, self.optional_tpl_2]
         lm_tpl = ListingMatcherTemplate('prod_code_mandatory_only', mandatory_tpls, optional_tpls)
         master = MasterTemplate("a-a+a-an", [lm_tpl])
-        engine = master.generate(self.blocks)
+        engine = master.generate(self.blocks, self.family_and_model_len)
         self.assert_(isinstance(engine.listing_matchers, list) and len(engine.listing_matchers) > 0, "expected non-empty list of listing matchers")
         self.assert_(len(engine.listing_matchers[0].optional_matching_rules) == 2, "expected 2 optional matching rules in first listing matcher")
 

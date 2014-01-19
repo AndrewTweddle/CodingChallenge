@@ -14,11 +14,15 @@ class MatchValueFunction(object):
     def is_assigned(self):
         return self.fixed_value <> 0 or self.value_per_char <> 0
     
-    def evaluate(self, num_chars_matched):
+    def evaluate(self, num_chars_matched, family_and_model_len):
         if num_chars_matched > 0:
-            return self.fixed_value + num_chars_matched * self.value_per_char
+            return self.fixed_value + num_chars_matched * self.value_per_char - family_and_model_len
         else:
             return 0.0
+        # Subtract the length of the family and model to encourage 
+        # matching to the shortest applicable product when there are ties.
+        # Unfortunately, when there are multiple matching rules, the subtraction will occur multiple times.
+        # But since this is only applicable as a tie-breaker, it shouldn't matter.
 
 # --------------------------------------------------------------------------------------------------
 # A class to represent the result of a matching attempt:
@@ -41,7 +45,8 @@ class MatchingRule(object):
 # A match rule class which uses a regular expression to test for a match:
 # 
 class RegexMatchingRule(MatchingRule):
-    def __init__(self, regex, value_func_on_desc, value_func_on_details, must_match_on_desc = False):
+    def __init__(self, regex, fam_and_model_len, value_func_on_desc, value_func_on_details, must_match_on_desc = False):
+        self.family_and_model_len = fam_and_model_len
         self.match_regex = regex
         self.value_func_on_product_desc = value_func_on_desc
         self.value_func_on_extra_prod_details = value_func_on_details
@@ -52,7 +57,7 @@ class RegexMatchingRule(MatchingRule):
         if match_obj is None:
             return MatchResult(False)
         chars_matched = match_obj.end() - match_obj.start()
-        match_value = match_value_func.evaluate(chars_matched)
+        match_value = match_value_func.evaluate(chars_matched, self.family_and_model_len)
         return MatchResult(True, match_value)
     
     def try_match(self, product_desc, extra_prod_details = None):
@@ -135,7 +140,7 @@ class MatchingRuleTemplate(object):
         self.must_match_on_product_desc = must_match_on_desc
     
     @abstractmethod
-    def generate(self, all_blocks):
+    def generate(self, all_blocks, family_and_model_len):
         pass
 
 # --------------------------------------------------------------------------------------------------
@@ -164,14 +169,14 @@ class RegexRuleTemplate(MatchingRuleTemplate):
             escaped_text = escaped_text + r'(?!\w)'
         return escaped_text
     
-    def generate(self, all_blocks):
+    def generate(self, all_blocks, family_and_model_len):
         # set_trace()
         block_gen = (all_blocks[s] for s in self.slices)
         extracted_blocks = itertools.chain.from_iterable(block_gen)
         extracted_text = ''.join(extracted_blocks)
         pattern = RegexRuleTemplate.regex_escape_with_optional_dashes_and_whitespace(extracted_text)
         regex = re.compile(pattern, flags = re.IGNORECASE or re.UNICODE )
-        return RegexMatchingRule(regex, self.value_func_on_product_desc,
+        return RegexMatchingRule(regex, family_and_model_len, self.value_func_on_product_desc,
             self.value_func_on_extra_prod_details, self.must_match_on_product_desc)
 
 # --------------------------------------------------------------------------------------------------
@@ -183,10 +188,10 @@ class ListingMatcherTemplate(object):
         self.mandatory_rule_templates = mandatory_templates
         self.optional_rule_templates = optional_templates
     
-    def generate(self, all_blocks):
+    def generate(self, all_blocks, family_and_model_len):
         # set_trace()
-        mandatory_rules = [template.generate(all_blocks) for template in self.mandatory_rule_templates]
-        optional_rules = [template.generate(all_blocks) for template in self.optional_rule_templates]
+        mandatory_rules = [template.generate(all_blocks, family_and_model_len) for template in self.mandatory_rule_templates]
+        optional_rules = [template.generate(all_blocks, family_and_model_len) for template in self.optional_rule_templates]
         listing_matcher = ListingMatcher(self.description, mandatory_rules, optional_rules)
         return listing_matcher
 
@@ -201,7 +206,7 @@ class MasterTemplate(object):
         self.classification = classific
         self.listing_matcher_templates = matcher_templates
     
-    def generate(self, all_blocks):
+    def generate(self, all_blocks, family_and_model_len):
         # set_trace()
-        listing_matchers = [matcher_template.generate(all_blocks) for matcher_template in self.listing_matcher_templates]
+        listing_matchers = [matcher_template.generate(all_blocks, family_and_model_len) for matcher_template in self.listing_matcher_templates]
         return MatchingEngine(listing_matchers)
