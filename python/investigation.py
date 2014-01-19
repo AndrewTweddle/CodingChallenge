@@ -783,6 +783,10 @@ products.family_classification.value_counts()
 # 
 
 products['family_and_model'] = products.family.fillna('') + ' + ' + products.model.fillna('')
+products['family_and_model_len'] = products.apply(lambda prd: len(prd['family_and_model']) - 3, axis = 1).astype(np.object)
+    # i.e. include the length of family and model, but without the joining characters: ' + '
+    # NB: Convert to object data type, otherwise we start getting errors like this: 
+    # "ValueError: Shape of passed values is (743,), indices imply (743, 13)"
 products['composite_classification'] = products.family_classification + '+' + products.model_classification
 
 # Concatenate the family and model blocks (with a joining block so that slices match up):
@@ -1373,8 +1377,9 @@ test_master_template_dict = {
 def generate_test_matching_engine(prod_row):
     classification = prod_row['composite_classification']
     blocks = prod_row['blocks']
+    family_and_model_len = prod_row['family_and_model_len']
     master_template = test_master_template_dict[classification]
-    engine = master_template.generate(blocks)
+    engine = master_template.generate(blocks, family_and_model_len)
     return engine
 
 products['test_matching_engine'] = products.apply(generate_test_matching_engine, axis=1)
@@ -1448,8 +1453,9 @@ master_template_dict = {
 def generate_matching_engine(prod_row):
     classification = prod_row['composite_classification']
     blocks = prod_row['blocks']
+    family_and_model_len = prod_row['family_and_model_len']
     master_template = master_template_dict[classification]
-    engine = master_template.generate(blocks)
+    engine = master_template.generate(blocks, family_and_model_len)
     return engine
 
 products['matching_engine'] = products.apply(generate_matching_engine, axis=1)
@@ -1705,6 +1711,8 @@ matched_products_and_listings['index_l'].value_counts().sort_index().to_csv('../
 # 
 # Result: All the SL202 listings decreased from 2 to 1 matches.
 # 
+# NB: This also reduced the number of matched listings ('index_l') by 12 to 8841.
+# 
 # ------------------------------------------------------------------------------------
 #
 # Proposal 3c: Allow the "Olympus µ 550 WP" to match either the "Stylus 550WP" or the "mju 550WP"
@@ -1714,4 +1722,28 @@ matched_products_and_listings['index_l'].value_counts().sort_index().to_csv('../
 #         Any attempt to fix this would require adding logic specific to this one match - not worth it.
 # 
 # Note: This might be fixed by proposal 1b (matching shortest model + family), since "mju 550WP" is shorter than "Stylus 550WP".
+# 
+# ------------------------------------------------------------------------------------
+#
+# Proposal 1b: Subtract length of family + model from each match.
+# 
+# Note: Unwanted side-effect... the length will be subtracted once per matching rule.
+#       So when multiple words match, the total length gets subtracted repeatedly.
+#       Since this should only be used as a tie-break condition, the repetitions shouldn't matter.
+# 
+# NB:   All value functions were scaled up by a factor of 100.
+#       Hence the subtraction of the match length should be negligible compared to other factors.
+# 
+# Result:  Success! The only changed sequence was for the "Agfa CL30"
+#          listing not to have a highest match for the "CL30 Clik!":
+# 
+#   manufacturer  family       model                   productDesc  match_result_value
+# 1         Agfa  ePhoto        CL30  Agfa CL30 1MP Digital Camera           103999990
+# 0         Agfa  ePhoto  CL30 Clik!  Agfa CL30 1MP Digital Camera           103999984
+#
+# 
+# matched_products_and_listings.index_l.count()
+# 8841
+# 
+# So no change in the number of matches.
 # 
