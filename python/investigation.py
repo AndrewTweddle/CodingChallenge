@@ -1463,8 +1463,10 @@ products['matching_engine'] = products.apply(generate_matching_engine, axis=1)
 #       TODO: refactor this into the correct place for the final solution.
 # 
 
-products_and_listings = pd.merge(products_and_listings, products[['matching_engine']], left_on='index_p', right_index=True, how='inner')
-    
+products_and_listings = pd.merge(products_and_listings, products[products.matchRule != 'ignore'][['matching_engine']], left_on='index_p', right_index=True, how='inner')
+
+# Note: This was modified after the fact to filter by product.matchRule. See discovery 5 under section 10.5 below.
+
 # -----------------------------------------------------------------------------
 # 10.4 Run the matching engine for each product and listing combination:
 # 
@@ -1698,3 +1700,8 @@ matched_products_and_listings['index_l'].value_counts().sort_index().to_csv('../
 # 156       Pentax  Optio      WG-1  Pentax Optio WG-1 GPS-Digitalkamera (14 Megapi...            11000000
 # 
 # ------------------------------------------------------------------------------------
+#
+# Proposal 5a: Filter products by matchRule != 'ignore'
+# 
+# Result: All the SL202 listings decreased from 2 to 1 matches.
+# 
