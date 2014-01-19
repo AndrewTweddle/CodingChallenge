@@ -1502,3 +1502,151 @@ products_and_listings.match_result_description.value_counts()
 # mr_description = 'Model and words in family approximately'
 # products_and_listings[products_and_listings.match_result_description == mr_description][['productDesc','family','model','manufacturer']]
 # 
+
+
+# -----------------------------------------------------------------------------
+# 10.5 Find listings which match more than one product:
+# 
+
+rule_match_columns = ['index_l', 'productDesc', 'resolution_in_MP', 'rounded_MP', 'index_p', 'manufacturer', 'family', 'model']
+rule_matches = products_and_listings[products_and_listings.match_result_is_match][rule_match_columns]
+
+matched_products_and_listings = products_and_listings[products_and_listings.match_result_is_match]
+manuf_listing_groups = matched_products_and_listings.groupby(['manufacturer', 'index_l'])
+manuf_listing_group_sizes = manuf_listing_groups.size()
+manuf_listing_sizes = DataFrame({'group_count' : manuf_listing_group_sizes}).reset_index()
+manuf_listing_dup_groups = manuf_listing_sizes[manuf_listing_sizes.group_count > 1]
+manuf_listing_dups_columns = ['manufacturer','family','model','index_l','productDesc','extraProdDetails','match_result_is_match','match_result_value','match_result_description','group_count']
+manuf_listing_dups = pd.merge(matched_products_and_listings, manuf_listing_dup_groups, on=['manufacturer','index_l'], sort=True)[manuf_listing_dups_columns]
+manuf_listing_dups_sorted = manuf_listing_dups.sort_index(by = ['group_count','manufacturer','productDesc','index_l','match_result_value'], ascending=[False,True,True,True,False])
+manuf_listing_dups_sorted.to_csv('../data/intermediate/manuf_listing_dups.csv', encoding='utf-8')
+
+# ------------------------------------------------------------------------------------
+# Discoveries:
+# 
+# manuf_listing_dups_sorted.index_l.value_counts().count()
+# 95
+# 
+# i.e. there were 95 listings which matched more than one product.
+#
+# Script to extract a subset of the listings:
+# 
+# index_l_filter = 8211
+# mlist_dups_sorted_min_columns = ['manufacturer', 'family','model','productDesc','match_result_value']
+# manuf_listing_dups_sorted[manuf_listing_dups_sorted.index_l == index_l_filter][mlist_dups_sorted_min_columns]
+# 
+# The following anomalies were discovered in the data:
+#
+# ------------------------------------------------------------------------------------
+# 
+# 1. Dead heat between CL30 and CL30 Clik! products:
+#   
+#   manufacturer  family       model                   productDesc  match_result_value
+# 0         Agfa  ePhoto  CL30 Clik!  Agfa CL30 1MP Digital Camera             1040000
+# 1         Agfa  ePhoto        CL30  Agfa CL30 1MP Digital Camera             1040000
+# 
+# Possible corrective action: 
+# 
+# a. Subtract match value for words in listing which were not matched, or
+# b. Favour shorter family and model by subtracting the length of family and model from the match value
+#    (simpler and roughly equivalent).
+#
+# ------------------------------------------------------------------------------------
+# 
+# 2. Some listings have product descriptions containing alternate product codes.
+#    The alternative product codes could be in brackets or after a slash (i.e. divider).
+#    Which product is found depends on the longest code, not the best match.
+#    This happened a lot for the Canon 550D/Rebel T2i/Kiss X4 products.
+# 
+# Example 2.1:
+# 
+#    manufacturer family    model                                        productDesc  match_result_value
+# 33        Canon  Rebel      T2i  Canon KissX4 (European model:Canon Rebel T2i) ...            10900000
+# 34        Canon    NaN  Kiss X4  Canon KissX4 (European model:Canon Rebel T2i) ...            10600000
+#
+# Example 2.2:
+#
+#    manufacturer family model                               productDesc  match_result_value
+# 52        Canon    EOS  550D  Canon T2I / 550D 29 Piece Pro Deluxe Kit             1040000
+# 51        Canon  Rebel   T2i  Canon T2I / 550D 29 Piece Pro Deluxe Kit             1030000
+# 
+# Example 2.3:
+# 
+#     manufacturer family   model                                        productDesc  match_result_value
+# 182      Samsung    NaN  ST5000  3.5" Touch Screen LCD Samsung TL240/ST5000 Dig...            10600000
+# 181      Samsung    NaN   TL240  3.5" Touch Screen LCD Samsung TL240/ST5000 Dig...            10500000
+#
+# 
+# Possible corrective actions:
+# 
+# a. Reduce the value of matches if the matched part of the productDesc comes after an open bracket or a slash.
+# b. Split the listing's title into 3 parts, not 2: 
+#        productDesc, altProductDesc (after the slash or brackets) and extraProdDetails
+#    Add a 3rd parameter to the MatchValueFunction based on altProductDesc.
+# c. Increase the value of matches which are earlier in the listing.
+#    Modify MatchValueFunction.evaluate() to be based on match position as well as match length.
+#    Issue: How to find the right balance between match position and match length.
+#           NB: There may be no "right" balance, since it is likely to be product-dependent.
+# 
+# ------------------------------------------------------------------------------------
+# 
+# 3. The "Olympus µ 550 WP" could match either the "Stylus 550WP" or the "mju 550WP"
+# 
+# 
+#     manufacturer  family      model                                        productDesc  match_result_value
+# 109      Olympus     NaN  mju 550WP  Olympus - µ 550 WP - Appareil photo compact nu...             1060000
+# 110      Olympus  Stylus      550WP  Olympus - µ 550 WP - Appareil photo compact nu...             1060000
+# 
+# 
+# Possible corrective actions:
+# 
+# a. Convert µ to be mju in the product listing before performing the match.
+#    This is tantamount to hard-coding a rule for a specific product.
+# b. When "mju" is encountered in the family or model, create a second rule to convert to "µ".
+#    BUT: This gets messy, because it can't be done at the template level, 
+#         since this is based only on classification.
+# c. Do nothing. These are the same product. Don't worry which one is matched.
+# 
+# 
+# ------------------------------------------------------------------------------------
+# 
+# 4. The "Pentax Optio WG-1 GPS-Digitalkamera" doesn't treat GPS as being part of the code
+#    since "GPS" is followed by a dash immediately.
+#
+#
+#     manufacturer family     model                                        productDesc  match_result_value
+# 156       Pentax  Optio      WG-1  Pentax Optio WG-1 GPS-Digitalkamera (14 Megapi...            11000000
+# 155       Pentax  Optio  WG-1 GPS  Pentax Optio WG-1 GPS-Digitalkamera (14 Megapi...             3130500
+# 
+# 
+# Possible corrective actions:
+# 
+# a. Modify the regular expression to allow dashes as the next character after the match.
+#    Currently there are a number of restrictions on the match, such as ensuring that:
+#      i.   it is followed by whitespace,
+#      ii.  or is at the end of the string,
+#      iii. or that if it ends in a dash, the dash is NOT IN THE MIDDLE OF A WORD,
+#      iv.  or that if ends in a number, that number is not followed by a decimal point).
+#    
+#    So rule iii could be relaxed.
+#    But the rule sounds reasonable. Should it really be relaxed to cater for this special case?
+#    Perhaps try relaxing it and see if it has any side-effects.
+# 
+# 
+# ------------------------------------------------------------------------------------
+# 
+# 5. The Samsung SL202 has multiple product listings.
+# 
+# One of many examples:
+# 
+#     manufacturer family  model                          productDesc  match_result_value
+# 165      Samsung    NaN  SL202  Samsung SL202 10.2MP Digital Camera            10500000
+# 166      Samsung    NaN  SL202  Samsung SL202 10.2MP Digital Camera            10500000
+# 
+# Possible corrective actions:
+# 
+# a. This duplication was discovered much earlier.
+#    To fix this, filter out products which have: matchRule == 'ignore'
+# 
+# 
+# ------------------------------------------------------------------------------------
