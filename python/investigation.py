@@ -1705,3 +1705,13 @@ matched_products_and_listings['index_l'].value_counts().sort_index().to_csv('../
 # 
 # Result: All the SL202 listings decreased from 2 to 1 matches.
 # 
+# ------------------------------------------------------------------------------------
+#
+# Proposal 3c: Allow the "Olympus µ 550 WP" to match either the "Stylus 550WP" or the "mju 550WP"
+#              Do nothing.
+# 
+# Reason: http://en.wikipedia.org/wiki/Olympus_mju indicates that these are identical products differing by region.
+#         Any attempt to fix this would require adding logic specific to this one match - not worth it.
+# 
+# Note: This might be fixed by proposal 1b (matching shortest model + family), since "mju 550WP" is shorter than "Stylus 550WP".
+# 
