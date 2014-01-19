@@ -14,24 +14,24 @@ class BaseMasterTemplateBuilder(object):
     alt_prod_code_having_dash_with_regex_desc = 'Alternate prod code with dash approximately'
     prod_code_having_no_dash_with_regex_desc = 'Prod code without a dash approximately'
     
-    all_of_family_and_model_with_regex_value_func_on_prod_desc = MatchValueFunction( 10000000, 100000)
-    all_of_family_and_model_with_regex_value_func_on_prod_details = MatchValueFunction( 100000, 1000)
-    family_and_model_separately_with_regex_value_func_on_prod_desc = MatchValueFunction( 2500000, 25000)  # NB: These will be added twice - once for family and once for model
-    family_and_model_separately_with_regex_value_func_on_prod_details = MatchValueFunction( 25000, 250)  # NB: These will be added twice - once for family and once for model
+    all_of_family_and_model_with_regex_value_func_on_prod_desc = MatchValueFunction( 1000000000, 10000000)
+    all_of_family_and_model_with_regex_value_func_on_prod_details = MatchValueFunction( 10000000, 100000)
+    family_and_model_separately_with_regex_value_func_on_prod_desc = MatchValueFunction( 250000000, 2500000)  # NB: These will be added twice - once for family and once for model
+    family_and_model_separately_with_regex_value_func_on_prod_details = MatchValueFunction( 2500000, 25000)  # NB: These will be added twice - once for family and once for model
     # model_and_words_in_family uses the value functions above for the model match, and the value functions below for each word match:
-    family_word_with_regex_value_func_on_prod_desc = MatchValueFunction( 10000, 100)
-    family_word_with_regex_value_func_on_prod_details = MatchValueFunction( 100, 1)
-    model_word_with_regex_value_func_on_prod_desc = MatchValueFunction( 100000, 1000)
-    model_word_with_regex_value_func_on_prod_details = MatchValueFunction( 1000, 10)
+    family_word_with_regex_value_func_on_prod_desc = MatchValueFunction( 1000000, 10000)
+    family_word_with_regex_value_func_on_prod_details = MatchValueFunction( 10000, 100)
+    model_word_with_regex_value_func_on_prod_desc = MatchValueFunction( 10000000, 100000)
+    model_word_with_regex_value_func_on_prod_details = MatchValueFunction( 100000, 1000)
     # prod code value functions:
-    prod_code_having_dash_with_regex_value_func_on_prod_desc = MatchValueFunction( 3000000, 30000)
-    prod_code_having_dash_with_regex_value_func_on_prod_details = MatchValueFunction( 30000, 300)
-    alt_prod_code_having_dash_with_regex_value_func_on_prod_desc = MatchValueFunction( 2500000, 25000)
-    alt_prod_code_having_dash_with_regex_value_func_on_prod_details = MatchValueFunction( 25000, 250)
-    prod_code_having_alphas_around_dash_with_regex_value_func_on_prod_desc = MatchValueFunction( 2000000, 20000)
-    prod_code_having_alphas_around_dash_with_regex_value_func_on_prod_details = MatchValueFunction( 20000, 200)
-    prod_code_having_no_dash_with_regex_value_func_on_prod_desc = MatchValueFunction( 1000000, 10000)
-    prod_code_having_no_dash_with_regex_value_func_on_prod_details = MatchValueFunction( 10000, 100)
+    prod_code_having_dash_with_regex_value_func_on_prod_desc = MatchValueFunction( 300000000, 3000000)
+    prod_code_having_dash_with_regex_value_func_on_prod_details = MatchValueFunction( 3000000, 30000)
+    alt_prod_code_having_dash_with_regex_value_func_on_prod_desc = MatchValueFunction( 250000000, 2500000)
+    alt_prod_code_having_dash_with_regex_value_func_on_prod_details = MatchValueFunction( 2500000, 25000)
+    prod_code_having_alphas_around_dash_with_regex_value_func_on_prod_desc = MatchValueFunction( 200000000, 2000000)
+    prod_code_having_alphas_around_dash_with_regex_value_func_on_prod_details = MatchValueFunction( 2000000, 20000)
+    prod_code_having_no_dash_with_regex_value_func_on_prod_desc = MatchValueFunction( 100000000, 1000000)
+    prod_code_having_no_dash_with_regex_value_func_on_prod_details = MatchValueFunction( 1000000, 10000)
     
     word_regex_pattern = '(?:[can]|\-)+'
     prod_code_having_alpha_dash_pattern_then_a_number = 'a-a_n'
