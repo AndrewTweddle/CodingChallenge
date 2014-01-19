@@ -1521,13 +1521,20 @@ manuf_listing_dups = pd.merge(matched_products_and_listings, manuf_listing_dup_g
 manuf_listing_dups_sorted = manuf_listing_dups.sort_index(by = ['group_count','manufacturer','productDesc','index_l','match_result_value'], ascending=[False,True,True,True,False])
 manuf_listing_dups_sorted.to_csv('../data/intermediate/manuf_listing_dups.csv', encoding='utf-8')
 
+# Export matched listings, so that we can compare before and after to see which listings have been added:
+matched_products_and_listings['index_l'].value_counts().sort_index().to_csv('../data/intermediate/matched_listing_indexes.csv', encoding='utf-8')
+
+
 # ------------------------------------------------------------------------------------
 # Discoveries:
 # 
+# matched_products_and_listings.index_l.count()
+# 8847
+# (i.e. total matched listings)
+# 
 # manuf_listing_dups_sorted.index_l.value_counts().count()
 # 95
-# 
-# i.e. there were 95 listings which matched more than one product.
+# (i.e. listings with more than one matching product).
 #
 # Script to extract a subset of the listings:
 # 
@@ -1648,5 +1655,46 @@ manuf_listing_dups_sorted.to_csv('../data/intermediate/manuf_listing_dups.csv', 
 # a. This duplication was discovered much earlier.
 #    To fix this, filter out products which have: matchRule == 'ignore'
 # 
+# 
+# ------------------------------------------------------------------------------------
+
+# ************************************************************************************
+# 
+# RESULTS OF MAKING SOME OF THESE PROPOSED CHANGES:
+# 
+# Proposal 4.a: Modify matches to allow a dash at the end of the match.
+# 
+# matched_products_and_listings.index_l.count()
+# 8853
+# (i.e. 6 extra listings matched)
+# 
+# 
+# What are the extra matched listings?
+# 
+# index_l: 8528, 8529, 8949, 11767, 11780, 11781
+#
+# 
+# new_index_l = 8528
+# mlist_dups_sorted_min_columns = ['manufacturer', 'family','model','productDesc','match_result_value']
+# matched_products_and_listings[matched_products_and_listings.index_l == new_index_l][mlist_dups_sorted_min_columns]
+#
+#        manufacturer family    model                                          productDesc  match_result_value
+# 684914    Panasonic  Lumix  DMC-GH1    Panasonic DMC-GH1-K 12.1MP Four Thirds Interch...             3210000
+# 684994    Panasonic  Lumix  DMC-GH1    Panasonic DMC-GH1-K 12.1MP Four Thirds Interch...             3210000
+# 718598    Panasonic  Lumix  DMC-FS12   Panasonic Lumix DMC-FS12-K - Digital camera - ...            11400000
+# 967044         Sony  Alpha  DSLR-A550  Sony - DSLR-A550- Appareil photo reflex numriq...             3270000
+# 968060         Sony  Alpha  DSLR-A850  Sony - DSLR-A850- Appareil photo reflex numriq...             3270000
+# 968141         Sony  Alpha  DSLR-A850  Sony - DSLR-A850- Appareil photo reflex numriq...             3270000
+# 
+# The last 3 matches are additional correct matches resulting from allowing the dash.
+# The first 3 matches above are an example of why there was a rule about not allowing a dash at the end of the matching text.
+# HOWEVER, wikipedia indicates that the K suffix is for the model in black (see http://en.wikipedia.org/wiki/Panasonic_Lumix_DMC-GH1).
+# Hence the only changes are all good.
+# 
+# Additionally the listings with duplicates are now in the correct order:
+# 
+#     manufacturer family     model                                        productDesc  match_result_value
+# 155       Pentax  Optio  WG-1 GPS  Pentax Optio WG-1 GPS-Digitalkamera (14 Megapi...            11400000
+# 156       Pentax  Optio      WG-1  Pentax Optio WG-1 GPS-Digitalkamera (14 Megapi...            11000000
 # 
 # ------------------------------------------------------------------------------------
