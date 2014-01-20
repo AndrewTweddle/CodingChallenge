@@ -25,6 +25,8 @@ data/
         model_classifications/
                         - contains product records grouped by the classification pattern of the 'model' field, 
                         - with a csv file per pattern
+        composite_classifications/
+                        - classification patterns, as above, but for the composite family + model
 
 -----------------
 Python scripts and folders:
