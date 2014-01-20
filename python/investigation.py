@@ -1747,3 +1747,22 @@ matched_products_and_listings['index_l'].value_counts().sort_index().to_csv('../
 # 
 # So no change in the number of matches.
 # 
+# 
+# ------------------------------------------------------------------------------------
+#
+# Proposal 2c: Multiple the value of a listing if it is before 
+#              the separator (slash or bracket) in the productDesc
+# 
+# Result: Success! 
+#         Each of the listings for a variant of the Canon EOS 550D is now using the first product code in the listing.
+#         The following listing was also out of sequence previously, and is now correct:
+# 
+#     manufacturer family   model                                        productDesc  match_result_value
+# 161      Samsung    NaN   TL240  3.5" Touch Screen LCD Samsung TL240/ST5000 Dig...         10499999995
+# 162      Samsung    NaN  ST5000  3.5" Touch Screen LCD Samsung TL240/ST5000 Dig...          1059999994
+# 
+# matched_products_and_listings.index_l.count()
+# 8841
+# 
+# So no change in the number of matches.
+# 
