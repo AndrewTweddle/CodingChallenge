@@ -14,9 +14,16 @@ class MatchValueFunction(object):
     def is_assigned(self):
         return self.fixed_value <> 0 or self.value_per_char <> 0
     
-    def evaluate(self, num_chars_matched, family_and_model_len):
+    def evaluate(self, num_chars_matched, family_and_model_len, is_after_sep):
         if num_chars_matched > 0:
-            return self.fixed_value + num_chars_matched * self.value_per_char - family_and_model_len
+            if is_after_sep:
+                return self.fixed_value + num_chars_matched * self.value_per_char - family_and_model_len
+            else:
+                return 10 * (self.fixed_value + num_chars_matched * self.value_per_char) - family_and_model_len
+                # Some listings show multiple alternate product codes (e.g. Canon EOS 550D = Rebel T2i = Kiss X4)
+                # These other product codes are usually shown in brackets or separated by slashes.
+                # To encourage the algorithm to choose the product shown first in the listing,
+                # multiply the value of the match by 10 if there is no separator or if it comes before the separator
         else:
             return 0.0
         # Subtract the length of the family and model to encourage 
@@ -57,7 +64,15 @@ class RegexMatchingRule(MatchingRule):
         if match_obj is None:
             return MatchResult(False)
         chars_matched = match_obj.end() - match_obj.start()
-        match_value = match_value_func.evaluate(chars_matched, self.family_and_model_len)
+        
+        # Make the match more valuable if it occurs before the first separator 
+        # (i.e. a slash or an open bracket) in the text to match.
+        # This ensures that, if the listing contains alternate product codes/names 
+        # in brackets or after a slash, that the first product code is more likely to be matched:
+        sep_mr = re.search('\(|\/', text_to_match, flags = re.UNICODE )
+        is_after_sep = sep_mr != None and sep_mr.start() < match_obj.start()
+        match_value = match_value_func.evaluate(chars_matched, self.family_and_model_len, is_after_sep)
+        
         return MatchResult(True, match_value)
     
     def try_match(self, product_desc, extra_prod_details = None):

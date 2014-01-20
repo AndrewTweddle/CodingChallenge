@@ -1,5 +1,6 @@
 import unittest
 from recordlinker.builder import *
+# from pdb import set_trace
 
 class FamilyAndModelSeparatelyMasterTemplateBuilder(SingleMethodMasterTemplateBuilder):
     def __init__(self, classific):
@@ -27,7 +28,7 @@ class AllOfFamilyAndModel_MasterTemplateBuilderTestCase(unittest.TestCase):
         product_desc = 'C y b e r s h o t-DSC W 310'
         extra_prod_details = ''
         value_func = MasterTemplateBuilder.all_of_family_and_model_with_regex_value_func_on_prod_desc
-        expected_match_value = value_func.fixed_value + value_func.value_per_char * len(product_desc) - family_and_model_len
+        expected_match_value = 10 * ( value_func.fixed_value + value_func.value_per_char * len(product_desc) ) - family_and_model_len
         expected_description = MasterTemplateBuilder.all_of_family_and_model_with_regex_desc
         
         builder = MasterTemplateBuilder(classification)
@@ -126,10 +127,10 @@ class ModelAndWordsInFamily_MasterTemplateBuilderTestCase(unittest.TestCase):
         extra_prod_details = 'Digital camera'
         
         expected_match_value \
-            = BaseMasterTemplateBuilder.family_and_model_separately_with_regex_value_func_on_prod_desc.evaluate(len('1000 HS'), family_and_model_len) \
-            + BaseMasterTemplateBuilder.family_word_with_regex_value_func_on_prod_desc.evaluate(len('Digital'), family_and_model_len) \
-            + BaseMasterTemplateBuilder.family_word_with_regex_value_func_on_prod_desc.evaluate(len('IXUS'), family_and_model_len) \
-            + BaseMasterTemplateBuilder.family_word_with_regex_value_func_on_prod_details.evaluate(len('Digital'), family_and_model_len)
+            = BaseMasterTemplateBuilder.family_and_model_separately_with_regex_value_func_on_prod_desc.evaluate(len('1000 HS'), family_and_model_len, is_after_sep = False) \
+            + BaseMasterTemplateBuilder.family_word_with_regex_value_func_on_prod_desc.evaluate(len('Digital'), family_and_model_len, is_after_sep = False) \
+            + BaseMasterTemplateBuilder.family_word_with_regex_value_func_on_prod_desc.evaluate(len('IXUS'), family_and_model_len, is_after_sep = False) \
+            + BaseMasterTemplateBuilder.family_word_with_regex_value_func_on_prod_details.evaluate(len('Digital'), family_and_model_len, is_after_sep = False)
         
         builder = SingleMethodMasterTemplateBuilder(classification, 
             BaseMasterTemplateBuilder.match_model_and_words_in_family_with_regex)
@@ -147,7 +148,8 @@ class ModelAndWordsInFamily_MasterTemplateBuilderTestCase(unittest.TestCase):
         extra_prod_details = ''
         
         expected_match_value \
-            = BaseMasterTemplateBuilder.family_and_model_separately_with_regex_value_func_on_prod_desc.evaluate(len('1000 HS'), family_and_model_len)
+            = BaseMasterTemplateBuilder.family_and_model_separately_with_regex_value_func_on_prod_desc.evaluate( \
+                len('1000 HS'), family_and_model_len, is_after_sep = False)
         
         builder = SingleMethodMasterTemplateBuilder(classification, 
             BaseMasterTemplateBuilder.match_model_and_words_in_family_with_regex)
@@ -236,7 +238,8 @@ class ProdCode_MasterTemplateBuilderTestCase(unittest.TestCase):
         extra_prod_details = 'Lux'
         
         expected_match_value \
-            = BaseMasterTemplateBuilder.prod_code_having_alphas_around_dash_with_regex_value_func_on_prod_desc.evaluate(len('V-LUX 20'), family_and_model_len)
+            = BaseMasterTemplateBuilder.prod_code_having_alphas_around_dash_with_regex_value_func_on_prod_desc.evaluate( \
+                len('V-LUX 20'), family_and_model_len, is_after_sep = False)
         
         builder = SingleMethodMasterTemplateBuilder(classification, 
             BaseMasterTemplateBuilder.match_prod_code_with_regex)
@@ -254,10 +257,10 @@ class ProdCode_MasterTemplateBuilderTestCase(unittest.TestCase):
         extra_prod_details = 'Mark'
         
         expected_match_value \
-            = BaseMasterTemplateBuilder.prod_code_having_dash_with_regex_value_func_on_prod_desc.evaluate(len('EOS 1-D'), family_and_model_len) \
-            + BaseMasterTemplateBuilder.family_word_with_regex_value_func_on_prod_desc.evaluate(len('Canon'), family_and_model_len) \
-            + BaseMasterTemplateBuilder.model_word_with_regex_value_func_on_prod_desc.evaluate(len('IV'), family_and_model_len) \
-            + BaseMasterTemplateBuilder.model_word_with_regex_value_func_on_prod_details.evaluate(len('Mark'), family_and_model_len)
+            = BaseMasterTemplateBuilder.prod_code_having_dash_with_regex_value_func_on_prod_desc.evaluate(len('EOS 1-D'), family_and_model_len, is_after_sep = False) \
+            + BaseMasterTemplateBuilder.family_word_with_regex_value_func_on_prod_desc.evaluate(len('Canon'), family_and_model_len, is_after_sep = False) \
+            + BaseMasterTemplateBuilder.model_word_with_regex_value_func_on_prod_desc.evaluate(len('IV'), family_and_model_len, is_after_sep = False) \
+            + BaseMasterTemplateBuilder.model_word_with_regex_value_func_on_prod_details.evaluate(len('Mark'), family_and_model_len, is_after_sep = False)
         
         builder = SingleMethodMasterTemplateBuilder(classification, 
             BaseMasterTemplateBuilder.match_prod_code_with_regex)
@@ -275,8 +278,10 @@ class ProdCode_MasterTemplateBuilderTestCase(unittest.TestCase):
         extra_prod_details = 'V-100'
         
         expected_match_value \
-            = BaseMasterTemplateBuilder.alt_prod_code_having_dash_with_regex_value_func_on_prod_desc.evaluate(len('DSC-X100'), family_and_model_len) \
-            + BaseMasterTemplateBuilder.model_word_with_regex_value_func_on_prod_details.evaluate(len('V-100'), family_and_model_len)
+            = BaseMasterTemplateBuilder.alt_prod_code_having_dash_with_regex_value_func_on_prod_desc.evaluate( \
+                len('DSC-X100'), family_and_model_len, is_after_sep = False) \
+            + BaseMasterTemplateBuilder.model_word_with_regex_value_func_on_prod_details.evaluate( \
+                len('V-100'), family_and_model_len, is_after_sep = False)
         
         builder = SingleMethodMasterTemplateBuilder(classification, 
             BaseMasterTemplateBuilder.match_prod_code_with_regex)
@@ -294,10 +299,14 @@ class ProdCode_MasterTemplateBuilderTestCase(unittest.TestCase):
         extra_prod_details = 'Mini M200'
         
         expected_match_value \
-            = BaseMasterTemplateBuilder.prod_code_having_no_dash_with_regex_value_func_on_prod_desc.evaluate(len('M-200'), family_and_model_len) \
-            + BaseMasterTemplateBuilder.family_word_with_regex_value_func_on_prod_desc.evaluate(len('EasyShare'), family_and_model_len) \
-            + BaseMasterTemplateBuilder.model_word_with_regex_value_func_on_prod_details.evaluate(len('Mini'), family_and_model_len) \
-            + BaseMasterTemplateBuilder.prod_code_having_no_dash_with_regex_value_func_on_prod_details.evaluate(len('M200'), family_and_model_len)
+            = BaseMasterTemplateBuilder.prod_code_having_no_dash_with_regex_value_func_on_prod_desc.evaluate( \
+                len('M-200'), family_and_model_len, is_after_sep = False) \
+            + BaseMasterTemplateBuilder.family_word_with_regex_value_func_on_prod_desc.evaluate( \
+                len('EasyShare'), family_and_model_len, is_after_sep = False) \
+            + BaseMasterTemplateBuilder.model_word_with_regex_value_func_on_prod_details.evaluate( \
+                len('Mini'), family_and_model_len, is_after_sep = False) \
+            + BaseMasterTemplateBuilder.prod_code_having_no_dash_with_regex_value_func_on_prod_details.evaluate( \
+                len('M200'), family_and_model_len, is_after_sep = False)
         
         builder = SingleMethodMasterTemplateBuilder(classification, 
             BaseMasterTemplateBuilder.match_prod_code_with_regex)
@@ -306,7 +315,68 @@ class ProdCode_MasterTemplateBuilderTestCase(unittest.TestCase):
         match_result = engine.try_match_listing(product_desc, extra_prod_details)
         self.assert_(match_result.is_match, 'There should be a match for a product code with no dashes')
         self.assertEqual(match_result.match_value, expected_match_value)
+        
+class MultipleCodesInProductDescTestCase(unittest.TestCase):
+    
+    def testProdCodeMatchAfterSlash(self):
+        product_desc = 'Canon T2I / 550D 29 Piece Pro Deluxe Kit'
+        extra_prod_details = ''
+        
+        classification_1 = 'a+na'
+        blocks_1 = ['EOS','+','550','D']
+        family_and_model_len_1 = len('EOS550D')
+        builder_1 = MasterTemplateBuilder(classification_1)
+        
+        master_tpl_1 = builder_1.build()
+        engine_1 = master_tpl_1.generate(blocks_1, family_and_model_len_1)
+        match_result_1 = engine_1.try_match_listing(product_desc, extra_prod_details)
+        self.assert_(match_result_1.is_match, 'There should be a match for the EOS 550D product')
+        self.assertEqual(match_result_1.description, BaseMasterTemplateBuilder.prod_code_having_no_dash_with_regex_desc)
+        match_value_1 = match_result_1.match_value
+        
+        classification_2 = 'a+ana'
+        blocks_2 = ['Rebel','+','T','2','i']
+        family_and_model_len_2 = len('RebelT2i')
+        builder_2 = MasterTemplateBuilder(classification_2)
+        master_tpl_2 = builder_2.build()
+        engine_2 = master_tpl_2.generate(blocks_2, family_and_model_len_2)
+        match_result_2 = engine_2.try_match_listing(product_desc, extra_prod_details)
+        self.assert_(match_result_2.is_match, 'There should be a match for the Rebel T2i product')
+        self.assertEqual(match_result_2.description, BaseMasterTemplateBuilder.prod_code_having_no_dash_with_regex_desc)
+        match_value_2 = match_result_2.match_value
+        
+        self.assert_(match_value_1 < match_value_2, 'The Rebel T2i should be the higher value match as it precedes the slash')
+    
+    def testProdCodeMatchAfterBracket(self):
+        product_desc = 'Canon EOS 550D (European EOS Rebel T2i) 18 MP CMOS APS-C Digital SLR Camera'
+        extra_prod_details = ''
+        
+        classification_1 = 'a+na'
+        blocks_1 = ['EOS','+','550','D']
+        family_and_model_len_1 = len('EOS550D')
+        builder_1 = MasterTemplateBuilder(classification_1)
+        
+        master_tpl_1 = builder_1.build()
+        engine_1 = master_tpl_1.generate(blocks_1, family_and_model_len_1)
+        match_result_1 = engine_1.try_match_listing(product_desc, extra_prod_details)
+        self.assert_(match_result_1.is_match, 'There should be a match for the EOS 550D product')
+        self.assertEqual(match_result_1.description, BaseMasterTemplateBuilder.all_of_family_and_model_with_regex_desc)
+        match_value_1 = match_result_1.match_value
+        
+        classification_2 = 'a+ana'
+        blocks_2 = ['Rebel','+','T','2','i']
+        family_and_model_len_2 = len('RebelT2i')
+        builder_2 = MasterTemplateBuilder(classification_2)
+        master_tpl_2 = builder_2.build()
+        engine_2 = master_tpl_2.generate(blocks_2, family_and_model_len_2)
+        match_result_2 = engine_2.try_match_listing(product_desc, extra_prod_details)
+        self.assert_(match_result_2.is_match, 'There should be a match for the Rebel T2i product')
+        self.assertEqual(match_result_2.description, BaseMasterTemplateBuilder.all_of_family_and_model_with_regex_desc)
+        match_value_2 = match_result_2.match_value
+        
+        self.assert_(match_value_1 > match_value_2, 'The Canon 550D should be the higher value match as it precedes the opening round bracket')
 
+        
 # Run unit tests from the command line:        
 if __name__ == '__main__':
     unittest.main()

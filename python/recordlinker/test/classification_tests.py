@@ -22,14 +22,21 @@ class MatchValueFunctionTestCase(unittest.TestCase):
         self.assert_(not self.match_valueFunc_withZeroFixedAndPerCharVal.is_assigned())
     
     def testWithNoCharsMatched(self):
-        val = self.match_valueFunc.evaluate(0, self.family_and_model_len)
+        val = self.match_valueFunc.evaluate(0, self.family_and_model_len, is_after_sep = False)
         self.assertEqual(val, 0, 'The value should be zero when no characters matched')
         
     def testWithSomeCharsMatched(self):
         matched_char_count = 10
-        val = self.match_valueFunc.evaluate(matched_char_count, self.family_and_model_len)
+        val = self.match_valueFunc.evaluate(matched_char_count, self.family_and_model_len, is_after_sep = False)
+        expected_val = 10 * ( self.fixed_val + self.per_char_val * matched_char_count ) - self.family_and_model_len
+        self.assertEqual(val, expected_val)
+    
+    def testWithSomeCharsMatchedAndAfterSlashOrBracket(self):
+        matched_char_count = 10
+        val = self.match_valueFunc.evaluate(matched_char_count, self.family_and_model_len, is_after_sep = True)
         expected_val = self.fixed_val + self.per_char_val * matched_char_count - self.family_and_model_len
         self.assertEqual(val, expected_val)
+    
 
 class MatchingRuleStub(MatchingRule):
     def __init__(self, text_to_find, desc_value, details_value):
@@ -152,18 +159,30 @@ class RegexMatchingRuleTestCase(unittest.TestCase):
     def testRegexMatchingRuleOnProductDesc(self):
         product_desc = 'Cybershot DSC-HX100v'
         extra_prod_details = ''
-        expected_value = self.value_func_on_desc.evaluate(self.match_length, self.family_and_model_len)
+        expected_value = self.value_func_on_desc.evaluate(self.match_length, self.family_and_model_len, is_after_sep = False)
+        self.run_rule(product_desc, extra_prod_details, expected_value, expected_to_match = True, must_match_on_desc = True)
+    
+    def testRegexMatchingRuleOnProductDescAfterSlashSeparator(self):
+        product_desc = 'Cybershot DSC-SomeProdCode / DSC-HX100v'
+        extra_prod_details = ''
+        expected_value = self.value_func_on_desc.evaluate(self.match_length, self.family_and_model_len, is_after_sep = True)
+        self.run_rule(product_desc, extra_prod_details, expected_value, expected_to_match = True, must_match_on_desc = True)
+    
+    def testRegexMatchingRuleOnProductDescAfterBracketSeparator(self):
+        product_desc = 'Cybershot DSC-SomeProdCode (DSC-HX100v)'
+        extra_prod_details = ''
+        expected_value = self.value_func_on_desc.evaluate(self.match_length, self.family_and_model_len, is_after_sep = True)
         self.run_rule(product_desc, extra_prod_details, expected_value, expected_to_match = True, must_match_on_desc = True)
     
     def testRegexMatchingRuleOnProductDetailsWhenMustMatchOnDescTrue(self):
         product_desc = 'Cybershot'
         extra_prod_details = 'DSC-HX100v'
         self.run_rule(product_desc, extra_prod_details, expected_value = 0, expected_to_match = False, must_match_on_desc = True)
-        
+    
     def testRegexMatchingRuleOnProductDetailsWhenMustMatchOnDescFalse(self):
         product_desc = 'Cybershot'
         extra_prod_details = 'DSC-HX100v'
-        expected_value = self.value_func_on_details.evaluate(self.match_length, self.family_and_model_len)
+        expected_value = self.value_func_on_details.evaluate(self.match_length, self.family_and_model_len, is_after_sep = False)
         self.run_rule(product_desc, extra_prod_details, expected_value, expected_to_match = True, must_match_on_desc = False)
         
     def testRegexMatchingRuleOnNoMatch(self):
@@ -174,14 +193,14 @@ class RegexMatchingRuleTestCase(unittest.TestCase):
     def testRegexMatchingRuleOnProductDescAndDetailsMatching(self):
         product_desc = 'Cybershot DSC-HX100v'
         extra_prod_details = 'Cybershot DSC-HX100v'
-        expected_value = self.value_func_on_desc.evaluate(self.match_length, self.family_and_model_len) \
-            + self.value_func_on_details.evaluate(self.match_length, self.family_and_model_len)
+        expected_value = self.value_func_on_desc.evaluate(self.match_length, self.family_and_model_len, is_after_sep = False) \
+            + self.value_func_on_details.evaluate(self.match_length, self.family_and_model_len, is_after_sep = False)
         self.run_rule(product_desc, extra_prod_details, expected_value, expected_to_match = True, must_match_on_desc = True)
     
     def testRegexAMatchingRuleOnMissingExtraProdDetails(self):
         product_desc = 'Cybershot DSC-HX100v'
         extra_prod_details = None
-        expected_value = self.value_func_on_desc.evaluate(self.match_length, self.family_and_model_len)
+        expected_value = self.value_func_on_desc.evaluate(self.match_length, self.family_and_model_len, is_after_sep = False)
         self.run_rule(product_desc, extra_prod_details, expected_value, expected_to_match = True, must_match_on_desc = True)
 
 class MasterTemplateTestCase(unittest.TestCase):
