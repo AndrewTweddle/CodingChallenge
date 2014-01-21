@@ -1790,3 +1790,146 @@ best_matches[best_match_columns].sort_index(by=best_match_sort_by).to_csv('../da
 # best_matches[best_matches.index_l == index_l_filter][best_matches_min_columns]
 #
 
+
+# ------------------------------------------------------------------------------------
+# Discoveries from manually inspecting the matches:
+# 
+# 10.6.1. Why was ELPH 500 HS matched instead of Canon IXY 31S:
+# 
+# index_l	index_p	manufacturer	family	model	productDesc
+# 5102	117	Canon	ELPH	500 HS	Canon IXY Digital camera IXY 31S Brown | ELPH 500 HS, IXUS 310 (Japan Import)
+# 5084	117	Canon	ELPH	500 HS	Canon IXY Digital camera IXY 31S Gold | ELPH 500 HS, IXUS 310 (Japan Import)
+# 5086	117	Canon	ELPH	500 HS	Canon IXY Digital camera IXY 31S Pink | ELPH 500 HS, IXUS 310 (Japan Import)
+# 5089	117	Canon	ELPH	500 HS	Canon IXY Digital camera IXY 31S Silver | ELPH 500 HS, IXUS 310 (Japan Import)
+#
+# Answer:
+# 
+# There are no products with IXY in the model.
+# 
+# The only products with '31' in the model are found as follows, and there is no 31S:
+# 
+# products[products.model.str.contains('31')][['family','model']]
+# 
+#          family     model
+# 0    Cyber-shot  DSC-W310
+# 13         IXUS    310 HS
+# 247         NaN     TG310
+# 267     Coolpix     S3100
+# 353   PowerShot  A3100 IS
+# 393         NaN    DCS315
+# 425  Photosmart      C315
+# 529         NaN     D3100
+# 539   EasyShare      M531
+# 
+# 
+# Corrective action: None required.
+# 
+# --------------------------------------------------------------------------------------
+# 10.6.2. Canon EOS 1-D Mark IV was also matched by the Mark I, II and II
+# 
+# index_l index_p         manufacturer  family	model	productDesc
+# 6396        624	Canon EOS-1D Mark IV	Canon EOS 1D Mark II - Appareil photo numérique - Reflex - 8.2 Mpix - boîtier nu - mémoire prise en charge : CF, SD, Microdrive - noir
+# 6397	624	Canon EOS-1D Mark IV	Canon EOS 1D Mark II - Appareil photo numérique - Reflex - 8.2 Mpix - boîtier nu - mémoire prise en charge : CF, SD, Microdrive - noir
+# 4145	624	Canon		EOS-1D Mark IV	Canon EOS 1D Mark II N 8.2MP Digital SLR Camera (Body Only)
+# 4594	624	Canon		EOS-1D Mark IV	Canon EOS 1D Mark III - Digital camera - SLR - 10.0 Mpix - body only - supported memory: CF, MMC, SD, Microdrive, SDHC
+# 4595	624	Canon		EOS-1D Mark IV	Canon EOS 1D Mark III - Digital camera - SLR - 10.0 Mpix - body only - supported memory: CF, MMC, SD, Microdrive, SDHC
+# 4177	624	Canon		EOS-1D Mark IV	Canon EOS 1D Mark III 10.1MP Digital SLR Camera (Body Only)
+# 4178	624	Canon		EOS-1D Mark IV	Canon EOS 1D Mark III 10.1MP Digital SLR Camera (Body Only)
+# 5313	624	Canon		EOS-1D Mark IV	Canon EOS 1D Mark III Digital SLR Camera (Body Only)
+# 5314	624	Canon		EOS-1D Mark IV	Canon EOS 1D Mark III Digital SLR Camera (Body Only)
+# 5315	624	Canon		EOS-1D Mark IV	Canon EOS 1D Mark III Digital SLR Camera (Body Only)
+# 4168	624	Canon		EOS-1D Mark IV	Canon EOS-1D 4.15MP Digital SLR Camera (Body Only)
+# 4175	624	Canon		EOS-1D Mark IV	Canon EOS-1D Mark II 8.2MP Digital SLR Camera (Body Only)
+# 4176	624	Canon		EOS-1D Mark IV	Canon EOS-1D Mark II 8.2MP Digital SLR Camera (Body Only)
+# 
+# 
+# Corrective action: 
+# a. Calculate Megapixel rating of product using match values 
+#    (e.g. using Bayesian average of match values with that mega-pixel value)
+# b. Exclude all listings where the listing's mega-pixels don't match the product's.
+# c. Re-calculate best product for each listing based on this filter.
+# 
+#
+# --------------------------------------------------------------------------------------
+# 10.6.3. Kiss X4 matched x4 optical zoom of the Powershot E1
+# 
+# index_l index_p manufacturer  family    model  productDesc
+# 6259    627	         Canon          Kiss X4  Canon - PowerShot E1 - Appareil photo compact numérique - Capteur 10 MP - Zoom optique x4 - Stabilisateur - Rose
+# 
+# Corrective action:
+# a. Don't allow a product code with a pattern of xn, x-n where n is numeric.
+#    This will eliminate this match. All other listings used the full model: "Kiss X4"
+# b. Do this by creating a special code for x, instead of using 'a' = alpha, when on its own.
+# 
+#
+# --------------------------------------------------------------------------------------
+# 10.6.4. The TRYX EX-TR100 matches on TRYX not EX-TR100.
+# 
+# index_l index_p manufacturer  family    model  productDesc
+# 12578	705	Casio	Exilim	TRYX	Casio Exilim TRYX EX-TR100 Digitalkamera (12 Megapixel, dreh-, schwenk und kippbares 7,6 cm (3 Zoll) Display) schwarz
+# 12579	705	Casio	Exilim	TRYX	Casio Exilim TRYX EX-TR100 Digitalkamera (12 Megapixel, dreh-, schwenk und kippbares 7,6 cm (3 Zoll) Display) schwarz
+# 12593	705	Casio	Exilim	TRYX	Casio Exilim TRYX EX-TR100 Digitalkamera (12 Megapixel, dreh-, schwenk und kippbares 7,6 cm (3 Zoll) Display) weiß
+# 
+# Answer:  There is no EX-TR100 model. So this is correct.
+# 
+# Corrective action:
+# a. No need to do anything.
+# b. Nice to have: when family+model = 'n+n' or '+n', make the value of the match on "family and model" much lower.
+#    Although it doesn't appear to have been an issue with this data set, it might have been a problem with a different data set.
+# 
+#
+# --------------------------------------------------------------------------------------
+# 10.6.5. The "Leica Digilux" product matches a variety of different models (different MP ratings)
+# 
+# index_l index_p manufacturer  family    model  productDesc
+# 16021	7	Leica		Digilux	Leica 'Digilux 2' 5MP Digital Camera
+# 16022	7	Leica		Digilux	Leica 'Digilux 2' 5MP Digital Camera
+# 15984	7	Leica		Digilux	Leica DIGILUX 3 7.5MP Digital SLR Camera
+# 15985	7	Leica		Digilux	Leica DIGILUX 3 7.5MP Digital SLR Camera
+# 16026	7	Leica		Digilux	Leica Digilux 1 3.9MP Digital Camera
+# 
+# Corrective action:
+# a. Ensure that the code to choose the highest weighted MP rating, 
+#    requires a sufficient gap between first and second highest weightings.
+#    If a variety of MP ratings are similarly likely, set the MP rating to an invalid number (e.g. -1).
+#    This should serve to eliminate all these matches.
+# 
+# 
+# --------------------------------------------------------------------------------------
+# 10.6.6. The "Olympus E-100 RS" was matched instead of an "E 30" 
+#         because the listing's description contained "Vis�e 100%"
+# 
+# index_l index_p manufacturer  family    model  productDesc
+# 8270	400	Olympus		E-100 RS	Olympus - E 30 - Appareil Photo Numérique Reflex (Boîtier nu) - AF 11points Visée 100% - Écran LCD 2,5" - Stabilisateur mécanique
+# 
+# Answer: 
+# i.  The '�' was presumably not seen as an alpha character, so the regex still matched on the left.
+# ii. The '%' is not one of the characters to the right which would cause the regex to fail.
+# 
+# Corrective action:
+# a. Change regex to ensure that the number in a product code is not followed by a percent symbol.
+# 
+# 
+# --------------------------------------------------------------------------------------
+# 10.6.7. The "� TOUGH-3000" ended up matching the Stylus instead of the mju
+# 
+# index_l index_p manufacturer  family    model  productDesc
+# 8167	187	Olympus	Stylus	Tough-3000	Olympus - µ TOUGH-3000 - Appareil photo numérique - 12 Mpix - Rose
+# 8108	187	Olympus	Stylus	Tough-3000	Olympus - µ TOUGH-3000 - Appareil photo numérique - 12 Mpix - Rouge
+# 8109	187	Olympus	Stylus	Tough-3000	Olympus - µ TOUGH-3000 - Appareil photo numérique - 12 Mpix - Rouge
+# 8123	187	Olympus	Stylus	Tough-3000	Olympus - µ TOUGH-3000 - Appareil photo numérique - 12 Mpix - Vert
+# 8124	187	Olympus	Stylus	Tough-3000	Olympus - µ TOUGH-3000 - Appareil photo numérique - 12 Mpix - Vert
+# 7495	187	Olympus	Stylus	Tough-3000	Olympus ? TOUGH-3000 Digital Compact Camera - Hot Pink (12MP, 3.6x wide Optical Zoom) 2.7 inch LCD
+# 
+# Corrective action:
+# a. None. This was a known issue which we decided to live with previously.
+# 
+# 
+# --------------------------------------------------------------------------------------
+# 10.6.8. Is the Ricoh GR A12 the same as the GXR (A12)?
+# 
+# index_l index_p manufacturer  family    model  productDesc
+# 16304	204	Ricoh		GXR (A12)	Ricoh - Objectif GR LENS A12 28 mm F2.5
+# 16305	204	Ricoh		GXR (A12)	Ricoh - Objectif GR LENS A12 28 mm F2.5
+# 16224	204	Ricoh		GXR (A12)	Ricoh A12 GR - Digital camera lens unit - prosumer - 12.3 Mpix
+# 
