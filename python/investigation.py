@@ -1766,3 +1766,27 @@ matched_products_and_listings['index_l'].value_counts().sort_index().to_csv('../
 # 
 # So no change in the number of matches.
 # 
+
+
+# -----------------------------------------------------------------------------
+# 10.6 Find product with highest match value for each listing:
+# 
+
+def get_highest_value_product_for_listing(listing_grp):
+    by_val = listing_grp.sort_index(by='match_result_value', ascending=False)
+    return by_val.iloc[0]
+
+matches_grouped_by_listing = matched_products_and_listings.groupby('index_l')
+best_matches = matches_grouped_by_listing.apply(get_highest_value_product_for_listing)
+
+best_match_columns = ['index_p', 'manufacturer', 'family', 'model', 'productDesc', 'extraProdDetails', 'match_result_value', 'match_result_description']
+best_match_sort_by = ['manufacturer', 'family', 'model', 'productDesc', 'extraProdDetails']
+best_matches[best_match_columns].sort_index(by=best_match_sort_by).to_csv('../data/intermediate/best_matches_by_match_result_value.csv', encoding='utf-8')
+
+# Script to investigate particular listings:
+# 
+# index_l_filter = 6414
+# best_matches_min_columns = ['manufacturer', 'family','model','productDesc','match_result_value']
+# best_matches[best_matches.index_l == index_l_filter][best_matches_min_columns]
+#
+
