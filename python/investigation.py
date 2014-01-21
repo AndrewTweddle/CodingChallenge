@@ -1871,6 +1871,11 @@ best_matches[best_match_columns].sort_index(by=best_match_sort_by).to_csv('../da
 # 12593	705	Casio	Exilim	TRYX	Casio Exilim TRYX EX-TR100 Digitalkamera (12 Megapixel, dreh-, schwenk und kippbares 7,6 cm (3 Zoll) Display) weiß
 # 
 # Answer:  There is no EX-TR100 model. So this is correct.
+#
+# products[products.model.str.contains('TR-100')][['manufacturer','family','model']]
+# products[products.model.str.contains('TR100')][['manufacturer','family','model']]
+# products[products.model.str.contains('TR 100')][['manufacturer','family','model']]
+# 
 # 
 # Corrective action:
 # a. No need to do anything.
