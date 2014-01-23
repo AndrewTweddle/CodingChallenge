@@ -1796,11 +1796,11 @@ best_matches[best_match_columns].sort_index(by=best_match_sort_by).to_csv('../da
 # 
 # 10.6.1. Why was ELPH 500 HS matched instead of Canon IXY 31S:
 # 
-# index_l	index_p	manufacturer	family	model	productDesc
-# 5102	117	Canon	ELPH	500 HS	Canon IXY Digital camera IXY 31S Brown | ELPH 500 HS, IXUS 310 (Japan Import)
-# 5084	117	Canon	ELPH	500 HS	Canon IXY Digital camera IXY 31S Gold | ELPH 500 HS, IXUS 310 (Japan Import)
-# 5086	117	Canon	ELPH	500 HS	Canon IXY Digital camera IXY 31S Pink | ELPH 500 HS, IXUS 310 (Japan Import)
-# 5089	117	Canon	ELPH	500 HS	Canon IXY Digital camera IXY 31S Silver | ELPH 500 HS, IXUS 310 (Japan Import)
+# index_l  index_p  manufacturer  family   model  productDesc
+# 5102         117         Canon    ELPH  500 HS  Canon IXY Digital camera IXY 31S Brown | ELPH 500 HS, IXUS 310 (Japan Import)
+# 5084         117         Canon    ELPH  500 HS  Canon IXY Digital camera IXY 31S Gold | ELPH 500 HS, IXUS 310 (Japan Import)
+# 5086         117         Canon    ELPH  500 HS  Canon IXY Digital camera IXY 31S Pink | ELPH 500 HS, IXUS 310 (Japan Import)
+# 5089         117         Canon    ELPH  500 HS  Canon IXY Digital camera IXY 31S Silver | ELPH 500 HS, IXUS 310 (Japan Import)
 #
 # Answer:
 # 
@@ -1827,20 +1827,20 @@ best_matches[best_match_columns].sort_index(by=best_match_sort_by).to_csv('../da
 # --------------------------------------------------------------------------------------
 # 10.6.2. Canon EOS 1-D Mark IV was also matched by the Mark I, II and II
 # 
-# index_l index_p         manufacturer  family	model	productDesc
-# 6396        624	Canon EOS-1D Mark IV	Canon EOS 1D Mark II - Appareil photo numérique - Reflex - 8.2 Mpix - boîtier nu - mémoire prise en charge : CF, SD, Microdrive - noir
-# 6397	624	Canon EOS-1D Mark IV	Canon EOS 1D Mark II - Appareil photo numérique - Reflex - 8.2 Mpix - boîtier nu - mémoire prise en charge : CF, SD, Microdrive - noir
-# 4145	624	Canon		EOS-1D Mark IV	Canon EOS 1D Mark II N 8.2MP Digital SLR Camera (Body Only)
-# 4594	624	Canon		EOS-1D Mark IV	Canon EOS 1D Mark III - Digital camera - SLR - 10.0 Mpix - body only - supported memory: CF, MMC, SD, Microdrive, SDHC
-# 4595	624	Canon		EOS-1D Mark IV	Canon EOS 1D Mark III - Digital camera - SLR - 10.0 Mpix - body only - supported memory: CF, MMC, SD, Microdrive, SDHC
-# 4177	624	Canon		EOS-1D Mark IV	Canon EOS 1D Mark III 10.1MP Digital SLR Camera (Body Only)
-# 4178	624	Canon		EOS-1D Mark IV	Canon EOS 1D Mark III 10.1MP Digital SLR Camera (Body Only)
-# 5313	624	Canon		EOS-1D Mark IV	Canon EOS 1D Mark III Digital SLR Camera (Body Only)
-# 5314	624	Canon		EOS-1D Mark IV	Canon EOS 1D Mark III Digital SLR Camera (Body Only)
-# 5315	624	Canon		EOS-1D Mark IV	Canon EOS 1D Mark III Digital SLR Camera (Body Only)
-# 4168	624	Canon		EOS-1D Mark IV	Canon EOS-1D 4.15MP Digital SLR Camera (Body Only)
-# 4175	624	Canon		EOS-1D Mark IV	Canon EOS-1D Mark II 8.2MP Digital SLR Camera (Body Only)
-# 4176	624	Canon		EOS-1D Mark IV	Canon EOS-1D Mark II 8.2MP Digital SLR Camera (Body Only)
+# index_l index_p  manufacturer  family           model  productDesc
+# 6396        624         Canon          EOS-1D Mark IV  Canon EOS 1D Mark II - Appareil photo numérique - Reflex - 8.2 Mpix - boîtier nu - mémoire prise en charge : CF, SD, Microdrive - noir
+# 6397        624         Canon          EOS-1D Mark IV  Canon EOS 1D Mark II - Appareil photo numérique - Reflex - 8.2 Mpix - boîtier nu - mémoire prise en charge : CF, SD, Microdrive - noir
+# 4145        624         Canon          EOS-1D Mark IV  Canon EOS 1D Mark II N 8.2MP Digital SLR Camera (Body Only)
+# 4594        624         Canon          EOS-1D Mark IV  Canon EOS 1D Mark III - Digital camera - SLR - 10.0 Mpix - body only - supported memory: CF, MMC, SD, Microdrive, SDHC
+# 4595        624         Canon          EOS-1D Mark IV  Canon EOS 1D Mark III - Digital camera - SLR - 10.0 Mpix - body only - supported memory: CF, MMC, SD, Microdrive, SDHC
+# 4177        624         Canon          EOS-1D Mark IV  Canon EOS 1D Mark III 10.1MP Digital SLR Camera (Body Only)
+# 4178        624         Canon          EOS-1D Mark IV  Canon EOS 1D Mark III 10.1MP Digital SLR Camera (Body Only)
+# 5313        624         Canon          EOS-1D Mark IV  Canon EOS 1D Mark III Digital SLR Camera (Body Only)
+# 5314        624         Canon          EOS-1D Mark IV  Canon EOS 1D Mark III Digital SLR Camera (Body Only)
+# 5315        624         Canon          EOS-1D Mark IV  Canon EOS 1D Mark III Digital SLR Camera (Body Only)
+# 4168        624         Canon          EOS-1D Mark IV  Canon EOS-1D 4.15MP Digital SLR Camera (Body Only)
+# 4175        624         Canon          EOS-1D Mark IV  Canon EOS-1D Mark II 8.2MP Digital SLR Camera (Body Only)
+# 4176        624         Canon          EOS-1D Mark IV  Canon EOS-1D Mark II 8.2MP Digital SLR Camera (Body Only)
 # 
 # 
 # Corrective action: 
@@ -1865,10 +1865,10 @@ best_matches[best_match_columns].sort_index(by=best_match_sort_by).to_csv('../da
 # --------------------------------------------------------------------------------------
 # 10.6.4. The TRYX EX-TR100 matches on TRYX not EX-TR100.
 # 
-# index_l index_p manufacturer  family    model  productDesc
-# 12578	705	Casio	Exilim	TRYX	Casio Exilim TRYX EX-TR100 Digitalkamera (12 Megapixel, dreh-, schwenk und kippbares 7,6 cm (3 Zoll) Display) schwarz
-# 12579	705	Casio	Exilim	TRYX	Casio Exilim TRYX EX-TR100 Digitalkamera (12 Megapixel, dreh-, schwenk und kippbares 7,6 cm (3 Zoll) Display) schwarz
-# 12593	705	Casio	Exilim	TRYX	Casio Exilim TRYX EX-TR100 Digitalkamera (12 Megapixel, dreh-, schwenk und kippbares 7,6 cm (3 Zoll) Display) weiß
+# index_l index_p manufacturer  family  model  productDesc
+# 12578       705        Casio  Exilim   TRYX  Casio Exilim TRYX EX-TR100 Digitalkamera (12 Megapixel, dreh-, schwenk und kippbares 7,6 cm (3 Zoll) Display) schwarz
+# 12579       705        Casio  Exilim   TRYX  Casio Exilim TRYX EX-TR100 Digitalkamera (12 Megapixel, dreh-, schwenk und kippbares 7,6 cm (3 Zoll) Display) schwarz
+# 12593       705        Casio  Exilim   TRYX  Casio Exilim TRYX EX-TR100 Digitalkamera (12 Megapixel, dreh-, schwenk und kippbares 7,6 cm (3 Zoll) Display) weiß
 # 
 # Answer:  There is no EX-TR100 model. So this is correct.
 #
@@ -1886,12 +1886,12 @@ best_matches[best_match_columns].sort_index(by=best_match_sort_by).to_csv('../da
 # --------------------------------------------------------------------------------------
 # 10.6.5. The "Leica Digilux" product matches a variety of different models (different MP ratings)
 # 
-# index_l index_p manufacturer  family    model  productDesc
-# 16021	7	Leica		Digilux	Leica 'Digilux 2' 5MP Digital Camera
-# 16022	7	Leica		Digilux	Leica 'Digilux 2' 5MP Digital Camera
-# 15984	7	Leica		Digilux	Leica DIGILUX 3 7.5MP Digital SLR Camera
-# 15985	7	Leica		Digilux	Leica DIGILUX 3 7.5MP Digital SLR Camera
-# 16026	7	Leica		Digilux	Leica Digilux 1 3.9MP Digital Camera
+# index_l index_p manufacturer   family    model  productDesc
+# 16021         7        Leica           Digilux  Leica 'Digilux 2' 5MP Digital Camera
+# 16022         7        Leica           Digilux  Leica 'Digilux 2' 5MP Digital Camera
+# 15984         7        Leica           Digilux  Leica DIGILUX 3 7.5MP Digital SLR Camera
+# 15985         7        Leica           Digilux  Leica DIGILUX 3 7.5MP Digital SLR Camera
+# 16026         7        Leica           Digilux  Leica Digilux 1 3.9MP Digital Camera
 # 
 # Corrective action:
 # a. Ensure that the code to choose the highest weighted MP rating, 
@@ -1904,8 +1904,8 @@ best_matches[best_match_columns].sort_index(by=best_match_sort_by).to_csv('../da
 # 10.6.6. The "Olympus E-100 RS" was matched instead of an "E 30" 
 #         because the listing's description contained "Vis�e 100%"
 # 
-# index_l index_p manufacturer  family    model  productDesc
-# 8270	400	Olympus		E-100 RS	Olympus - E 30 - Appareil Photo Numérique Reflex (Boîtier nu) - AF 11points Visée 100% - Écran LCD 2,5" - Stabilisateur mécanique
+# index_l index_p manufacturer  family     model  productDesc
+# 8270    400          Olympus          E-100 RS  Olympus - E 30 - Appareil Photo Numérique Reflex (Boîtier nu) - AF 11points Visée 100% - Écran LCD 2,5" - Stabilisateur mécanique
 # 
 # Answer: 
 # i.  The '�' was presumably not seen as an alpha character, so the regex still matched on the left.
@@ -1918,13 +1918,13 @@ best_matches[best_match_columns].sort_index(by=best_match_sort_by).to_csv('../da
 # --------------------------------------------------------------------------------------
 # 10.6.7. The "� TOUGH-3000" ended up matching the Stylus instead of the mju
 # 
-# index_l index_p manufacturer  family    model  productDesc
-# 8167	187	Olympus	Stylus	Tough-3000	Olympus - µ TOUGH-3000 - Appareil photo numérique - 12 Mpix - Rose
-# 8108	187	Olympus	Stylus	Tough-3000	Olympus - µ TOUGH-3000 - Appareil photo numérique - 12 Mpix - Rouge
-# 8109	187	Olympus	Stylus	Tough-3000	Olympus - µ TOUGH-3000 - Appareil photo numérique - 12 Mpix - Rouge
-# 8123	187	Olympus	Stylus	Tough-3000	Olympus - µ TOUGH-3000 - Appareil photo numérique - 12 Mpix - Vert
-# 8124	187	Olympus	Stylus	Tough-3000	Olympus - µ TOUGH-3000 - Appareil photo numérique - 12 Mpix - Vert
-# 7495	187	Olympus	Stylus	Tough-3000	Olympus ? TOUGH-3000 Digital Compact Camera - Hot Pink (12MP, 3.6x wide Optical Zoom) 2.7 inch LCD
+# index_l index_p manufacturer  family       model  productDesc
+# 8167    187          Olympus  Stylus  Tough-3000  Olympus - µ TOUGH-3000 - Appareil photo numérique - 12 Mpix - Rose
+# 8108    187          Olympus  Stylus  Tough-3000  Olympus - µ TOUGH-3000 - Appareil photo numérique - 12 Mpix - Rouge
+# 8109    187          Olympus  Stylus  Tough-3000  Olympus - µ TOUGH-3000 - Appareil photo numérique - 12 Mpix - Rouge
+# 8123    187          Olympus  Stylus  Tough-3000  Olympus - µ TOUGH-3000 - Appareil photo numérique - 12 Mpix - Vert
+# 8124    187          Olympus  Stylus  Tough-3000  Olympus - µ TOUGH-3000 - Appareil photo numérique - 12 Mpix - Vert
+# 7495    187          Olympus  Stylus  Tough-3000  Olympus ? TOUGH-3000 Digital Compact Camera - Hot Pink (12MP, 3.6x wide Optical Zoom) 2.7 inch LCD
 # 
 # Corrective action:
 # a. None. This was a known issue which we decided to live with previously.
@@ -1933,8 +1933,8 @@ best_matches[best_match_columns].sort_index(by=best_match_sort_by).to_csv('../da
 # --------------------------------------------------------------------------------------
 # 10.6.8. Is the Ricoh GR A12 the same as the GXR (A12)?
 # 
-# index_l index_p manufacturer  family    model  productDesc
-# 16304	204	Ricoh		GXR (A12)	Ricoh - Objectif GR LENS A12 28 mm F2.5
-# 16305	204	Ricoh		GXR (A12)	Ricoh - Objectif GR LENS A12 28 mm F2.5
-# 16224	204	Ricoh		GXR (A12)	Ricoh A12 GR - Digital camera lens unit - prosumer - 12.3 Mpix
+# index_l index_p manufacturer  family     model   productDesc
+# 16304   204            Ricoh          GXR (A12)  Ricoh - Objectif GR LENS A12 28 mm F2.5
+# 16305   204            Ricoh          GXR (A12)  Ricoh - Objectif GR LENS A12 28 mm F2.5
+# 16224   204            Ricoh          GXR (A12)  Ricoh A12 GR - Digital camera lens unit - prosumer - 12.3 Mpix
 # 
