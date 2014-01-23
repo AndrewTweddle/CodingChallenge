@@ -1938,3 +1938,11 @@ best_matches[best_match_columns].sort_index(by=best_match_sort_by).to_csv('../da
 # 16305   204            Ricoh          GXR (A12)  Ricoh - Objectif GR LENS A12 28 mm F2.5
 # 16224   204            Ricoh          GXR (A12)  Ricoh A12 GR - Digital camera lens unit - prosumer - 12.3 Mpix
 # 
+# Answer: No. The GR and GXR are different cameras. The A12 is being used as the product code rather than the GXR.
+# 
+# Corrective action:
+# a. Don't allow product codes to be in brackets; and...
+# b. Treat a "+c_" match as being a product code (with a relatively low value).
+#    Rely on the 10x rule to make it a higher match than the A12, which comes after a bracket.
+#    This will only help if there is a Ricoh GR product to match it to.
+#    But then it will create a new correct match, rather than just removing an incorrect match.
