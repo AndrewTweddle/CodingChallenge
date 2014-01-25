@@ -37,7 +37,7 @@ class BaseMasterTemplateBuilder(object):
     prod_code_having_alpha_dash_pattern_then_a_number = 'a-a_n'
     prod_code_having_dash_pattern = '[acn]+\-[-acn]*[acn]'
     prod_code_having_alpha_and_numeric_pattern = '[ac]+n[acn]*|n+[ac][acn]*'
-    alt_prod_code_pattern = '(?P<prefix>[acn][-acn]*\-)(?:[acn]*[acn])\!(?P<suffix>[acn]*[acn])'
+    alt_prod_code_pattern = '(?P<prefix>[acn][-acn]*\-)(?:[acn]*[acn])\!(?P<suffix>[acnx]*[acn])'
         
     def __init__(self, classific):
         self.classification = classific

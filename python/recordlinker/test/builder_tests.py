@@ -271,7 +271,7 @@ class ProdCode_MasterTemplateBuilderTestCase(unittest.TestCase):
         self.assertEqual(match_result.match_value, expected_match_value)
     
     def testAlternateProdCodeMatchHavingADash(self):
-        classification = '+a-an!an'
+        classification = '+a-an!xn'
         blocks = ['+','DSC','-','V','100',' / ','X','100']
         family_and_model_len = len( 'DSC-V100 / X100' )
         product_desc = 'DSC-X100'
