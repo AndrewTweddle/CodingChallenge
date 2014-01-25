@@ -455,6 +455,7 @@ def split_into_blocks_by_alpha_num(stringToSplit):
 
 # Use a list of tuples (instead of a dictionary) to control order of checking (dictionaries are unordered):
 blockClassifications = [
+        ('x', r'^x$'), # An 'x' on its own. This is to avoid treating something like an "x4" zoom specification as a product code
         ('c', r'^[B-DF-HJ-NP-TV-XZb-df-hj-np-tv-xz]+$'),
         ('a', r'^[A-Za-z]+$'),
         ('n', r'^\d+$'),
@@ -464,8 +465,8 @@ blockClassifications = [
         ('(', r'^\s*\(\s*$'),  # To cater for "GXR (A12)"
         (')', r'^\s*\)\s*$'),  # To cater for "GXR (A12)"
         ('!', r'^\s*\/\s*$'),  # To cater for "DSC-V100 / X100"
-        ('.', r'^\.$'),  # To cater for "4.3"
-        ('x', r'^.+$')
+        ('.', r'^\.$'),        # To cater for "4.3"
+        ('#', r'^.+$')         # An unknown character
     ]
     # A potential issue here is that the regex patterns assume ANSI characters.
     # However it seems that all the products listed are English, so this shouldn't matter.
@@ -489,9 +490,10 @@ def test_classification(blockToClassify, expected):
         print '"{0}" classified as "{1}". But "{2}" expected!'.format(blockToClassify, classification, expected)
 
 #Expect following to fail (test that test_classification works properly):
-test_classification('abcd', 'test_failure to test the test method')
+# test_classification('abcd', 'test_failure to test the test method')
 
 # Expect these to succeed:
+test_classification('x', 'x')
 test_classification('abcd', 'a')
 test_classification('1234', 'n')
 test_classification('bcd', 'c')
@@ -500,8 +502,8 @@ test_classification('D', 'c')
 test_classification(' \t ', '_')
 test_classification('-', '-')
 test_classification('   -  ', '~')
-test_classification(':', 'x')
-test_classification(':-)', 'x')
+test_classification(':', '#')
+test_classification(':-)', '#')
 test_classification('', '$')
 test_classification('.', '.')
 test_classification('/', '!')
@@ -518,6 +520,13 @@ test_classification('  )  ', ')')
 def derive_classifications(blocksToClassify):
     block_classifications = [derive_classification(block) for block in blocksToClassify]
     classification = ''.join(block_classifications)
+    
+    # Convert an 'x' back to a consonant block 'c' if it is:
+    #   a. not succeeded by an 'n', or
+    #   b. preceded by a dash
+    classification = re.sub(r'x(?!n)', 'c', classification)
+    classification = re.sub(r'(?<=\-)x', 'c', classification)
+    
     # There is no need to differentiate consonant blocks from other alphabetic blocks 
     # if a dash or number precedes or succeeds the consonant block 
     # (since that already indicates a product code pattern)...
@@ -531,17 +540,22 @@ def test_derive_classifications(blocksToClassify, expected):
         print '"{0}" classified as "{1}". But "{2}" expected!'.format(','.join(blocksToClassify), classification, expected)
 
 # test that test_derive_classifications works by giving an incorrect expectation:
-test_derive_classifications(['abc','12','-','abc',':','12', '  ','MP'], 'test_failure to test the test method')
+# test_derive_classifications(['abc','12','-','abc',':','12', '  ','MP'], 'test_failure to test the test method')
 
 # Expect these to succeed:
-test_derive_classifications(['abc', '12','-','bc',':','12', '  ','MP'], 'an-axn_c')
-test_derive_classifications(['abc', ' ', 'bc','-','12',':','12', '  ','MP'], 'a_a-nxn_c')
-test_derive_classifications(['  :  ','  -  ','12','.','1','MP', '','IS'], 'x~n.na$a')
+test_derive_classifications(['abc', '12','-','bc',':','12', '  ','MP'], 'an-a#n_c')
+test_derive_classifications(['abc', ' ', 'bc','-','12',':','12', '  ','MP'], 'a_a-n#n_c')
+test_derive_classifications(['  :  ','  -  ','12','.','1','MP', '','IS'], '#~n.na$a')
 test_derive_classifications([],'')
 test_derive_classifications(['jklmn'],'c')
 test_derive_classifications(['jklmn',' '],'c_')
 test_derive_classifications(['jklmn','15'],'an')
 test_derive_classifications(['15', 'jklmn'],'na')
+test_derive_classifications(['x','400'], 'xn')
+test_derive_classifications(['x',' '], 'c_')
+test_derive_classifications(['x'], 'c')
+test_derive_classifications(['-','x','100'], '-an')
+test_derive_classifications(['ax','400'], 'an')
 
 # ----------------------------------------------------------------------
 # 5.4 Convert a string into a list of tuples, where each tuple contains:
@@ -682,6 +696,48 @@ group_and_save_classification_patterns('model', 'model_classification', ['manufa
 # Note: 32 classification patterns after the refactoring, compared to 23 before. So not untractable.
 #
 
+# ----------------------------------------------------------------------
+# Classification patterns found in 'model' column after a refactoring
+# to treat a solitary 'x' as its own pattern, but only if succeeded by a number
+# 
+# This is to ensure that an "x4" is not erroneously treated as a product code, 
+# since it could also be a zoom specification.
+#
+# Pattern: a               count: 4      example: Digilux
+# Pattern: a-a             count: 2      example: K-r
+# Pattern: a-a_n           count: 2      example: V-LUX 20
+# Pattern: a-an            count: 167    example: DSC-W310
+# Pattern: a-an!xn         count: 1      example: DSC-V100 / X100
+# Pattern: a-ana           count: 10     example: DSC-HX100v
+# Pattern: a-n             count: 56     example: NEX-3
+# Pattern: a-n_a           count: 17     example: C-2000 Zoom
+# Pattern: a-n_c           count: 3      example: C-2500 L
+# Pattern: a-na            count: 21     example: QV-5000SX
+# Pattern: a-na_a_a        count: 1      example: EOS-1D Mark IV
+# Pattern: a_a-an          count: 4      example: PEN E-P2
+# Pattern: a_a-ana         count: 1      example: PEN E-PL1s
+# Pattern: a_a_n           count: 7      example: mju Tough 8010
+# Pattern: a_a_xn          count: 1      example: Kiss Digital X3
+# Pattern: a_an            count: 2      example: Mini M200
+# Pattern: a_n             count: 12     example: mju 9010
+# Pattern: a_n_a           count: 2      example: EX 1500 Zoom
+# Pattern: a_na            count: 1      example: mju 550WP
+# Pattern: a_xn            count: 1      example: Kiss X4
+# Pattern: an              count: 273    example: TL240
+# Pattern: an_a            count: 31     example: SD980 IS
+# Pattern: an_a#           count: 1      example: CL30 Clik!
+# Pattern: an_c            count: 2      example: SX220 HS
+# Pattern: ana             count: 37     example: Z900EXR
+# Pattern: c(an)           count: 1      example: GXR (A12)
+# Pattern: c_a             count: 1      example: N Digital
+# Pattern: c_a_a           count: 1      example: GR Digital III
+# Pattern: n               count: 36     example: 1500
+# Pattern: n.n             count: 1      example: 4.3
+# Pattern: n_a             count: 16     example: 130 IS
+# Pattern: n_c             count: 8      example: 310 HS
+# Pattern: na              count: 15     example: 900S
+# Pattern: xn              count: 4      example: X70
+# Pattern: xn_c            count: 1      example: X560 WP
 
 
 # ==============================================================================
@@ -857,7 +913,64 @@ group_and_save_classification_patterns('family_and_model', 'composite_classifica
 # Note: Now we're at 49 classification patterns (up from 32).
 # 
 
-
+# ----------------------------------------------------------------------
+# All composite classifications after a refactoring to treat an 'x'
+# followed by a digit (but not preceded by a dash) as 'xn' not 'an':
+# 
+# Pattern: +a              count: 2      example:  + Digilux
+# Pattern: +a-a            count: 2      example:  + K-r
+# Pattern: +a-a_n          count: 2      example:  + V-LUX 20
+# Pattern: +a-an           count: 11     example:  + PDR-M60
+# Pattern: +a-an!xn        count: 1      example:  + DSC-V100 / X100
+# Pattern: +a-ana          count: 2      example:  + R-D1x
+# Pattern: +a-n            count: 41     example:  + FE-5010
+# Pattern: +a-n_a          count: 17     example:  + C-2000 Zoom
+# Pattern: +a-n_c          count: 2      example:  + C-2500 L
+# Pattern: +a-na           count: 21     example:  + QV-5000SX
+# Pattern: +a-na_a_a       count: 1      example:  + EOS-1D Mark IV
+# Pattern: +a_a-an         count: 4      example:  + PEN E-P2
+# Pattern: +a_a-ana        count: 1      example:  + PEN E-PL1s
+# Pattern: +a_a_n          count: 7      example:  + mju Tough 8010
+# Pattern: +a_n            count: 7      example:  + mju 9010
+# Pattern: +a_na           count: 1      example:  + mju 550WP
+# Pattern: +a_xn           count: 1      example:  + Kiss X4
+# Pattern: +an             count: 109    example:  + TL240
+# Pattern: +an_a           count: 2      example:  + DC200 plus
+# Pattern: +ana            count: 17     example:  + HZ15W
+# Pattern: +c(an)          count: 1      example:  + GXR (A12)
+# Pattern: +c_a            count: 1      example:  + N Digital
+# Pattern: +c_a_a          count: 1      example:  + GR Digital III
+# Pattern: +xn             count: 3      example:  + X70
+# Pattern: +xn_c           count: 1      example:  + X560 WP
+# Pattern: a+a             count: 2      example: Digilux + Zoom
+# Pattern: a+a-an          count: 119    example: Exilim + EX-Z29
+# Pattern: a+a-ana         count: 3      example: Cybershot + DSC-HX100v
+# Pattern: a+a-n           count: 15     example: Alpha + NEX-3
+# Pattern: a+a-n_c         count: 1      example: Optio + WG-1 GPS
+# Pattern: a+a_a_xn        count: 1      example: EOS + Kiss Digital X3
+# Pattern: a+a_an          count: 2      example: EasyShare + Mini M200
+# Pattern: a+a_n           count: 5      example: Stylus + Tough 6000
+# Pattern: a+a_n_a         count: 2      example: DiMAGE + EX 1500 Zoom
+# Pattern: a+an            count: 158    example: Coolpix + S6100
+# Pattern: a+an_a          count: 29     example: PowerShot + SD980 IS
+# Pattern: a+an_a#         count: 1      example: ePhoto + CL30 Clik!
+# Pattern: a+an_c          count: 2      example: PowerShot + SX220 HS
+# Pattern: a+ana           count: 20     example: Finepix + Z900EXR
+# Pattern: a+n             count: 35     example: FinePix + 1500
+# Pattern: a+n.n           count: 1      example: Digilux + 4.3
+# Pattern: a+n_a           count: 8      example: FinePix + 4700 Zoom
+# Pattern: a+n_c           count: 7      example: IXUS + 310 HS
+# Pattern: a+na            count: 15     example: Coolpix + 900S
+# Pattern: a+xn            count: 1      example: FinePix + X100
+# Pattern: a-a+a-an        count: 37     example: Cyber-shot + DSC-W310
+# Pattern: a-a+a-ana       count: 5      example: Cyber-shot + DSC-HX7v
+# Pattern: a-a+n           count: 1      example: D-LUX + 5
+# Pattern: a_+an           count: 6      example: Cybershot  + W580
+# Pattern: a_a+n_a         count: 8      example: Digital IXUS + 130 IS
+# Pattern: a_a+n_c         count: 1      example: Digital IXUS + 1000 HS
+# 
+# Increased to 51 classification patterns.
+# 
 
 # ==============================================================================
 # 7. Design matching rules based on the classification patterns:
@@ -1498,13 +1611,13 @@ products_and_listings['match_result_description'] = products_and_listings['match
 products_and_listings.match_result_description.value_counts()
 
 # Results:
-#                                                  1159435
-# Family and model approximately                      7765
-# Prod code with dash approximately                    472
+#                                                  1158086
+# Family and model approximately                      7757
+# Prod code with dash approximately                    473
 # Family and model separately and approximately        343
-# Prod code without a dash approximately               221
+# Prod code without a dash approximately               219
 # Model and words in family approximately               46
-
+#
 # Check if the matches makes sense by inspection...
 # 
 # mr_description = 'Model and words in family approximately'
@@ -1952,6 +2065,11 @@ best_matches[best_match_columns].sort_index(by=best_match_sort_by).to_csv('../da
 # Results of fixing the above errors:
 # 
 # 10.6.1 No corrective action required.
+# 10.6.3 Success! 
+#        The Kiss X4 is no longer a match for the "Canon - PowerShot E1 - Appareil photo compact numérique - Capteur 10 MP - Zoom optique x4..."
+#        HOWEVER, the price paid is that a correct match is now lost:
+#           The Fujifilm FinePix X100 no longer matches listing "Fujifilm X100 12.3 MP APS-C CMOS EXR Digital Camera,23mm Fujinon Lens and 2.8-Inch LCD"
+#        Since incorrect matches are more heavily weighted than correct matches, this is an acceptable trade-off.
 # 10.6.4 No corrective action required.
 # 10.6.6 Checked that the E-100 is no longer matching a listing containing "Visée 100%".
 # 10.6.7 No corrective action will be taken.
