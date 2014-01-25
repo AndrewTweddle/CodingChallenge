@@ -1946,3 +1946,10 @@ best_matches[best_match_columns].sort_index(by=best_match_sort_by).to_csv('../da
 #    Rely on the 10x rule to make it a higher match than the A12, which comes after a bracket.
 #    This will only help if there is a Ricoh GR product to match it to.
 #    But then it will create a new correct match, rather than just removing an incorrect match.
+
+
+# ------------------------------------------------------------------------------------
+# Results of fixing the above errors:
+# 
+# 10.6.6 Checked that the E-100 is no longer matching a listing containing "Visée 100%"
+# 

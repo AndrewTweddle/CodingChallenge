@@ -375,7 +375,21 @@ class MultipleCodesInProductDescTestCase(unittest.TestCase):
         match_value_2 = match_result_2.match_value
         
         self.assert_(match_value_1 > match_value_2, 'The Canon 550D should be the higher value match as it precedes the opening round bracket')
-
+    
+    def testProdCodeMatchIfFollowedByAPercentSymbol(self):
+        product_desc = 'Olympus - E 30 - Appareil Photo Numérique Reflex (Boîtier nu) - AF 11points Visée 100% - Écran LCD 2,5'
+        extra_prod_details = ''
+        
+        classification = '+a-n_c'
+        blocks = ['+','E','-','100',' ','RS']
+        family_and_model_len = len('E-100 RS')
+        builder = MasterTemplateBuilder(classification)
+        
+        master_tpl = builder.build()
+        engine = master_tpl.generate(blocks, family_and_model_len)
+        match_result = engine.try_match_listing(product_desc, extra_prod_details)
+        self.assert_(not match_result.is_match, u'There should be no match to the E-100 RS for a Visée 100%')
+        
         
 # Run unit tests from the command line:        
 if __name__ == '__main__':

@@ -218,7 +218,8 @@ class MasterTemplateTestCase(unittest.TestCase):
         self.optional_value_func_on_details = MatchValueFunction(100, 1)
         self.prod_code_mandatory_tpl = RegexRuleTemplate([self.slice_prod_code],
             self.mandatory_value_func_on_desc, self.mandatory_value_func_on_details, must_match_on_desc = True)
-        self.expected_prod_code_regex_pattern = "(?<!\\w)D\\s*(?:\\-\\s*)?S\\s*(?:\\-\\s*)?C\\s*(?:\\-\\s*)?W\\s*(?:\\-\\s*)?3\\s*(?:\\-\\s*)?1\\s*(?:\\-\\s*)?0(?!\\w|\\.\\d|\\,\\d)"
+        self.expected_prod_code_regex_pattern = "(?<!\\w)D\\s*(?:\\-\\s*)?S\\s*(?:\\-\\s*)?C\\s*(?:\\-\\s*)?W\\s*(?:\\-\\s*)?3\\s*(?:\\-\\s*)?1\\s*(?:\\-\\s*)?0(?!\\w|%|\\.\\d|\\,\\d)"
+        
         self.optional_tpl_1 = RegexRuleTemplate(self.slices_optional[0:1], 
             self.optional_value_func_on_desc, self.optional_value_func_on_details, must_match_on_desc = True)
         self.expected_optional_tpl_1_regex_pattern = "(?<!\\w)C\\s*(?:\\-\\s*)?y\\s*(?:\\-\\s*)?b\\s*(?:\\-\\s*)?e\\s*(?:\\-\\s*)?r(?!\\w)"

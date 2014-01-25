@@ -179,7 +179,7 @@ class RegexRuleTemplate(MatchingRuleTemplate):
         if is_last_char_numeric:
             # Don't match a final numeric character if it's followed by a decimal point (or comma) and a number.
             # This is to prevent issues like a "Casio Exilim EX-Z3 3.2MP Digital Camera" being a match for an "EX-Z33" model.
-            escaped_text = escaped_text + r'(?!\w|\.\d|\,\d)'
+            escaped_text = escaped_text + r'(?!\w|%|\.\d|\,\d)'
         else:
             escaped_text = escaped_text + r'(?!\w)'
         return escaped_text
