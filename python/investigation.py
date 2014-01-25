@@ -1951,5 +1951,7 @@ best_matches[best_match_columns].sort_index(by=best_match_sort_by).to_csv('../da
 # ------------------------------------------------------------------------------------
 # Results of fixing the above errors:
 # 
-# 10.6.6 Checked that the E-100 is no longer matching a listing containing "Visée 100%"
-# 
+# 10.6.1 No corrective action required.
+# 10.6.4 No corrective action required.
+# 10.6.6 Checked that the E-100 is no longer matching a listing containing "Visée 100%".
+# 10.6.7 No corrective action will be taken.
