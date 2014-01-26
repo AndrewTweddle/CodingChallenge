@@ -2065,11 +2065,26 @@ best_matches[best_match_columns].sort_index(by=best_match_sort_by).to_csv('../da
 # Results of fixing the above errors:
 # 
 # 10.6.1 No corrective action required.
+# 
 # 10.6.3 Success! 
 #        The Kiss X4 is no longer a match for the "Canon - PowerShot E1 - Appareil photo compact numérique - Capteur 10 MP - Zoom optique x4..."
 #        HOWEVER, the price paid is that a correct match is now lost:
 #           The Fujifilm FinePix X100 no longer matches listing "Fujifilm X100 12.3 MP APS-C CMOS EXR Digital Camera,23mm Fujinon Lens and 2.8-Inch LCD"
 #        Since incorrect matches are more heavily weighted than correct matches, this is an acceptable trade-off.
+# 
 # 10.6.4 No corrective action required.
+# 
 # 10.6.6 Checked that the E-100 is no longer matching a listing containing "Visée 100%".
+# 
 # 10.6.7 No corrective action will be taken.
+# 
+# 10.6.8 Success! The following 3 listings are no longer being matched to the Ricoh GXR (A12):
+#        a. Ricoh - Objectif GR LENS A12 28 mm F2.5,,1029999991,Prod code without a dash approximately
+#        b. Ricoh - Objectif GR LENS A12 28 mm F2.5,,1029999991,Prod code without a dash approximately
+#        c. Ricoh A12 GR - Digital camera lens unit - prosumer - 12.3 Mpix,,1029999991,Prod code without a dash approximately
+# 
+#        HOWEVER:
+#        Should they be matched to the Ricoh GR Digital III product?
+#        This could be achieved by treating a '+c_' pattern as a product code with a low value match.
+#        This is especially useful if we restrict the 'c' classification to at least 2 characters.
+#        But this may open the door to more mismatches, particularly since there are multiple version of the Ricoh GR, but only one in this data set.
