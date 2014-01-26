@@ -34,10 +34,15 @@ class BaseMasterTemplateBuilder(object):
     prod_code_having_no_dash_with_regex_value_func_on_prod_details = MatchValueFunction( 1000000, 10000)
     
     word_regex_pattern = '(?:[can]|\-)+'
-    prod_code_having_alpha_dash_pattern_then_a_number = 'a-a_n'
-    prod_code_having_dash_pattern = '[acn]+\-[-acn]*[acn]'
-    prod_code_having_alpha_and_numeric_pattern = '[ac]+n[acn]*|n+[ac][acn]*'
-    alt_prod_code_pattern = '(?P<prefix>[acn][-acn]*\-)(?:[acn]*[acn])\!(?P<suffix>[acnx]*[acn])'
+    
+    # The following product code patterns all prevent a product code from
+    # being preceded by an opening bracket or succeeded by a closing bracket.
+    # This is to prevent products such as the "Ricoh GXR (A12)" being matched to the "Ricoh GR A12".
+    # Note that the product code should not be preceded or succeeded by another alphanumeric block.
+    prod_code_having_alpha_dash_pattern_then_a_number = '(?<!\(|a|c|n)a-a_n(?!\)|a|c|n)'
+    prod_code_having_dash_pattern = '(?<!\(|a|c|n)[acn]+\-[-acn]*[acn](?!\)|a|c|n)'
+    prod_code_having_alpha_and_numeric_pattern = '(?<!\(|a|c)(?:[ac]+n[acn]*|n+[ac][acn]*)(?!\)|a|c|n)'
+    alt_prod_code_pattern = '(?<!\(|a|c|n)(?P<prefix>[acn][-acn]*\-)(?:[acn]*[acn])\!(?P<suffix>[acnx]*[acn])(?!\)|a|c|n)'
         
     def __init__(self, classific):
         self.classification = classific

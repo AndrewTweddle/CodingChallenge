@@ -330,6 +330,21 @@ class ProdCode_MasterTemplateBuilderTestCase(unittest.TestCase):
         match_result = engine.try_match_listing(product_desc, extra_prod_details)
         self.assert_(not match_result.is_match, u'There should be no match to the E-100 RS for a Visée 100%')
     
+    def testProdCodeMatchWithProdCodeInBrackets(self):
+        product_desc = 'Ricoh A12 GR - Digital camera lens unit - prosumer - 12.3 Mpix'
+        extra_prod_details = ''
+        
+        classification = '+c(an)'
+        blocks = ['+', 'GXR',' (', 'A', '12', ')']
+        family_and_model_len = len('GXR (A12)')
+        builder = MasterTemplateBuilder(classification)
+        
+        master_tpl = builder.build()
+        engine = master_tpl.generate(blocks, family_and_model_len)
+        match_result = engine.try_match_listing(product_desc, extra_prod_details)
+        self.assert_(not match_result.is_match, 'There should be no match to the GXR A12 for a Ricoh A12 GR')
+
+
 class MultipleCodesInProductDescTestCase(unittest.TestCase):
     
     def testProdCodeMatchAfterSlash(self):
