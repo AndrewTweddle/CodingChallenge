@@ -6,7 +6,7 @@ import numpy as np
 from nltk.metrics import *
 import re
 from string import Template
-from math import floor
+from math import floor, ceil
 from operator import truediv
 
 folder_data_intermediate = '../data/intermediate'
@@ -2066,6 +2066,8 @@ best_matches[best_match_columns].sort_index(by=best_match_sort_by).to_csv('../da
 # 
 # 10.6.1 No corrective action required.
 # 
+# 10.6.2 To be addressed in section 11 below.
+# 
 # 10.6.3 Success! 
 #        The Kiss X4 is no longer a match for the "Canon - PowerShot E1 - Appareil photo compact numérique - Capteur 10 MP - Zoom optique x4..."
 #        HOWEVER, the price paid is that a correct match is now lost:
@@ -2073,6 +2075,8 @@ best_matches[best_match_columns].sort_index(by=best_match_sort_by).to_csv('../da
 #        Since incorrect matches are more heavily weighted than correct matches, this is an acceptable trade-off.
 # 
 # 10.6.4 No corrective action required.
+# 
+# 10.6.5 To be addressed in section 11 below.
 # 
 # 10.6.6 Checked that the E-100 is no longer matching a listing containing "Visée 100%".
 # 
@@ -2088,3 +2092,79 @@ best_matches[best_match_columns].sort_index(by=best_match_sort_by).to_csv('../da
 #        This could be achieved by treating a '+c_' pattern as a product code with a low value match.
 #        This is especially useful if we restrict the 'c' classification to at least 2 characters.
 #        But this may open the door to more mismatches, particularly since there are multiple version of the Ricoh GR, but only one in this data set.
+
+
+# ==============================================================================
+# 11. Estimate the Megapixel rating of each product and use this
+#     to filter out incorrect matches:
+#
+
+
+# -----------------------------------------------------------------------------
+# 11.1 Estimate the likely Megapixel rating of each product
+#     based on the Megapixel ratings of the highest valued matches:
+# 
+
+# Attempt 1: Not the best, because it doesn't take into account different MP ratings with the same best match value.
+# 
+# def get_rounded_MP_of_best_value_match(grp_by_prod):
+#     by_val = grp_by_prod.sort_index(by='match_result_value', ascending=False)
+#     return by_val.iloc[0]['rounded_MP'] 
+#
+# matches_grouped_by_product = matched_products_and_listings[matched_products_and_listings.rounded_MP.notnull()].groupby('index_p')
+# best_rounded_MP_by_product = matches_grouped_by_product.apply(get_rounded_MP_of_best_value_match)
+# best_rounded_MP_by_product_DF = DataFrame({'best_value_rounded_MP' : best_rounded_MP_by_product}).reset_index()
+# matched_products_and_listings = pd.merge(matched_products_and_listings, best_rounded_MP_by_product_DF, left_on='index_p', right_on='index_p', how='left')
+
+# Attempt 2:
+matches_grouped_by_product_mp_and_result_value = matched_products_and_listings[
+    matched_products_and_listings.rounded_MP.notnull()].groupby(['index_p', 'rounded_MP', 'match_result_value'])
+
+matches_by_product_mp_and_result_value_with_counts \
+    = DataFrame({'group_count' : matches_grouped_by_product_mp_and_result_value.size()}).reset_index()
+
+def get_rounded_MP_of_best_value_match(grp_by_prod):
+    by_val = grp_by_prod.sort_index(by=['match_result_value','group_count'], ascending=False)
+    # TODO: Check that second best rounded_MP is the same, has lower value, or has significantly lower group_count.
+    #       Else make rounded_MP -1 to signal too much ambiguity.
+    return by_val.iloc[0]['rounded_MP']
+
+matches_grouped_by_product = matches_by_product_mp_and_result_value_with_counts.groupby('index_p')
+best_rounded_MP_by_product = matches_grouped_by_product.apply(get_rounded_MP_of_best_value_match)
+best_rounded_MP_by_product_DF = DataFrame({'best_value_rounded_MP' : best_rounded_MP_by_product}).reset_index()
+matched_products_and_listings = pd.merge(matched_products_and_listings, best_rounded_MP_by_product_DF, left_on='index_p', right_on='index_p', how='left')
+
+
+# -----------------------------------------------------------------------------
+# 11.2 Calculate the highest valued product for each listing, 
+#      where the listing's rounded megapixel rating matches 
+#      the highest valued megapixel rating
+#      
+
+def get_is_rounded_MP_matched(matched_prod_and_listing):
+    rounded_MP = matched_prod_and_listing['rounded_MP']
+    best_value_rounded_MP = matched_prod_and_listing['best_value_rounded_MP']
+    return rounded_MP == best_value_rounded_MP
+
+are_both_MPS_set = pd.notnull(matched_products_and_listings[['rounded_MP', 'best_value_rounded_MP']]).all(axis=1)
+
+matched_products_and_listings['is_best_value_rounded_MP_matched'] = matched_products_and_listings[are_both_MPS_set].apply(get_is_rounded_MP_matched, axis=1)
+matched_products_and_listings.is_best_value_rounded_MP_matched = matched_products_and_listings.is_best_value_rounded_MP_matched.fillna(True)
+    
+filtered_matched_products_and_listings = matched_products_and_listings[matched_products_and_listings.is_best_value_rounded_MP_matched]
+filtered_matches_grouped_by_listing = filtered_matched_products_and_listings.groupby('index_l')
+filtered_best_matches = filtered_matches_grouped_by_listing.apply(get_highest_value_product_for_listing)
+filtered_best_matches[best_match_columns].sort_index(by=best_match_sort_by).to_csv('../data/intermediate/filtered_best_matches_by_match_result_value.csv', encoding='utf-8')
+
+# Result:  This correctly eliminates the EOS 1-D models that are not Mark IV's.
+#          HOWEVER...
+# Issues:  1. A few listings have equal highest values, but multiple MP ratings.
+#             Investigate why this is so.
+#             Decide whether to eliminate all of these listings (set best_value_rounded_MP = -1, say).
+#             Or possibly choose the lowest valued MP rating.
+#          2. German listings seem to always round the Megapixel rating up.
+#             Consider accepting the match if the absolute MP rating difference is <= 1.
+#          3. Quite a few listings have errors in the Megapixel rating. But they seem to be correct otherwise.
+#             Consider only eliminating lower-valued matches.
+#             Alternatively, always keep listings where match_result_description = 'Family and model approximately'
+# 
