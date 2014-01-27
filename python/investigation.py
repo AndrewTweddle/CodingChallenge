@@ -2186,3 +2186,184 @@ filtered_best_matches[best_match_columns].sort_index(by=best_match_sort_by).to_c
 #    if there are multiple MP ratings at the highest match_result_value
 #    and none of these ratings has at least 75% of the matching listings.
 # 
+#    RESULT:
+# 
+# The following listings will be excluded due to mismatch:
+#    
+# index_l,index_p,manufacturer,family,model,productDesc,extraProdDetails,match_result_value,match_result_description
+# 12561,254,Casio,Exilim,EX-ZR10,"Casio Exilim EX-ZR10 Highspeed-Digitalkamera (14 Megapixel, 7-fach opt, Zoom, 7,6 cm (3 Zoll) Display, bildstabilisiert) pink",,11399999987,Family and model approximately
+# 12562,254,Casio,Exilim,EX-ZR10,"Casio Exilim EX-ZR10 Highspeed-Digitalkamera (14 Megapixel, 7-fach opt, Zoom, 7,6 cm (3 Zoll) Display, bildstabilisiert) pink",,11399999987,Family and model approximately
+# 12563,254,Casio,Exilim,EX-ZR10,"Casio Exilim EX-ZR10 Highspeed-Digitalkamera (14 Megapixel, 7-fach opt, Zoom, 7,6 cm (3 Zoll) Display, bildstabilisiert) pink",,11399999987,Family and model approximately
+# 14245,641,Fujifilm,FinePix,Z90,Fujifilm - FinePix Z90 - Appareil photo numérique - 16 Mpix - Rose,,11099999990,Family and model approximately
+# 14246,641,Fujifilm,FinePix,Z90,Fujifilm - FinePix Z90 - Appareil photo numérique - 16 Mpix - Rose,,11099999990,Family and model approximately
+# 14247,641,Fujifilm,FinePix,Z90,Fujifilm - FinePix Z90 - Appareil photo numérique - 16 Mpix - Violet,,11099999990,Family and model approximately
+# 14248,641,Fujifilm,FinePix,Z90,Fujifilm - FinePix Z90 - Appareil photo numérique - 16 Mpix - Violet,,11099999990,Family and model approximately
+# 3012,214,Nikon,Coolpix,S620,Nikon COOLPIX S620 Silver 10MP Digital Camera,,11199999989,Family and model approximately
+# 6668,324,Olympus,,PEN E-PL1,OLYMPUS 262855 12.3 Megapixel E-PL1 Pen Camera (Black camera body),,3252999982,Prod code with dash approximately
+# 6669,324,Olympus,,PEN E-PL1,OLYMPUS 262855 12.3 Megapixel E-PL1 Pen Camera (Black camera body),,3252999982,Prod code with dash approximately
+# 6670,324,Olympus,,PEN E-PL1,OLYMPUS 262855 12.3 Megapixel E-PL1 Pen Camera (Black camera body),,3252999982,Prod code with dash approximately
+# 6671,324,Olympus,,PEN E-PL1,OLYMPUS 262855 12.3 Megapixel E-PL1 Pen Camera (Black camera body),,3252999982,Prod code with dash approximately
+# 7003,324,Olympus,,PEN E-PL1,OLYMPUS 262855 12.3 Megapixel E-PL1 Pen Camera (Black camera body),,3252999982,Prod code with dash approximately
+# 7004,324,Olympus,,PEN E-PL1,OLYMPUS 262855 12.3 Megapixel E-PL1 Pen Camera (Black camera body),,3252999982,Prod code with dash approximately
+# 7005,324,Olympus,,PEN E-PL1,OLYMPUS 262855 12.3 Megapixel E-PL1 Pen Camera (Black camera body),,3252999982,Prod code with dash approximately
+# 8329,324,Olympus,,PEN E-PL1,"Olympus - PEN E-PL1 - Appareil Photo Bridge - 12,3 Mpix - Kit boîtier Champagne",Objectif 14-150 mm Noir,10899999991,Family and model approximately
+# 8330,324,Olympus,,PEN E-PL1,"Olympus - PEN E-PL1 - Appareil Photo Bridge - 12,3 Mpix - Kit boîtier Champagne",Objectif 14-150 mm Noir,10899999991,Family and model approximately
+# 8324,324,Olympus,,PEN E-PL1,"Olympus - PEN E-PL1 - Appareil Photo Bridge - 12,3 Mpix - Kit boîtier Noir",Objectif 14-150mm Noir,10899999991,Family and model approximately
+# 8325,324,Olympus,,PEN E-PL1,"Olympus - PEN E-PL1 - Appareil Photo Bridge - 12,3 Mpix - Kit boîtier Noir",Objectif 14-150mm Noir,10899999991,Family and model approximately
+# 8300,324,Olympus,,PEN E-PL1,"Olympus - PEN E-PL1 DZK - Appareil Photo Bridge - 12,3 Mpix - Kit boîtier Noir",Objectifs 14-42 mm / 40-155 mm Noir,10899999991,Family and model approximately
+# 8301,324,Olympus,,PEN E-PL1,"Olympus - PEN E-PL1 DZK - Appareil Photo Bridge - 12,3 Mpix - Kit boîtier Noir",Objectifs 14-42 mm / 40-155 mm Noir,10899999991,Family and model approximately
+# 8336,324,Olympus,,PEN E-PL1,"Olympus - Pen E-PL1 - Compact à objectifs interchangeables - Boîtier nu - 12,3 Mpix - Blanc",,10899999991,Family and model approximately
+# 8337,324,Olympus,,PEN E-PL1,"Olympus - Pen E-PL1 - Compact à objectifs interchangeables - Boîtier nu - 12,3 Mpix - Blanc",,10899999991,Family and model approximately
+# 8298,324,Olympus,,PEN E-PL1,"Olympus - Pen E-PL1 - Compact à objectifs interchangeables - Boîtier nu - 12,3 Mpix - Champagne",,10899999991,Family and model approximately
+# 8299,324,Olympus,,PEN E-PL1,"Olympus - Pen E-PL1 - Compact à objectifs interchangeables - Boîtier nu - 12,3 Mpix - Champagne",,10899999991,Family and model approximately
+# 8331,324,Olympus,,PEN E-PL1,"Olympus - Pen E-PL1 - Compact à objectifs interchangeables - Boîtier nu - 12,3 Mpix - Noir",,10899999991,Family and model approximately
+# 8332,324,Olympus,,PEN E-PL1,"Olympus - Pen E-PL1 - Compact à objectifs interchangeables - Boîtier nu - 12,3 Mpix - Noir",,10899999991,Family and model approximately
+# 8253,324,Olympus,,PEN E-PL1,"Olympus - Pen E-PL1 - Kit compact à objectifs interchangeables - Boîtier Blanc - 12,3 Mpix",Objectif 14 - 42mm - Argent,10899999991,Family and model approximately
+# 8254,324,Olympus,,PEN E-PL1,"Olympus - Pen E-PL1 - Kit compact à objectifs interchangeables - Boîtier Blanc - 12,3 Mpix",Objectif 14 - 42mm - Argent,10899999991,Family and model approximately
+# 8313,324,Olympus,,PEN E-PL1,"Olympus - Pen E-PL1 - Kit compact à objectifs interchangeables - Boîtier Blanc - 12,3 Mpix",Objectif 14 - 42mm - Argent,10899999991,Family and model approximately
+# 8314,324,Olympus,,PEN E-PL1,"Olympus - Pen E-PL1 - Kit compact à objectifs interchangeables - Boîtier Blanc - 12,3 Mpix",Objectif 14 - 42mm - Argent,10899999991,Family and model approximately
+# 8251,324,Olympus,,PEN E-PL1,"Olympus - Pen E-PL1 - Kit compact à objectifs interchangeables - Boîtier Champagne - 12,3 Mpix",Objectif 14 - 42mm - Argent,10899999991,Family and model approximately
+# 8252,324,Olympus,,PEN E-PL1,"Olympus - Pen E-PL1 - Kit compact à objectifs interchangeables - Boîtier Champagne - 12,3 Mpix",Objectif 14 - 42mm - Argent,10899999991,Family and model approximately
+# 8311,324,Olympus,,PEN E-PL1,"Olympus - Pen E-PL1 - Kit compact à objectifs interchangeables - Boîtier Champagne - 12,3 Mpix",Objectif 14 - 42mm - Argent,10899999991,Family and model approximately
+# 8312,324,Olympus,,PEN E-PL1,"Olympus - Pen E-PL1 - Kit compact à objectifs interchangeables - Boîtier Champagne - 12,3 Mpix",Objectif 14 - 42mm - Argent,10899999991,Family and model approximately
+# 8255,324,Olympus,,PEN E-PL1,"Olympus - Pen E-PL1 - Kit compact à objectifs interchangeables - Boîtier Noir - 12,3 Mpix",Objectif 14 - 42mm - Noir,10899999991,Family and model approximately
+# 8256,324,Olympus,,PEN E-PL1,"Olympus - Pen E-PL1 - Kit compact à objectifs interchangeables - Boîtier Noir - 12,3 Mpix",Objectif 14 - 42mm - Noir,10899999991,Family and model approximately
+# 8257,324,Olympus,,PEN E-PL1,"Olympus - Pen E-PL1 - Kit compact à objectifs interchangeables - Boîtier Noir - 12,3 Mpix",Objectif 14 - 42mm - Noir,10899999991,Family and model approximately
+# 8315,324,Olympus,,PEN E-PL1,"Olympus - Pen E-PL1 - Kit compact à objectifs interchangeables - Boîtier Noir - 12,3 Mpix",Objectif 14 - 42mm - Noir,10899999991,Family and model approximately
+# 8316,324,Olympus,,PEN E-PL1,"Olympus - Pen E-PL1 - Kit compact à objectifs interchangeables - Boîtier Noir - 12,3 Mpix",Objectif 14 - 42mm - Noir,10899999991,Family and model approximately
+# 8317,324,Olympus,,PEN E-PL1,"Olympus - Pen E-PL1 - Kit compact à objectifs interchangeables - Boîtier Noir - 12,3 Mpix",Objectif 14 - 42mm - Noir,10899999991,Family and model approximately
+# 8265,324,Olympus,,PEN E-PL1,"Olympus - Pen E-PL1 - Kit compact à objectifs interchangeables - Boîtier Rouge - 12,3 Mpix",Objectif 14 - 42mm - Noir,10899999991,Family and model approximately
+# 8266,324,Olympus,,PEN E-PL1,"Olympus - Pen E-PL1 - Kit compact à objectifs interchangeables - Boîtier Rouge - 12,3 Mpix",Objectif 14 - 42mm - Noir,10899999991,Family and model approximately
+# 8322,324,Olympus,,PEN E-PL1,"Olympus - Pen E-PL1 - Kit compact à objectifs interchangeables - Boîtier Rouge - 12,3 Mpix",Objectif 14 - 42mm - Noir,10899999991,Family and model approximately
+# 8323,324,Olympus,,PEN E-PL1,"Olympus - Pen E-PL1 - Kit compact à objectifs interchangeables - Boîtier Rouge - 12,3 Mpix",Objectif 14 - 42mm - Noir,10899999991,Family and model approximately
+# 6624,324,Olympus,,PEN E-PL1,"Olympus E-PL1 - Digital camera - mirrorless system - 12.3 Mpix - Olympus M.Zuiko Digital 14-42mm and Zuiko Digital 40-150mm lenses - optical zoom: 3 x - supported memory: SD, SDHC - black",,3149999991,Prod code with dash approximately
+# 6833,324,Olympus,,PEN E-PL1,"Olympus E-PL1 - Digital camera - mirrorless system - 12.3 Mpix - Olympus M.Zuiko Digital 14-42mm and Zuiko Digital 40-150mm lenses - optical zoom: 3 x - supported memory: SD, SDHC - black",,3149999991,Prod code with dash approximately
+# 7284,324,Olympus,,PEN E-PL1,"Olympus E-PL1 - Digital camera - mirrorless system - 12.3 Mpix - Olympus M.Zuiko Digital 14-42mm lens - optical zoom: 3 x - supported memory: SD, SDHC - champagne",,3149999991,Prod code with dash approximately
+# 7552,324,Olympus,,PEN E-PL1,Olympus E-PL1 14-42 mm Kit; 12.3 MP; 4032 x 3042 pixels; 2560 x 1920 1024 x 768; 0 x; 0 x; Live MOS (N3839292),,3149999991,Prod code with dash approximately
+# 6453,324,Olympus,,PEN E-PL1,Olympus PEN E-PL1 12.3MP Live MOS Micro Four Thirds Interchangeable Lens Digital Camera,14-42mm f/3.5-5.6 Zuiko Digital Zoom Lens (Black),10899999991,Family and model approximately
+# 6454,324,Olympus,,PEN E-PL1,Olympus PEN E-PL1 12.3MP Live MOS Micro Four Thirds Interchangeable Lens Digital Camera,14-42mm f/3.5-5.6 Zuiko Digital Zoom Lens (Black),10899999991,Family and model approximately
+# 6562,324,Olympus,,PEN E-PL1,Olympus PEN E-PL1 12.3MP Live MOS Micro Four Thirds Interchangeable Lens Digital Camera,14-42mm f/3.5-5.6 Zuiko Digital Zoom Lens (Black),10899999991,Family and model approximately
+# 6563,324,Olympus,,PEN E-PL1,Olympus PEN E-PL1 12.3MP Live MOS Micro Four Thirds Interchangeable Lens Digital Camera,14-42mm f/3.5-5.6 Zuiko Digital Zoom Lens (Black),10899999991,Family and model approximately
+# 6564,324,Olympus,,PEN E-PL1,Olympus PEN E-PL1 12.3MP Live MOS Micro Four Thirds Interchangeable Lens Digital Camera,14-42mm f/3.5-5.6 Zuiko Digital Zoom Lens (Black),10899999991,Family and model approximately
+# 6761,324,Olympus,,PEN E-PL1,Olympus PEN E-PL1 12.3MP Live MOS Micro Four Thirds Interchangeable Lens Digital Camera,14-42mm f/3.5-5.6 Zuiko Digital Zoom Lens (Black),10899999991,Family and model approximately
+# 6762,324,Olympus,,PEN E-PL1,Olympus PEN E-PL1 12.3MP Live MOS Micro Four Thirds Interchangeable Lens Digital Camera,14-42mm f/3.5-5.6 Zuiko Digital Zoom Lens (Black),10899999991,Family and model approximately
+# 6763,324,Olympus,,PEN E-PL1,Olympus PEN E-PL1 12.3MP Live MOS Micro Four Thirds Interchangeable Lens Digital Camera,14-42mm f/3.5-5.6 Zuiko Digital Zoom Lens (Black),10899999991,Family and model approximately
+# 6588,324,Olympus,,PEN E-PL1,Olympus PEN E-PL1 12.3MP Live MOS Micro Four Thirds Interchangeable Lens Digital Camera,14-42mm f/3.5-5.6 Zuiko Digital Zoom Lens (Black) + 8GB Deluxe Accessory Kit,10899999991,Family and model approximately
+# 6589,324,Olympus,,PEN E-PL1,Olympus PEN E-PL1 12.3MP Live MOS Micro Four Thirds Interchangeable Lens Digital Camera,14-42mm f/3.5-5.6 Zuiko Digital Zoom Lens (Black) + 8GB Deluxe Accessory Kit,10899999991,Family and model approximately
+# 6700,324,Olympus,,PEN E-PL1,Olympus PEN E-PL1 12.3MP Live MOS Micro Four Thirds Interchangeable Lens Digital Camera,"14-42mm f/3.5-5.6 Zuiko Digital Zoom Lens (Black) + SSE Best Value 32GB, Deluxe Carrying Case, HDMI Cable, Lens & Tripod Complete Accessories Package",10899999991,Family and model approximately
+# 6551,324,Olympus,,PEN E-PL1,Olympus PEN E-PL1 12.3MP Live MOS Micro Four Thirds Interchangeable Lens Digital Camera,14-42mm f/3.5-5.6 Zuiko Digital Zoom Lens (Blue),10899999991,Family and model approximately
+# 6552,324,Olympus,,PEN E-PL1,Olympus PEN E-PL1 12.3MP Live MOS Micro Four Thirds Interchangeable Lens Digital Camera,14-42mm f/3.5-5.6 Zuiko Digital Zoom Lens (Blue),10899999991,Family and model approximately
+# 6698,324,Olympus,,PEN E-PL1,Olympus PEN E-PL1 12.3MP Live MOS Micro Four Thirds Interchangeable Lens Digital Camera,"14-42mm f/3.5-5.6 Zuiko Digital Zoom Lens (Blue) + SSE Best Value 16GB, Deluxe Carrying Case, HDMI Cable, Lens & Tripod Complete Accessories Package",10899999991,Family and model approximately
+# 6699,324,Olympus,,PEN E-PL1,Olympus PEN E-PL1 12.3MP Live MOS Micro Four Thirds Interchangeable Lens Digital Camera,"14-42mm f/3.5-5.6 Zuiko Digital Zoom Lens (Blue) + SSE Best Value 32GB, Deluxe Carrying Case, Battery, Lens & Tripod Complete Accessories Package",10899999991,Family and model approximately
+# 6602,324,Olympus,,PEN E-PL1,Olympus PEN E-PL1 12.3MP Live MOS Micro Four Thirds Interchangeable Lens Digital Camera,14-42mm f/3.5-5.6 Zuiko Digital Zoom Lens (Champagne Gold) + 8GB Deluxe Accessory Kit,10899999991,Family and model approximately
+# 6702,324,Olympus,,PEN E-PL1,Olympus PEN E-PL1 12.3MP Live MOS Micro Four Thirds Interchangeable Lens Digital Camera,"14-42mm f/3.5-5.6 Zuiko Digital Zoom Lens (Champagne Gold) + SSE Best Value 16GB, Deluxe Carrying Case, Battery, Lens & Tripod Complete Accessories Package",10899999991,Family and model approximately
+# 6701,324,Olympus,,PEN E-PL1,Olympus PEN E-PL1 12.3MP Live MOS Micro Four Thirds Interchangeable Lens Digital Camera,"14-42mm f/3.5-5.6 Zuiko Digital Zoom Lens (Champagne Gold) + SSE Best Value 32GB, Deluxe Carrying Case, Battery, Lens & Flash Complete Accessories Package",10899999991,Family and model approximately
+# 6568,324,Olympus,,PEN E-PL1,Olympus PEN E-PL1 12.3MP Live MOS Micro Four Thirds Interchangeable Lens Digital Camera,14-42mm f/3.5-5.6 Zuiko Digital Zoom Lens (Champagne Silver),10899999991,Family and model approximately
+# 6569,324,Olympus,,PEN E-PL1,Olympus PEN E-PL1 12.3MP Live MOS Micro Four Thirds Interchangeable Lens Digital Camera,14-42mm f/3.5-5.6 Zuiko Digital Zoom Lens (Champagne Silver),10899999991,Family and model approximately
+# 6570,324,Olympus,,PEN E-PL1,Olympus PEN E-PL1 12.3MP Live MOS Micro Four Thirds Interchangeable Lens Digital Camera,14-42mm f/3.5-5.6 Zuiko Digital Zoom Lens (Champagne Silver),10899999991,Family and model approximately
+# 6790,324,Olympus,,PEN E-PL1,Olympus PEN E-PL1 12.3MP Live MOS Micro Four Thirds Interchangeable Lens Digital Camera,14-42mm f/3.5-5.6 Zuiko Digital Zoom Lens (Champagne Silver),10899999991,Family and model approximately
+# 6791,324,Olympus,,PEN E-PL1,Olympus PEN E-PL1 12.3MP Live MOS Micro Four Thirds Interchangeable Lens Digital Camera,14-42mm f/3.5-5.6 Zuiko Digital Zoom Lens (Champagne Silver),10899999991,Family and model approximately
+# 6792,324,Olympus,,PEN E-PL1,Olympus PEN E-PL1 12.3MP Live MOS Micro Four Thirds Interchangeable Lens Digital Camera,14-42mm f/3.5-5.6 Zuiko Digital Zoom Lens (Champagne Silver),10899999991,Family and model approximately
+# 6543,324,Olympus,,PEN E-PL1,Olympus PEN E-PL1 12.3MP Live MOS Micro Four Thirds Interchangeable Lens Digital Camera,14-42mm f/3.5-5.6 Zuiko Digital Zoom Lens (Gold),10899999991,Family and model approximately
+# 6544,324,Olympus,,PEN E-PL1,Olympus PEN E-PL1 12.3MP Live MOS Micro Four Thirds Interchangeable Lens Digital Camera,14-42mm f/3.5-5.6 Zuiko Digital Zoom Lens (Gold),10899999991,Family and model approximately
+# 6565,324,Olympus,,PEN E-PL1,Olympus PEN E-PL1 12.3MP Live MOS Micro Four Thirds Interchangeable Lens Digital Camera,14-42mm f/3.5-5.6 Zuiko Digital Zoom Lens (Slate Blue),10899999991,Family and model approximately
+# 6566,324,Olympus,,PEN E-PL1,Olympus PEN E-PL1 12.3MP Live MOS Micro Four Thirds Interchangeable Lens Digital Camera,14-42mm f/3.5-5.6 Zuiko Digital Zoom Lens (Slate Blue),10899999991,Family and model approximately
+# 6567,324,Olympus,,PEN E-PL1,Olympus PEN E-PL1 12.3MP Live MOS Micro Four Thirds Interchangeable Lens Digital Camera,14-42mm f/3.5-5.6 Zuiko Digital Zoom Lens (Slate Blue),10899999991,Family and model approximately
+# 6774,324,Olympus,,PEN E-PL1,Olympus PEN E-PL1 12.3MP Live MOS Micro Four Thirds Interchangeable Lens Digital Camera,14-42mm f/3.5-5.6 Zuiko Digital Zoom Lens (Slate Blue),10899999991,Family and model approximately
+# 6775,324,Olympus,,PEN E-PL1,Olympus PEN E-PL1 12.3MP Live MOS Micro Four Thirds Interchangeable Lens Digital Camera,14-42mm f/3.5-5.6 Zuiko Digital Zoom Lens (Slate Blue),10899999991,Family and model approximately
+# 6776,324,Olympus,,PEN E-PL1,Olympus PEN E-PL1 12.3MP Live MOS Micro Four Thirds Interchangeable Lens Digital Camera,14-42mm f/3.5-5.6 Zuiko Digital Zoom Lens (Slate Blue),10899999991,Family and model approximately
+# 6599,324,Olympus,,PEN E-PL1,Olympus PEN E-PL1 12.3MP Live MOS Micro Four Thirds Interchangeable Lens Digital Camera,14-42mm f/3.5-5.6 Zuiko Digital Zoom Lens (Slate Blue) + 8GB Deluxe Accessory Kit,10899999991,Family and model approximately
+# 6594,324,Olympus,,PEN E-PL1,Olympus PEN E-PL1 12.3MP Live MOS Micro Four Thirds Interchangeable Lens Digital Camera,14-42mm f/3.5-5.6 Zuiko Digital Zoom Lens and ED 40-150mm f/4.0-5.6 M.Zuiko Digital Camera Zoom Lens (Black) + 8GB Deluxe Accessory Kit,10899999991,Family and model approximately
+# 7147,324,Olympus,,PEN E-PL1,Olympus PEN E-PL1 12.3MP Live MOS Micro Four Thirds Interchangeable Lens Digital Camera,ED 14-150mm f/4.0-5.6 micro Four Thirds Zoom Lens,10899999991,Family and model approximately
+# 6595,324,Olympus,,PEN E-PL1,Olympus PEN E-PL1 12.3MP Live MOS Micro Four Thirds Interchangeable Lens Digital Camera,ED 14-150mm f/4.0-5.6 micro Four Thirds Zoom Lens + 8GB Deluxe Accessory Kit,10899999991,Family and model approximately
+# 8021,324,Olympus,,PEN E-PL1,"Olympus PEN E-PL1 Systemkamera (12 Megapixel, 6,9 cm (2,7 Zoll) Display, Bildstabilisator) blau",14-42mm Objektiv schwarz,10899999991,Family and model approximately
+# 8022,324,Olympus,,PEN E-PL1,"Olympus PEN E-PL1 Systemkamera (12 Megapixel, 6,9 cm (2,7 Zoll) Display, Bildstabilisator) blau",14-42mm Objektiv schwarz,10899999991,Family and model approximately
+# 8042,324,Olympus,,PEN E-PL1,"Olympus PEN E-PL1 Systemkamera (13 Megapixel, 6,9 cm (2,7 Zoll) Display, Bildstabilisator) Gehäuse champagner",,10899999991,Family and model approximately
+# 8043,324,Olympus,,PEN E-PL1,"Olympus PEN E-PL1 Systemkamera (13 Megapixel, 6,9 cm (2,7 Zoll) Display, Bildstabilisator) Gehäuse champagner",,10899999991,Family and model approximately
+# 8044,324,Olympus,,PEN E-PL1,"Olympus PEN E-PL1 Systemkamera (13 Megapixel, 6,9 cm (2,7 Zoll) Display, Bildstabilisator) Gehäuse champagner",,10899999991,Family and model approximately
+# 8038,324,Olympus,,PEN E-PL1,"Olympus PEN E-PL1 Systemkamera (13 Megapixel, 6,9 cm (2,7 Zoll) Display, Bildstabilisator) Gehäuse schwarz",,10899999991,Family and model approximately
+# 8039,324,Olympus,,PEN E-PL1,"Olympus PEN E-PL1 Systemkamera (13 Megapixel, 6,9 cm (2,7 Zoll) Display, Bildstabilisator) Gehäuse schwarz",,10899999991,Family and model approximately
+# 8040,324,Olympus,,PEN E-PL1,"Olympus PEN E-PL1 Systemkamera (13 Megapixel, 6,9 cm (2,7 Zoll) Display, Bildstabilisator) Gehäuse schwarz",,10899999991,Family and model approximately
+# 8050,324,Olympus,,PEN E-PL1,"Olympus PEN E-PL1 Systemkamera (13 Megapixel, 6,9 cm (2,7 Zoll) Display, Bildstabilisator) Gehäuse weiß",,10899999991,Family and model approximately
+# 8051,324,Olympus,,PEN E-PL1,"Olympus PEN E-PL1 Systemkamera (13 Megapixel, 6,9 cm (2,7 Zoll) Display, Bildstabilisator) Gehäuse weiß",,10899999991,Family and model approximately
+# 8011,324,Olympus,,PEN E-PL1,"Olympus PEN E-PL1 Systemkamera (13 Megapixel, 6,9 cm (2,7 Zoll) Display, Bildstabilisator) champagner",14-150mm Objektiv schwarz,10899999991,Family and model approximately
+# 8012,324,Olympus,,PEN E-PL1,"Olympus PEN E-PL1 Systemkamera (13 Megapixel, 6,9 cm (2,7 Zoll) Display, Bildstabilisator) champagner",14-150mm Objektiv schwarz,10899999991,Family and model approximately
+# 8033,324,Olympus,,PEN E-PL1,"Olympus PEN E-PL1 Systemkamera (13 Megapixel, 6,9 cm (2,7 Zoll) Display, Bildstabilisator) champagner",14-42mm & 40-150mm Objektiven silber,10899999991,Family and model approximately
+# 8034,324,Olympus,,PEN E-PL1,"Olympus PEN E-PL1 Systemkamera (13 Megapixel, 6,9 cm (2,7 Zoll) Display, Bildstabilisator) champagner",14-42mm & 40-150mm Objektiven silber,10899999991,Family and model approximately
+# 8019,324,Olympus,,PEN E-PL1,"Olympus PEN E-PL1 Systemkamera (13 Megapixel, 6,9 cm (2,7 Zoll) Display, Bildstabilisator) champagner",14-42mm Objektiv silber,10899999991,Family and model approximately
+# 8020,324,Olympus,,PEN E-PL1,"Olympus PEN E-PL1 Systemkamera (13 Megapixel, 6,9 cm (2,7 Zoll) Display, Bildstabilisator) champagner",14-42mm Objektiv silber,10899999991,Family and model approximately
+# 8031,324,Olympus,,PEN E-PL1,"Olympus PEN E-PL1 Systemkamera (13 Megapixel, 6,9 cm (2,7 Zoll) Display, Bildstabilisator) rot",14-42mm Objektiv schwarz,10899999991,Family and model approximately
+# 8032,324,Olympus,,PEN E-PL1,"Olympus PEN E-PL1 Systemkamera (13 Megapixel, 6,9 cm (2,7 Zoll) Display, Bildstabilisator) rot",14-42mm Objektiv schwarz,10899999991,Family and model approximately
+# 8013,324,Olympus,,PEN E-PL1,"Olympus PEN E-PL1 Systemkamera (13 Megapixel, 6,9 cm (2,7 Zoll) Display, Bildstabilisator) schwarz",14-150mm Objektiv schwarz,10899999991,Family and model approximately
+# 8014,324,Olympus,,PEN E-PL1,"Olympus PEN E-PL1 Systemkamera (13 Megapixel, 6,9 cm (2,7 Zoll) Display, Bildstabilisator) schwarz",14-150mm Objektiv schwarz,10899999991,Family and model approximately
+# 8015,324,Olympus,,PEN E-PL1,"Olympus PEN E-PL1 Systemkamera (13 Megapixel, 6,9 cm (2,7 Zoll) Display, Bildstabilisator) schwarz",14-150mm Objektiv schwarz,10899999991,Family and model approximately
+# 8023,324,Olympus,,PEN E-PL1,"Olympus PEN E-PL1 Systemkamera (13 Megapixel, 6,9 cm (2,7 Zoll) Display, Bildstabilisator) schwarz",14-42mm & 40-150mm Objektiven schwarz,10899999991,Family and model approximately
+# 8024,324,Olympus,,PEN E-PL1,"Olympus PEN E-PL1 Systemkamera (13 Megapixel, 6,9 cm (2,7 Zoll) Display, Bildstabilisator) schwarz",14-42mm & 40-150mm Objektiven schwarz,10899999991,Family and model approximately
+# 8025,324,Olympus,,PEN E-PL1,"Olympus PEN E-PL1 Systemkamera (13 Megapixel, 6,9 cm (2,7 Zoll) Display, Bildstabilisator) schwarz",14-42mm & 40-150mm Objektiven schwarz,10899999991,Family and model approximately
+# 7998,324,Olympus,,PEN E-PL1,"Olympus PEN E-PL1 Systemkamera (13 Megapixel, 6,9 cm (2,7 Zoll) Display, Bildstabilisator) schwarz",14-42mm Objektiv schwarz,10899999991,Family and model approximately
+# 7999,324,Olympus,,PEN E-PL1,"Olympus PEN E-PL1 Systemkamera (13 Megapixel, 6,9 cm (2,7 Zoll) Display, Bildstabilisator) schwarz",14-42mm Objektiv schwarz,10899999991,Family and model approximately
+# 8000,324,Olympus,,PEN E-PL1,"Olympus PEN E-PL1 Systemkamera (13 Megapixel, 6,9 cm (2,7 Zoll) Display, Bildstabilisator) schwarz",14-42mm Objektiv schwarz,10899999991,Family and model approximately
+# 8026,324,Olympus,,PEN E-PL1,"Olympus PEN E-PL1 Systemkamera (13 Megapixel, 6,9 cm (2,7 Zoll) Display, Bildstabilisator) weiß",14-42mm & 40-150mm Objektiven silber,10899999991,Family and model approximately
+# 8006,324,Olympus,,PEN E-PL1,"Olympus PEN E-PL1 Systemkamera (13 Megapixel, 6,9 cm (2,7 Zoll) Display, Bildstabilisator) weiß",14-42mm Objektiv silber,10899999991,Family and model approximately
+# 8007,324,Olympus,,PEN E-PL1,"Olympus PEN E-PL1 Systemkamera (13 Megapixel, 6,9 cm (2,7 Zoll) Display, Bildstabilisator) weiß",14-42mm Objektiv silber,10899999991,Family and model approximately
+# 8035,324,Olympus,,PEN E-PL1,"Olympus PEN E-PL1 Systemkamera (13 Megapixel, 6,9 cm Display, Bildstabilisator) Double Zoom Kit (EZ-M1442L & EZ4015-2) champagner",,10899999991,Family and model approximately
+# 8029,324,Olympus,,PEN E-PL1,"Olympus PEN E-PL1 Systemkamera (13 Megapixel, 6,9 cm Display, Bildstabilisator) Double Zoom Kit (EZ-M1442L & EZ4015-2) schwarz",,10899999991,Family and model approximately
+# 8030,324,Olympus,,PEN E-PL1,"Olympus PEN E-PL1 Systemkamera (13 Megapixel, 6,9 cm Display, Bildstabilisator) Double Zoom Kit (EZ-M1442L & EZ4015-2) schwarz",,10899999991,Family and model approximately
+# 8027,324,Olympus,,PEN E-PL1,"Olympus PEN E-PL1 Systemkamera (13 Megapixel, 6,9 cm Display, Bildstabilisator) Double Zoom Kit (EZ-M1442L & EZ4015-2) weiß",,10899999991,Family and model approximately
+# 16133,246,Ricoh,,CX2,Ricoh CX2 9.29MP Digital Camera,10.7x Optical Image Stabilized Zoom and 3 inch High Resolution LCD (Black),10299999997,Family and model approximately
+# 16128,246,Ricoh,,CX2,Ricoh CX2 9.29MP Digital Camera,10.7x Optical Image Stabilized Zoom and 3 inch High Resolution LCD (Silver),10299999997,Family and model approximately
+# 16129,246,Ricoh,,CX2,Ricoh CX2 9.29MP Digital Camera,10.7x Optical Image Stabilized Zoom and 3 inch High Resolution LCD (Silver),10299999997,Family and model approximately
+# 19505,246,Ricoh,,CX2,"Ricoh CX2 Digitalkamera (10 Megapixel, 10-fach opt. Zoom, 7,6 cm (3 Zoll) Display, Bildstabilisator) grau/pink",,10299999997,Family and model approximately
+# 19506,246,Ricoh,,CX2,"Ricoh CX2 Digitalkamera (10 Megapixel, 10-fach opt. Zoom, 7,6 cm (3 Zoll) Display, Bildstabilisator) grau/pink",,10299999997,Family and model approximately
+# 19507,246,Ricoh,,CX2,"Ricoh CX2 Digitalkamera (10 Megapixel, 10-fach opt. Zoom, 7,6 cm (3 Zoll) Display, Bildstabilisator) grau/pink",,10299999997,Family and model approximately
+# 19493,246,Ricoh,,CX2,"Ricoh CX2 Digitalkamera (10 Megapixel, 10-fach opt. Zoom, 7,6 cm (3 Zoll) Display, Bildstabilisator) schwarz",,10299999997,Family and model approximately
+# 19494,246,Ricoh,,CX2,"Ricoh CX2 Digitalkamera (10 Megapixel, 10-fach opt. Zoom, 7,6 cm (3 Zoll) Display, Bildstabilisator) schwarz",,10299999997,Family and model approximately
+# 19511,246,Ricoh,,CX2,"Ricoh CX2 Digitalkamera (10 Megapixel, 10-fach opt. Zoom, 7,6 cm (3 Zoll) Display, Bildstabilisator) silber",,10299999997,Family and model approximately
+# 19512,246,Ricoh,,CX2,"Ricoh CX2 Digitalkamera (10 Megapixel, 10-fach opt. Zoom, 7,6 cm (3 Zoll) Display, Bildstabilisator) silber",,10299999997,Family and model approximately
+# 891,703,Samsung,,WB700,"Samsung - WB700 - Appareil photo numérique - 16,4 Mpix - Noir",,10499999995,Family and model approximately
+# 
+# The following listings are also being excluded now, arguably correctly:
+# 
+# index_l,index_p,manufacturer,family,model,productDesc,extraProdDetails,match_result_value,match_result_description
+# 16021,7,Leica,,Digilux,Leica 'Digilux 2' 5MP Digital Camera,3.2x Optical Zoom,10699999993,Family and model approximately
+# 16022,7,Leica,,Digilux,Leica 'Digilux 2' 5MP Digital Camera,3.2x Optical Zoom,10699999993,Family and model approximately
+# 15984,7,Leica,,Digilux,Leica DIGILUX 3 7.5MP Digital SLR Camera,Leica D 14-50mm f/2.8-3.5 ASPH Lens with Optical Image Stabilization,10699999993,Family and model approximately
+# 15985,7,Leica,,Digilux,Leica DIGILUX 3 7.5MP Digital SLR Camera,Leica D 14-50mm f/2.8-3.5 ASPH Lens with Optical Image Stabilization,10699999993,Family and model approximately
+# 16026,7,Leica,,Digilux,Leica Digilux 1 3.9MP Digital Camera,3x Optical Zoom,10699999993,Family and model approximately
+#    
+# INVESTIGATIONS:
+# 
+# a. Why are so many PEN E-PL1 listings being rejected?
+# 
+# matches_by_product_mp_and_result_value_with_counts[matches_by_product_mp_and_result_value_with_counts.index_p == 324]
+# 
+#      index_p  rounded_MP  match_result_value  group_count
+# 327      324          12          3149999991            4
+# 328      324          12          3252999982            7
+# 329      324          12         10899999991           68
+# 330      324          13         10899999991           32
+#
+# ANSWER: Because 68% have an MP rating of 12, and 32% have MP rating of 13 (German listings), so the threshold of 75% has not been achieved.
+#
+# b. Why are the Ricoh CX2 listings being rejected?
+# 
+# ANSWER: 70% of the listings are at 10 Megapixels (German listings) and the other 30% at 9 MP. The threshold of 75% has not been achieved.
+#
+# CONCLUSION: 
+# 
+# The majority of the rejected listings appear to be due to:
+# 
+# i. German listings where the Megapixels have been rounded up, or
+# ii. Typos
+# 
+# It doesn't make sense to eliminate 131 good matches in order to eliminate the 5 suspect matches for the Digilux product.
+# The problem with the Digilux product is that it is insufficiently precise ("Digilux" is arguably the family not the model).
+# 
+# This can be fixed through 2 changes:
+# 
+# a. Modify the matching rule for "Family and model approximately" to either:
+#    i.  require a digit or dash in the combined family and model, or
+#    ii. reject models whose classification pattern is just 'n'
+# 
+# b. Ignore the Megapixel filtering rule for matches where the match_result_description is 'Family and model approximately'.
+# 
