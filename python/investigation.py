@@ -2132,7 +2132,7 @@ matched_products_and_listings = pd.merge(matched_products_and_listings, best_rou
 def get_is_rounded_MP_matched(matched_prod_and_listing):
     rounded_MP = matched_prod_and_listing['rounded_MP']
     best_value_rounded_MP = matched_prod_and_listing['best_value_rounded_MP']
-    return rounded_MP == best_value_rounded_MP
+    return (rounded_MP == best_value_rounded_MP) or (rounded_MP == best_value_rounded_MP + 1) or (rounded_MP == best_value_rounded_MP - 1)
 
 are_both_MPS_set = pd.notnull(matched_products_and_listings[['rounded_MP', 'best_value_rounded_MP']]).all(axis=1)
 
@@ -2155,4 +2155,9 @@ filtered_best_matches[best_match_columns].sort_index(by=best_match_sort_by).to_c
 #          3. Quite a few listings have errors in the Megapixel rating. But they seem to be correct otherwise.
 #             Consider only eliminating lower-valued matches.
 #             Alternatively, always keep listings where match_result_description = 'Family and model approximately'
+# 
+# Actions taken:
+# 
+# 1. Don't filter out listings with MP ratings that are 1 away from the best value MP rating.
+#    [RESULT: Many listings now being included]
 # 
