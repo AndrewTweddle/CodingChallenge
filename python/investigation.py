@@ -6,7 +6,7 @@ import numpy as np
 from nltk.metrics import *
 import re
 from string import Template
-from math import floor, ceil
+from math import floor
 from operator import truediv
 
 folder_data_intermediate = '../data/intermediate'
@@ -2105,18 +2105,6 @@ best_matches[best_match_columns].sort_index(by=best_match_sort_by).to_csv('../da
 #     based on the Megapixel ratings of the highest valued matches:
 # 
 
-# Attempt 1: Not the best, because it doesn't take into account different MP ratings with the same best match value.
-# 
-# def get_rounded_MP_of_best_value_match(grp_by_prod):
-#     by_val = grp_by_prod.sort_index(by='match_result_value', ascending=False)
-#     return by_val.iloc[0]['rounded_MP'] 
-#
-# matches_grouped_by_product = matched_products_and_listings[matched_products_and_listings.rounded_MP.notnull()].groupby('index_p')
-# best_rounded_MP_by_product = matches_grouped_by_product.apply(get_rounded_MP_of_best_value_match)
-# best_rounded_MP_by_product_DF = DataFrame({'best_value_rounded_MP' : best_rounded_MP_by_product}).reset_index()
-# matched_products_and_listings = pd.merge(matched_products_and_listings, best_rounded_MP_by_product_DF, left_on='index_p', right_on='index_p', how='left')
-
-# Attempt 2:
 matches_grouped_by_product_mp_and_result_value = matched_products_and_listings[
     matched_products_and_listings.rounded_MP.notnull()].groupby(['index_p', 'rounded_MP', 'match_result_value'])
 
