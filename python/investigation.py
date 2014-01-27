@@ -2111,11 +2111,29 @@ matches_grouped_by_product_mp_and_result_value = matched_products_and_listings[
 matches_by_product_mp_and_result_value_with_counts \
     = DataFrame({'group_count' : matches_grouped_by_product_mp_and_result_value.size()}).reset_index()
 
+THRESHOLD_FOR_REJECTING_MPS_DUE_TO_DIVERSITY = 0.75
+
 def get_rounded_MP_of_best_value_match(grp_by_prod):
     by_val = grp_by_prod.sort_index(by=['match_result_value','group_count'], ascending=False)
-    # TODO: Check that second best rounded_MP is the same, has lower value, or has significantly lower group_count.
-    #       Else make rounded_MP -1 to signal too much ambiguity.
-    return by_val.iloc[0]['rounded_MP']
+    # Check that second best rounded_MP is the same, has lower value, or has significantly lower group_count.
+    # Else make rounded_MP -1 to signal too much ambiguity.
+    best_rounded_MP = by_val.iloc[0]['rounded_MP']
+    if by_val['match_result_value'].count() > 1:
+        best_match_result_value = by_val.iloc[0]['match_result_value']
+        second_best_rounded_MP = by_val.iloc[1]['rounded_MP']
+        second_best_match_result_value = by_val.iloc[1]['match_result_value']
+        
+        # Check for multiple top-rated mega-pixel ratings:
+        if second_best_match_result_value == best_match_result_value:
+            number_of_top_valued_MPs = by_val[by_val.match_result_value == best_match_result_value]['group_count'].sum()
+            if number_of_top_valued_MPs > 2 or abs(second_best_rounded_MP - best_rounded_MP) > 1:
+                best_match_group_count = by_val.iloc[0]['group_count']
+                proportion_of_best_match = best_match_group_count / number_of_top_valued_MPs
+                if proportion_of_best_match < THRESHOLD_FOR_REJECTING_MPS_DUE_TO_DIVERSITY:
+                    return -1
+                    # There is too much ambiguity in the Megapixel ratings, suggesting that something is wrong with the product record.
+                    # So create an invalid MP rating to ensure that all matches (with MP ratings) are rejected:
+    return best_rounded_MP
 
 matches_grouped_by_product = matches_by_product_mp_and_result_value_with_counts.groupby('index_p')
 best_rounded_MP_by_product = matches_grouped_by_product.apply(get_rounded_MP_of_best_value_match)
@@ -2132,7 +2150,7 @@ matched_products_and_listings = pd.merge(matched_products_and_listings, best_rou
 def get_is_rounded_MP_matched(matched_prod_and_listing):
     rounded_MP = matched_prod_and_listing['rounded_MP']
     best_value_rounded_MP = matched_prod_and_listing['best_value_rounded_MP']
-    return (rounded_MP == best_value_rounded_MP) or (rounded_MP == best_value_rounded_MP + 1) or (rounded_MP == best_value_rounded_MP - 1)
+    return abs(rounded_MP - best_value_rounded_MP) <= 1
 
 are_both_MPS_set = pd.notnull(matched_products_and_listings[['rounded_MP', 'best_value_rounded_MP']]).all(axis=1)
 
@@ -2158,6 +2176,13 @@ filtered_best_matches[best_match_columns].sort_index(by=best_match_sort_by).to_c
 # 
 # Actions taken:
 # 
-# 1. Don't filter out listings with MP ratings that are 1 away from the best value MP rating.
-#    [RESULT: Many listings now being included]
+# a. Don't filter out listings with MP ratings that are 1 away from the best value MP rating.
+# 
+#    RESULT: 
+#    
+#    Many of the excluded listings are now being included again.
+# 
+# b. Modify get_rounded_MP_of_best_value_match() to set the MP to -1
+#    if there are multiple MP ratings at the highest match_result_value
+#    and none of these ratings has at least 75% of the matching listings.
 # 
