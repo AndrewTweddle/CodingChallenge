@@ -2403,3 +2403,5 @@ filtered_best_matches[best_match_columns].sort_index(by=best_match_sort_by).to_c
 #             And the match value description for these records is "Prod code with dash approximately"
 #    SO:      Use a threshold match value instead, such as BaseMasterTemplateBuilder.prod_code_having_no_dash_with_regex_value_func_on_prod_desc
 #             This will include all product code matches, but exclude the family+model matches where model is alpha only. 
+#    BUT:     This would make the older EOS 1-D models match the Mark IV again.
+#    SO:      Accept that the price of fixing the EOS 1-D mismatches is that these 11 PEN E-PL1 listings won't get matched.
