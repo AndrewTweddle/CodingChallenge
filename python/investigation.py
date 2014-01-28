@@ -2153,11 +2153,13 @@ def get_is_rounded_MP_matched(matched_prod_and_listing):
     return abs(rounded_MP - best_value_rounded_MP) <= 1
 
 are_both_MPS_set = pd.notnull(matched_products_and_listings[['rounded_MP', 'best_value_rounded_MP']]).all(axis=1)
-
+matched_products_and_listings['is_highest_type_of_match'] = matched_products_and_listings.match_result_description == BaseMasterTemplateBuilder.all_of_family_and_model_with_regex_desc
 matched_products_and_listings['is_best_value_rounded_MP_matched'] = matched_products_and_listings[are_both_MPS_set].apply(get_is_rounded_MP_matched, axis=1)
 matched_products_and_listings.is_best_value_rounded_MP_matched = matched_products_and_listings.is_best_value_rounded_MP_matched.fillna(True)
-    
-filtered_matched_products_and_listings = matched_products_and_listings[matched_products_and_listings.is_best_value_rounded_MP_matched]
+
+is_not_filtered_out = matched_products_and_listings[['is_highest_type_of_match', 'is_best_value_rounded_MP_matched']].any(axis = 1)
+
+filtered_matched_products_and_listings = matched_products_and_listings[is_not_filtered_out]
 filtered_matches_grouped_by_listing = filtered_matched_products_and_listings.groupby('index_l')
 filtered_best_matches = filtered_matches_grouped_by_listing.apply(get_highest_value_product_for_listing)
 filtered_best_matches[best_match_columns].sort_index(by=best_match_sort_by).to_csv('../data/intermediate/filtered_best_matches_by_match_result_value.csv', encoding='utf-8')
@@ -2377,3 +2379,27 @@ filtered_best_matches[best_match_columns].sort_index(by=best_match_sort_by).to_c
 #    SO:      Add back the rule for 'a' models, but with a very low priority.
 #    RESULT:  Now the three products with 'a' models are back, 
 #             but with description: "Family and alpha model approximately"
+# 
+# b. Ignore the Megapixel filtering rule for 'Family and model approximately' listings
+#    
+#    RESULTS: a. The EOS 1-D models which aren't Mark IV's are correctly filtered out.
+#             b. The Digilux models are correctly filtered out now.
+#             c. The following models are incorrectly filtered out:
+# 
+# index_l,index_p,manufacturer,family,model,productDesc,extraProdDetails,match_result_value,match_result_description
+# 6668,324,Olympus,,PEN E-PL1,OLYMPUS 262855 12.3 Megapixel E-PL1 Pen Camera (Black camera body),,3252999982,Prod code with dash approximately
+# 6669,324,Olympus,,PEN E-PL1,OLYMPUS 262855 12.3 Megapixel E-PL1 Pen Camera (Black camera body),,3252999982,Prod code with dash approximately
+# 6670,324,Olympus,,PEN E-PL1,OLYMPUS 262855 12.3 Megapixel E-PL1 Pen Camera (Black camera body),,3252999982,Prod code with dash approximately
+# 6671,324,Olympus,,PEN E-PL1,OLYMPUS 262855 12.3 Megapixel E-PL1 Pen Camera (Black camera body),,3252999982,Prod code with dash approximately
+# 7003,324,Olympus,,PEN E-PL1,OLYMPUS 262855 12.3 Megapixel E-PL1 Pen Camera (Black camera body),,3252999982,Prod code with dash approximately
+# 7004,324,Olympus,,PEN E-PL1,OLYMPUS 262855 12.3 Megapixel E-PL1 Pen Camera (Black camera body),,3252999982,Prod code with dash approximately
+# 7005,324,Olympus,,PEN E-PL1,OLYMPUS 262855 12.3 Megapixel E-PL1 Pen Camera (Black camera body),,3252999982,Prod code with dash approximately
+# 6624,324,Olympus,,PEN E-PL1,"Olympus E-PL1 - Digital camera - mirrorless system - 12.3 Mpix - Olympus M.Zuiko Digital 14-42mm and Zuiko Digital 40-150mm lenses - optical zoom: 3 x - supported memory: SD, SDHC - black",,3149999991,Prod code with dash approximately
+# 6833,324,Olympus,,PEN E-PL1,"Olympus E-PL1 - Digital camera - mirrorless system - 12.3 Mpix - Olympus M.Zuiko Digital 14-42mm and Zuiko Digital 40-150mm lenses - optical zoom: 3 x - supported memory: SD, SDHC - black",,3149999991,Prod code with dash approximately
+# 7284,324,Olympus,,PEN E-PL1,"Olympus E-PL1 - Digital camera - mirrorless system - 12.3 Mpix - Olympus M.Zuiko Digital 14-42mm lens - optical zoom: 3 x - supported memory: SD, SDHC - champagne",,3149999991,Prod code with dash approximately
+# 7552,324,Olympus,,PEN E-PL1,Olympus E-PL1 14-42 mm Kit; 12.3 MP; 4032 x 3042 pixels; 2560 x 1920 1024 x 768; 0 x; 0 x; Live MOS (N3839292),,3149999991,Prod code with dash approximately
+#
+#    WHY:     Because less than 75% of the highest valued matches have the same megapixel rating, leading to a fake rating of -1 MP.
+#             And the match value description for these records is "Prod code with dash approximately"
+#    SO:      Use a threshold match value instead, such as BaseMasterTemplateBuilder.prod_code_having_no_dash_with_regex_value_func_on_prod_desc
+#             This will include all product code matches, but exclude the family+model matches where model is alpha only. 
