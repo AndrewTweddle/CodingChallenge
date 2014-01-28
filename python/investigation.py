@@ -2125,8 +2125,9 @@ def get_rounded_MP_of_best_value_match(grp_by_prod):
         
         # Check for multiple top-rated mega-pixel ratings:
         if second_best_match_result_value == best_match_result_value:
-            number_of_top_valued_MPs = by_val[by_val.match_result_value == best_match_result_value]['group_count'].sum()
-            if number_of_top_valued_MPs > 2 or abs(second_best_rounded_MP - best_rounded_MP) > 1:
+            count_of_top_valued_MPs = by_val[by_val.match_result_value == best_match_result_value]['group_count'].count()
+            if count_of_top_valued_MPs > 2 or abs(second_best_rounded_MP - best_rounded_MP) > 1:
+                number_of_top_valued_MPs = by_val[by_val.match_result_value == best_match_result_value]['group_count'].sum()
                 best_match_group_count = by_val.iloc[0]['group_count']
                 proportion_of_best_match = best_match_group_count / number_of_top_valued_MPs
                 if proportion_of_best_match < THRESHOLD_FOR_REJECTING_MPS_DUE_TO_DIVERSITY:
@@ -2405,3 +2406,9 @@ filtered_best_matches[best_match_columns].sort_index(by=best_match_sort_by).to_c
 #             This will include all product code matches, but exclude the family+model matches where model is alpha only. 
 #    BUT:     This would make the older EOS 1-D models match the Mark IV again.
 #    SO:      Accept that the price of fixing the EOS 1-D mismatches is that these 11 PEN E-PL1 listings won't get matched.
+#    BUT:     The PEN E-PL1 only has 2 MP ratings (12 MP and 13 MP, caused by the German listings rounding up not down).
+#             So why is it being set to -1 MP?
+#    ANSWER:  There was a bug, which has now been fixed!
+#    RESULT:  The Pen E-PL1 listings are now being correctly matched again.
+#             Only the EOS 1-D's and the Leica Digilux are being filtered out now!
+
