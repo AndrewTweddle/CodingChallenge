@@ -39,6 +39,19 @@ class AllOfFamilyAndModel_MasterTemplateBuilderTestCase(unittest.TestCase):
         self.assertEqual(match_result.match_value, expected_match_value)
         self.assertEqual(match_result.description, expected_description)
     
+    def testAllOfFamilyAndModelApproximatelyWhenModelIsAlphaOnly(self):
+        classification = '+a'
+        blocks = ['+', 'Digilux']
+        family_and_model_len = len('Digilux')
+        product_desc = "Leica 'Digilux 2' 5MP Digital Camera"
+        extra_prod_details = ''
+        
+        builder = MasterTemplateBuilder(classification)
+        master_tpl = builder.build()
+        engine = master_tpl.generate(blocks, family_and_model_len)
+        match_result = engine.try_match_listing(product_desc, extra_prod_details)
+        self.assert_(not match_result.is_match, '"Family and model approximately" should not match when model classification is n')
+    
 class FamilyAndModelSeparately_MasterTemplateBuilderTestCase(unittest.TestCase):
     def testFamilyAndModelSeparately(self):
         classification = 'a+an'
@@ -117,6 +130,19 @@ class FamilyAndModelSeparately_MasterTemplateBuilderTestCase(unittest.TestCase):
         engine = master_tpl.generate(blocks, family_and_model_len)
         match_result = engine.try_match_listing(product_desc, extra_prod_details)
         self.assert_(not match_result.is_match, 'No match should be found since the model contains no digits')
+    
+    def testFamilyAndModelSeparatelyWhenModelIsAlphaOnly(self):
+        classification = '+a'
+        blocks = ['+', 'Digilux']
+        family_and_model_len = len('Digilux')
+        product_desc = "Leica 'Digilux 2' 5MP Digital Camera"
+        extra_prod_details = ''
+        
+        builder = FamilyAndModelSeparatelyMasterTemplateBuilder(classification)
+        master_tpl = builder.build()
+        engine = master_tpl.generate(blocks, family_and_model_len)
+        match_result = engine.try_match_listing(product_desc, extra_prod_details)
+        self.assert_(not match_result.is_match, '"Family and model separately" should not match when model classification is n')
 
 class ModelAndWordsInFamily_MasterTemplateBuilderTestCase(unittest.TestCase):
     def testModelAndWordsInFamily(self):
@@ -228,6 +254,19 @@ class ModelAndWordsInFamily_MasterTemplateBuilderTestCase(unittest.TestCase):
         match_result = engine.try_match_listing(product_desc, extra_prod_details)
         self.assert_(not match_result.is_match, 'No match should be found since the model contains no digits')
     
+    def testModelAndWordsInFamilyWhenModelIsAlphaOnly(self):
+        classification = '+a'
+        blocks = ['+', 'Digilux']
+        family_and_model_len = len('Digilux')
+        product_desc = "Leica 'Digilux 2' 5MP Digital Camera"
+        extra_prod_details = ''
+        
+        builder = SingleMethodMasterTemplateBuilder(classification, 
+            BaseMasterTemplateBuilder.match_model_and_words_in_family_with_regex)
+        master_tpl = builder.build()
+        engine = master_tpl.generate(blocks, family_and_model_len)
+        match_result = engine.try_match_listing(product_desc, extra_prod_details)
+        self.assert_(not match_result.is_match, '"Model and words in family" should not match when model classification is n')
 
 class ProdCode_MasterTemplateBuilderTestCase(unittest.TestCase):
     def testProdCodeMatchHavingAlphasAroundDashThenASpaceAndANumber(self):

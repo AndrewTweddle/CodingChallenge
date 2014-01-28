@@ -73,6 +73,8 @@ class BaseMasterTemplateBuilder(object):
     
     def match_all_of_family_and_model_with_regex(self):
         # set_trace()
+        if self.model_classification.replace('_','') == 'a':
+            return []
         slices = [self.family_slice, self.model_slice]
         rule_tpl = RegexRuleTemplate( slices,
             MasterTemplateBuilder.all_of_family_and_model_with_regex_value_func_on_prod_desc,
