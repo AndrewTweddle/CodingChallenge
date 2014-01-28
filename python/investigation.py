@@ -2375,5 +2375,5 @@ filtered_best_matches[best_match_columns].sort_index(by=best_match_sort_by).to_c
 #    RESULT:  The Digilux model is no longer matched in the pre-filtered best_matches_by_match_result_value.csv
 #    HOWEVER: Neither are the Casio Exilim TRYX, Kodak Slice.
 #    SO:      Add back the rule for 'a' models, but with a very low priority.
-# 
-
+#    RESULT:  Now the three products with 'a' models are back, 
+#             but with description: "Family and alpha model approximately"

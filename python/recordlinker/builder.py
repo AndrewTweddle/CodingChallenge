@@ -13,6 +13,7 @@ class BaseMasterTemplateBuilder(object):
     prod_code_having_dash_with_regex_desc = 'Prod code with dash approximately'
     alt_prod_code_having_dash_with_regex_desc = 'Alternate prod code with dash approximately'
     prod_code_having_no_dash_with_regex_desc = 'Prod code without a dash approximately'
+    all_of_family_and_alpha_model_with_regex_desc = 'Family and alpha model approximately'
     
     all_of_family_and_model_with_regex_value_func_on_prod_desc = MatchValueFunction( 1000000000, 10000000)
     all_of_family_and_model_with_regex_value_func_on_prod_details = MatchValueFunction( 10000000, 100000)
@@ -32,6 +33,9 @@ class BaseMasterTemplateBuilder(object):
     prod_code_having_alphas_around_dash_with_regex_value_func_on_prod_details = MatchValueFunction( 2000000, 20000)
     prod_code_having_no_dash_with_regex_value_func_on_prod_desc = MatchValueFunction( 100000000, 1000000)
     prod_code_having_no_dash_with_regex_value_func_on_prod_details = MatchValueFunction( 1000000, 10000)
+    # Match values where model is 'a':
+    all_of_family_and_alpha_model_with_regex_value_func_on_prod_desc = MatchValueFunction( 10000000, 100000)
+    all_of_family_and_alpha_model_with_regex_value_func_on_prod_details = MatchValueFunction( 100000, 1000)
     
     word_regex_pattern = '(?:[can]|\-)+'
     
@@ -73,8 +77,11 @@ class BaseMasterTemplateBuilder(object):
     
     def match_all_of_family_and_model_with_regex(self):
         # set_trace()
+        
+        # Don't apply this rule if the model is all alphabetic:
         if self.model_classification.replace('_','') == 'a':
             return []
+        
         slices = [self.family_slice, self.model_slice]
         rule_tpl = RegexRuleTemplate( slices,
             MasterTemplateBuilder.all_of_family_and_model_with_regex_value_func_on_prod_desc,
@@ -300,7 +307,24 @@ class BaseMasterTemplateBuilder(object):
         
         # No product code match found:
         return []
-
+    
+    def match_all_of_family_and_alpha_model_with_regex(self):
+        # set_trace()
+        
+        # Only apply this rule if the model is all alphabetic:
+        if self.model_classification.replace('_','') != 'a':
+            return []
+        
+        slices = [self.family_slice, self.model_slice]
+        rule_tpl = RegexRuleTemplate( slices,
+            MasterTemplateBuilder.all_of_family_and_alpha_model_with_regex_value_func_on_prod_desc,
+            MasterTemplateBuilder.all_of_family_and_alpha_model_with_regex_value_func_on_prod_details,
+            must_match_on_desc = True)
+        listing_tpl = ListingMatcherTemplate(
+            MasterTemplateBuilder.all_of_family_and_alpha_model_with_regex_desc, 
+            [rule_tpl], [])
+        return [listing_tpl]
+    
 # --------------------------------------------------------------------------------------------------
 # A derived class which is the standard way to build a MasterTemplate from a classification string:
 # 
@@ -309,7 +333,8 @@ class MasterTemplateBuilder(BaseMasterTemplateBuilder):
         BaseMasterTemplateBuilder.match_all_of_family_and_model_with_regex,
         BaseMasterTemplateBuilder.match_family_and_model_separately_with_regex,
         BaseMasterTemplateBuilder.match_model_and_words_in_family_with_regex,
-        BaseMasterTemplateBuilder.match_prod_code_with_regex
+        BaseMasterTemplateBuilder.match_prod_code_with_regex,
+        BaseMasterTemplateBuilder.match_all_of_family_and_alpha_model_with_regex
     ]
     
     def get_listing_templates(self):

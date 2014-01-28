@@ -46,11 +46,12 @@ class AllOfFamilyAndModel_MasterTemplateBuilderTestCase(unittest.TestCase):
         product_desc = "Leica 'Digilux 2' 5MP Digital Camera"
         extra_prod_details = ''
         
-        builder = MasterTemplateBuilder(classification)
+        builder = SingleMethodMasterTemplateBuilder(classification, 
+            BaseMasterTemplateBuilder.match_all_of_family_and_model_with_regex)
         master_tpl = builder.build()
         engine = master_tpl.generate(blocks, family_and_model_len)
         match_result = engine.try_match_listing(product_desc, extra_prod_details)
-        self.assert_(not match_result.is_match, '"Family and model approximately" should not match when model classification is n')
+        self.assert_(not match_result.is_match, '"Family and model approximately" should not match when model classification is a')
     
 class FamilyAndModelSeparately_MasterTemplateBuilderTestCase(unittest.TestCase):
     def testFamilyAndModelSeparately(self):
@@ -142,7 +143,7 @@ class FamilyAndModelSeparately_MasterTemplateBuilderTestCase(unittest.TestCase):
         master_tpl = builder.build()
         engine = master_tpl.generate(blocks, family_and_model_len)
         match_result = engine.try_match_listing(product_desc, extra_prod_details)
-        self.assert_(not match_result.is_match, '"Family and model separately" should not match when model classification is n')
+        self.assert_(not match_result.is_match, '"Family and model separately" should not match when model classification is a')
 
 class ModelAndWordsInFamily_MasterTemplateBuilderTestCase(unittest.TestCase):
     def testModelAndWordsInFamily(self):
@@ -266,7 +267,7 @@ class ModelAndWordsInFamily_MasterTemplateBuilderTestCase(unittest.TestCase):
         master_tpl = builder.build()
         engine = master_tpl.generate(blocks, family_and_model_len)
         match_result = engine.try_match_listing(product_desc, extra_prod_details)
-        self.assert_(not match_result.is_match, '"Model and words in family" should not match when model classification is n')
+        self.assert_(not match_result.is_match, '"Model and words in family" should not match when model classification is a')
 
 class ProdCode_MasterTemplateBuilderTestCase(unittest.TestCase):
     def testProdCodeMatchHavingAlphasAroundDashThenASpaceAndANumber(self):
@@ -384,6 +385,42 @@ class ProdCode_MasterTemplateBuilderTestCase(unittest.TestCase):
         self.assert_(not match_result.is_match, 'There should be no match to the GXR A12 for a Ricoh A12 GR')
 
 
+class AllOfFamilyAndAlphaModel_MasterTemplateBuilderTestCase(unittest.TestCase):
+    def testAllOfFamilyAndAlphaModelApproximatelyWhenModelIsNotJustAlpha(self):
+        classification = 'a-a+a-an'
+        blocks = ['Cyber', '-', 'shot', ' ', 'DSC', '-', 'W', '310']
+        family_and_model_len = len('Cyber-shotDSC-W310')
+        product_desc = 'C y b e r s h o t-DSC W 310'
+        extra_prod_details = ''
+        
+        builder = SingleMethodMasterTemplateBuilder(classification, 
+            BaseMasterTemplateBuilder.match_all_of_family_and_alpha_model_with_regex)
+        master_tpl = builder.build()
+        engine = master_tpl.generate(blocks, family_and_model_len)
+        match_result = engine.try_match_listing(product_desc, extra_prod_details)
+        self.assert_(not match_result.is_match, '"Family and alpha model approximately" should only match when model classification is a')
+    
+    def testAllOfFamilyAndAlphaModelApproximatelyWhenModelIsAlphaOnly(self):
+        classification = '+a'
+        blocks = [' ', 'Digilux']
+        family_and_model_len = len('Digilux')
+        product_desc = "Leica 'Digilux 2' 5MP Digital Camera"
+        matched_product_desc_len = len('Digilux')
+        extra_prod_details = ''
+        value_func = MasterTemplateBuilder.all_of_family_and_alpha_model_with_regex_value_func_on_prod_desc
+        expected_match_value = 10 * ( value_func.fixed_value + value_func.value_per_char * matched_product_desc_len ) - family_and_model_len
+        expected_description = MasterTemplateBuilder.all_of_family_and_alpha_model_with_regex_desc
+        
+        builder = SingleMethodMasterTemplateBuilder(classification, 
+            BaseMasterTemplateBuilder.match_all_of_family_and_alpha_model_with_regex)
+        master_tpl = builder.build()
+        engine = master_tpl.generate(blocks, family_and_model_len)
+        match_result = engine.try_match_listing(product_desc, extra_prod_details)
+        self.assert_(match_result.is_match, 'A match should be found')
+        self.assertEqual(match_result.match_value, expected_match_value)
+        self.assertEqual(match_result.description, expected_description)
+
+
 class MultipleCodesInProductDescTestCase(unittest.TestCase):
     
     def testProdCodeMatchAfterSlash(self):
@@ -443,8 +480,7 @@ class MultipleCodesInProductDescTestCase(unittest.TestCase):
         match_value_2 = match_result_2.match_value
         
         self.assert_(match_value_1 > match_value_2, 'The Canon 550D should be the higher value match as it precedes the opening round bracket')
-        
-        
+
 # Run unit tests from the command line:        
 if __name__ == '__main__':
     unittest.main()
