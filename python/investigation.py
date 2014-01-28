@@ -2363,7 +2363,17 @@ filtered_best_matches[best_match_columns].sort_index(by=best_match_sort_by).to_c
 # 
 # a. Modify the matching rule for "Family and model approximately" to either:
 #    i.  require a digit or dash in the combined family and model, or
-#    ii. reject models whose classification pattern is just 'n'
+#    ii. reject models whose classification pattern is just 'a'
 # 
 # b. Ignore the Megapixel filtering rule for matches where the match_result_description is 'Family and model approximately'.
 # 
+
+# Outcome:
+#
+# a. [Reject models whose classification pattern is just 'a']
+# 
+#    RESULT:  The Digilux model is no longer matched in the pre-filtered best_matches_by_match_result_value.csv
+#    HOWEVER: Neither are the Casio Exilim TRYX, Kodak Slice.
+#    SO:      Add back the rule for 'a' models, but with a very low priority.
+# 
+
