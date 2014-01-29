@@ -2412,3 +2412,29 @@ filtered_best_matches[best_match_columns].sort_index(by=best_match_sort_by).to_c
 #    RESULT:  The Pen E-PL1 listings are now being correctly matched again.
 #             Only the EOS 1-D's and the Leica Digilux are being filtered out now!
 
+
+
+# ==============================================================================
+# 12. Analyze listings which weren't matched to any product:
+#
+
+# -----------------------------------------------------------------------------
+# 12.1 Set matched product on all listings:
+# 
+
+filtered_columns = ['index_p', 'index_l']
+filtered_prod_columns = ['family', 'model', 'manufacturer', 'product_name', 'announced-date']
+listings_with_matched_products = pd.merge( listingsByPManuf, filtered_best_matches[filtered_columns], how='left', left_index=True, right_on='index_l')
+listings_with_matched_products = pd.merge( 
+    listings_with_matched_products, products[filtered_prod_columns], how='left', left_on='index_p', right_index=True )
+
+# listings_with_matched_products.head()
+
+
+# -----------------------------------------------------------------------------
+# 12.2 Find all listings which haven't been matched to a product:
+# 
+
+unmatched_listings_cols = ['pManuf', 'productDesc', 'extraProdDetails']
+unmatched_listings = listings_with_matched_products[listings_with_matched_products.index_p.isnull()][unmatched_listings_cols]
+unmatched_listings.sort_index(by=unmatched_listings_cols).to_csv('../data/intermediate/unmatched_listings.csv', encoding='utf-8')
