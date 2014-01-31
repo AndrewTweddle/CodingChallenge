@@ -2438,3 +2438,11 @@ listings_with_matched_products = pd.merge(
 unmatched_listings_cols = ['pManuf', 'productDesc', 'extraProdDetails']
 unmatched_listings = listings_with_matched_products[listings_with_matched_products.index_p.isnull()][unmatched_listings_cols]
 unmatched_listings.sort_index(by=unmatched_listings_cols).to_csv('../data/intermediate/unmatched_listings.csv', encoding='utf-8')
+
+
+# search_string = '733'
+# products[products.model.str.contains(search_string)][['manufacturer', 'family', 'model']].head()
+# products[products.model.str.contains(search_string)].model.count()
+#
+# Filter by manufacturer:
+# products[products.manufacturer.str.contains('Agfa')][['manufacturer', 'family', 'model']].head()
