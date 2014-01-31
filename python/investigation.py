@@ -2446,3 +2446,107 @@ unmatched_listings.sort_index(by=unmatched_listings_cols).to_csv('../data/interm
 #
 # Filter by manufacturer:
 # products[products.manufacturer.str.contains('Agfa')][['manufacturer', 'family', 'model']].head()
+
+
+# ISSUES DISCOVERED:
+# 
+# -----------------------------------------------------------------------------
+# ISSUE 1:
+# 
+# Some listings have product codes with a character appended to indicate the colour of the product.
+# Others have the words HD or IS appended to the code.
+# These suffixes cause the product code matches to fail.
+# 
+# CORRECTIVE ACTION:
+#    
+# a. Add a low value product code regex which checks that the product code
+#    is followed by a single letter or specific letters (i.e. HD or IS).
+#    
+# RESULT:
+# 
+# Many new (correct) matches now found:
+# 
+# 5x Canon PowerShot A2200IS
+# 1x Canon PowerShot S90IS
+# 4x Canon SX30IS
+# 4x FUJIFILM FinePix S2950HD
+# 4x Fujifilm - FinePix S3300HD
+# 9x FUJIFILM FinePix S3400HD
+# 1x HP c200A
+# 4x Panasonic DMC-F2K
+# 3x Panasonic Lumix DMC-F3K
+# 2x Panasonic Lumix DMC-FH20K
+# 7x Panasonic DMC-FH25* (*=A/K/R/S/V)
+# 1x Panasonic DMC-FX48K
+# 5x Panasonic DMC-FX75*
+# 27x Panasonic - Lumix G - DMC-G2*
+# 11x Panasonic DMC-GH1*
+# 1x Panasonic Lumix DMC-ZS3*
+# 3x Sony - DSLR-A230*
+# 15x Sony DSLR A290* SLR
+# 1x Sony - DSLR-A330*
+# 4x Sony - DSLR-A380*
+# 7x Sony DSLR DSLR-A390*
+# 7x Sony - DSLR-A450*
+# 11x Sony - DSLR-A500*
+# 6x Sony - DSLR-A550*
+# 6x Sony DSLRA580*
+# 6x Sony - DSLR-A850*
+# 50x SONY Alpha NEX-3*
+# 51x SONY Alpha NEX-5*
+# 9x Sony DSC-H55*
+# 6x Sony DSC-HX5V*
+# 22x Sony - DSC-HX7V*
+# 9x Sony DSC-S2000*
+# 3x Sony Cyber-shot DSCS950*
+# 9x Sony - Cyber-Shot - DSC-T90*
+# 7x Sony - Cyber-Shot - DSC-T900
+# 30x Sony - Cybershot DSC-T99*
+# 13x Sony - CyberShot - DSC-TX1*
+# 9x Sony DSC-TX100V*
+# 17x Sony DSC-TX5*
+# 9x Sony DSC-TX7*
+# 17x Sony - Cybershot DSC-TX9*
+# 2x Sony Cyber-shot DSC-W180*
+# 1x Sony - Cyber-Shot - DSC-W220*
+# 2x Sony - Cyber-Shot - DSC-W290*
+# 7x Sony DSC-W310*
+# 12x Sony DSC-W320*
+# 26x Sony DSC-W350*
+# 15x Sony DSC-W380*
+# 9x Sony - DSC-WX1*
+# 26x Sony - Cybershot DSC-WX5*
+# 31x Sony - DSC-W530*
+# 20x Sony - DSC-H70*
+# 11x Sony - DSC-TX10*
+# 24x Sony - DSC-W510*
+# 1x Sony DSC-W560*
+# 25x Sony - DSC-T110*
+# 33x Sony - DSC-W570*
+# 8x Sony DSC-WX10*
+# 22x Sony - DSC-WX7*
+# 29x SONY Alpha SLT-A33*
+# 33x SONY Alpha SLT-A55*
+# 
+# Unknown whether this is correct or not:
+#
+# 6x Pentax - Optio E70L
+#    
+# NEW ISSUES CREATED:
+#
+# a. The EOS 1Ds matches the EOS-1D, despite being a different "Mark". Also the 1Ds is not the same as the 1D.
+#    
+# index_l,index_p,manufacturer,family,model,productDesc,extraProdDetails,match_result_value,match_result_description
+# 4183,624,Canon,,EOS-1D Mark IV,Canon EOS 1Ds Mark II 16.7MP Digital SLR Camera (Body Only),,105059972,Prod code excluding last character or IS
+# 4184,624,Canon,,EOS-1D Mark IV,Canon EOS 1Ds Mark II 16.7MP Digital SLR Camera (Body Only),,105059972,Prod code excluding last character or IS
+# 5326,624,Canon,,EOS-1D Mark IV,Canon EOS 1Ds Mark III Digital SLR Camera (Body Only),,105059972,Prod code excluding last character or IS
+# 5327,624,Canon,,EOS-1D Mark IV,Canon EOS 1Ds Mark III Digital SLR Camera (Body Only),,105059972,Prod code excluding last character or IS
+# 5328,624,Canon,,EOS-1D Mark IV,Canon EOS 1Ds Mark III Digital SLR Camera (Body Only),,105059972,Prod code excluding last character or IS
+# 
+# CORRECTIVE ACTION:
+# 
+# a. Given the large number of correct matches generated, we might just have to live with these 5 errors.
+# b. Alternatively, add logic to ensure that Mark XXX matches, as this will also eliminate these matches.
+# 
+# -----------------------------------------------------------------------------
+
