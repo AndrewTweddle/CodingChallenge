@@ -14,6 +14,7 @@ class BaseMasterTemplateBuilder(object):
     alt_prod_code_having_dash_with_regex_desc = 'Alternate prod code with dash approximately'
     prod_code_having_no_dash_with_regex_desc = 'Prod code without a dash approximately'
     all_of_family_and_alpha_model_with_regex_desc = 'Family and alpha model approximately'
+    prod_code_followed_by_a_letter_or_specific_letters_with_regex_desc = 'Prod code excluding last character or IS'
     
     all_of_family_and_model_with_regex_value_func_on_prod_desc = MatchValueFunction( 1000000000, 10000000)
     all_of_family_and_model_with_regex_value_func_on_prod_details = MatchValueFunction( 10000000, 100000)
@@ -33,9 +34,11 @@ class BaseMasterTemplateBuilder(object):
     prod_code_having_alphas_around_dash_with_regex_value_func_on_prod_details = MatchValueFunction( 2000000, 20000)
     prod_code_having_no_dash_with_regex_value_func_on_prod_desc = MatchValueFunction( 100000000, 1000000)
     prod_code_having_no_dash_with_regex_value_func_on_prod_details = MatchValueFunction( 1000000, 10000)
+    prod_code_followed_by_a_letter_or_specific_letters_with_regex_value_func_on_prod_desc = MatchValueFunction( 100000, 1000)
+    prod_code_followed_by_a_letter_or_specific_letters_with_regex_value_func_on_prod_details = MatchValueFunction( 1000, 10)
     # Match values where model is 'a':
-    all_of_family_and_alpha_model_with_regex_value_func_on_prod_desc = MatchValueFunction( 10000000, 100000)
-    all_of_family_and_alpha_model_with_regex_value_func_on_prod_details = MatchValueFunction( 100000, 1000)
+    all_of_family_and_alpha_model_with_regex_value_func_on_prod_desc = MatchValueFunction( 1000000, 10000)
+    all_of_family_and_alpha_model_with_regex_value_func_on_prod_details = MatchValueFunction( 10000, 100)
     
     word_regex_pattern = '(?:[can]|\-)+'
     
@@ -308,6 +311,50 @@ class BaseMasterTemplateBuilder(object):
         # No product code match found:
         return []
     
+    def get_prod_code_followed_by_a_letter_or_specific_letters_listing_tpl_from_match_result(self, match_result, 
+        value_func_on_prod_desc, value_func_on_prod_details, listing_desc):
+        start = match_result.start()
+        end = match_result.end()
+        match_len = end - start
+        model_slice_offset = self.family_model_separator_index + 1
+        
+        prod_code_slices = [slice(start + model_slice_offset, end + model_slice_offset)]
+        prod_code_rule_tpl = RegexRuleTemplateFollowedByAnyLetterOrSpecificLetters( prod_code_slices,
+            value_func_on_prod_desc, value_func_on_prod_details, must_match_on_desc = True)
+        
+        # Replace the product code with spaces to ensure that it doesn't contribute to the word matches as well:
+        model_classification_text = self.model_classification[:start] + (match_len * ' ') + self.model_classification[end:]
+        word_rule_tpls = self.get_family_and_model_regex_word_templates(self.family_classification, model_classification_text)
+        
+        listing_tpl = ListingMatcherTemplate( listing_desc, [prod_code_rule_tpl], word_rule_tpls)
+        return listing_tpl
+    
+    def get_listing_tpl_for_prod_code_followed_by_a_letter_or_specific_letters(self, match_result):
+        listing_tpl = self.get_prod_code_followed_by_a_letter_or_specific_letters_listing_tpl_from_match_result(match_result, 
+            MasterTemplateBuilder.prod_code_followed_by_a_letter_or_specific_letters_with_regex_value_func_on_prod_desc, 
+            MasterTemplateBuilder.prod_code_followed_by_a_letter_or_specific_letters_with_regex_value_func_on_prod_details, 
+            MasterTemplateBuilder.prod_code_followed_by_a_letter_or_specific_letters_with_regex_desc)
+        if listing_tpl == None:
+            return []
+        
+        return [listing_tpl]
+    
+    def match_prod_code_followed_by_a_letter_or_specific_letters_with_regex(self):
+        # Match product codes which contain a dash:
+        match_result = re.search( BaseMasterTemplateBuilder.prod_code_having_dash_pattern, 
+            self.model_classification, re.IGNORECASE | re.UNICODE | re.VERBOSE )
+        if match_result != None:
+            return self.get_listing_tpl_for_prod_code_followed_by_a_letter_or_specific_letters(match_result)
+            
+        # Match product codes which contain both alphabetic and numeric characters but no dash:
+        match_result = re.search( BaseMasterTemplateBuilder.prod_code_having_alpha_and_numeric_pattern, 
+            self.model_classification, re.IGNORECASE | re.UNICODE | re.VERBOSE )
+        if match_result != None:
+            return self.get_listing_tpl_for_prod_code_followed_by_a_letter_or_specific_letters(match_result)
+        
+        # No product code match found:
+        return []
+    
     def match_all_of_family_and_alpha_model_with_regex(self):
         # set_trace()
         
@@ -334,7 +381,8 @@ class MasterTemplateBuilder(BaseMasterTemplateBuilder):
         BaseMasterTemplateBuilder.match_family_and_model_separately_with_regex,
         BaseMasterTemplateBuilder.match_model_and_words_in_family_with_regex,
         BaseMasterTemplateBuilder.match_prod_code_with_regex,
-        BaseMasterTemplateBuilder.match_all_of_family_and_alpha_model_with_regex
+        BaseMasterTemplateBuilder.match_all_of_family_and_alpha_model_with_regex,
+        BaseMasterTemplateBuilder.match_prod_code_followed_by_a_letter_or_specific_letters_with_regex
     ]
     
     def get_listing_templates(self):

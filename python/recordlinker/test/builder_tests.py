@@ -385,6 +385,85 @@ class ProdCode_MasterTemplateBuilderTestCase(unittest.TestCase):
         self.assert_(not match_result.is_match, 'There should be no match to the GXR A12 for a Ricoh A12 GR')
 
 
+class ProdCodeExcludingLastCharOrIS_MasterTemplateBuilderTestCase(unittest.TestCase):
+    def testProdCodeFollowedByAnyLetter(self):
+        classification = 'a+a-n'
+        blocks = ['Alpha','+','NEX','-','3']
+        family_and_model_len = len('AlphaNEX-3')
+        product_desc = 'SONY NEX-3K black'
+        extra_prod_details = '18 - 55 mm Lens'
+        
+        expected_match_value \
+            = BaseMasterTemplateBuilder.prod_code_followed_by_a_letter_or_specific_letters_with_regex_value_func_on_prod_desc.evaluate( \
+                len('NEX-3'), family_and_model_len, is_after_sep = False)
+        expected_description = MasterTemplateBuilder.prod_code_followed_by_a_letter_or_specific_letters_with_regex_desc
+        
+        builder = MasterTemplateBuilder(classification)
+        master_tpl = builder.build()
+        engine = master_tpl.generate(blocks, family_and_model_len)
+        match_result = engine.try_match_listing(product_desc, extra_prod_details)
+        self.assert_(match_result.is_match, 'There should be a match to the NEX-3 of a NEX-3K listing')
+        self.assertEqual(match_result.match_value, expected_match_value)
+        self.assertEqual(match_result.description, expected_description)
+    
+    def testProdCodeFollowedByIS(self):
+        classification = 'a+an'
+        blocks = ['Powershot','+','A','2200']
+        family_and_model_len = len('PowershotA2200')
+        product_desc = 'Canon PowerShot A2200IS (Black)'
+        extra_prod_details = ''
+        
+        expected_match_value \
+            = BaseMasterTemplateBuilder.prod_code_followed_by_a_letter_or_specific_letters_with_regex_value_func_on_prod_desc.evaluate( \
+                len('A2200'), family_and_model_len, is_after_sep = False) \
+            + BaseMasterTemplateBuilder.family_word_with_regex_value_func_on_prod_desc.evaluate( \
+                len('Powershot'), family_and_model_len, is_after_sep = False)
+        expected_description = MasterTemplateBuilder.prod_code_followed_by_a_letter_or_specific_letters_with_regex_desc
+        
+        builder = MasterTemplateBuilder(classification)
+        master_tpl = builder.build()
+        engine = master_tpl.generate(blocks, family_and_model_len)
+        match_result = engine.try_match_listing(product_desc, extra_prod_details)
+        self.assert_(match_result.is_match, 'There should be a match to the A2200 of a Powershot A2200IS listing')
+        self.assertEqual(match_result.match_value, expected_match_value)
+        self.assertEqual(match_result.description, expected_description)
+    
+    def testProdCodeFollowedByHD(self):
+        classification = 'a+an'
+        blocks = ['FinePix','+','S','2950']
+        family_and_model_len = len('FinePixS2950')
+        product_desc = 'FUJIFILM FinePix S2950HD'
+        extra_prod_details = ''
+        
+        expected_match_value \
+            = BaseMasterTemplateBuilder.prod_code_followed_by_a_letter_or_specific_letters_with_regex_value_func_on_prod_desc.evaluate( \
+                len('S2950'), family_and_model_len, is_after_sep = False) \
+            + BaseMasterTemplateBuilder.family_word_with_regex_value_func_on_prod_desc.evaluate( \
+                len('FinePix'), family_and_model_len, is_after_sep = False)
+        expected_description = MasterTemplateBuilder.prod_code_followed_by_a_letter_or_specific_letters_with_regex_desc
+        
+        builder = MasterTemplateBuilder(classification)
+        master_tpl = builder.build()
+        engine = master_tpl.generate(blocks, family_and_model_len)
+        match_result = engine.try_match_listing(product_desc, extra_prod_details)
+        self.assert_(match_result.is_match, 'There should be a match to the S2950 of a FinePix S2950HD listing')
+        self.assertEqual(match_result.match_value, expected_match_value)
+        self.assertEqual(match_result.description, expected_description)
+    
+    def testProdCodeFollowedByADigit(self):
+        classification = 'a+an'
+        blocks = ['Powershot','+','S','20']
+        family_and_model_len = len('PowerShotS20')
+        product_desc = 'Canon PowerShot S200 2MP Digital ELPH Camera'
+        extra_prod_details = ''
+        
+        builder = MasterTemplateBuilder(classification)
+        master_tpl = builder.build()
+        engine = master_tpl.generate(blocks, family_and_model_len)
+        match_result = engine.try_match_listing(product_desc, extra_prod_details)
+        self.assert_(not match_result.is_match, 'There should be no match to the S20 of a Canon PowerShot S200 listing')
+
+
 class AllOfFamilyAndAlphaModel_MasterTemplateBuilderTestCase(unittest.TestCase):
     def testAllOfFamilyAndAlphaModelApproximatelyWhenModelIsNotJustAlpha(self):
         classification = 'a-a+a-an'

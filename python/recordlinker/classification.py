@@ -159,11 +159,28 @@ class MatchingRuleTemplate(object):
         pass
 
 # --------------------------------------------------------------------------------------------------
+# A class to represent the base template for a RegexMatchingRule:
+# 
+class RegexRuleBaseTemplate(MatchingRuleTemplate):
+    @abstractmethod
+    def generate_regex_pattern(self, text):
+        pass
+    
+    def generate(self, all_blocks, family_and_model_len):
+        # set_trace()
+        block_gen = (all_blocks[s] for s in self.slices)
+        extracted_blocks = itertools.chain.from_iterable(block_gen)
+        extracted_text = ''.join(extracted_blocks)
+        pattern = self.generate_regex_pattern(extracted_text)
+        regex = re.compile(pattern, flags = re.IGNORECASE or re.UNICODE )
+        return RegexMatchingRule(regex, family_and_model_len, self.value_func_on_product_desc,
+            self.value_func_on_extra_prod_details, self.must_match_on_product_desc)
+
+# --------------------------------------------------------------------------------------------------
 # A class to represent the template for a RegexMatchingRule:
 # 
-class RegexRuleTemplate(MatchingRuleTemplate):
-    @staticmethod
-    def regex_escape_with_optional_dashes_and_whitespace(text):
+class RegexRuleTemplate(RegexRuleBaseTemplate):
+    def generate_regex_pattern(self, text):
         # Remove all white-space and dashes:
         escaped_text = re.sub('(\s|\-)+', '', text)
         is_last_char_numeric = len(escaped_text) > 0 and escaped_text[-1].isdigit()
@@ -183,16 +200,28 @@ class RegexRuleTemplate(MatchingRuleTemplate):
         else:
             escaped_text = escaped_text + r'(?!\w)'
         return escaped_text
-    
-    def generate(self, all_blocks, family_and_model_len):
-        # set_trace()
-        block_gen = (all_blocks[s] for s in self.slices)
-        extracted_blocks = itertools.chain.from_iterable(block_gen)
-        extracted_text = ''.join(extracted_blocks)
-        pattern = RegexRuleTemplate.regex_escape_with_optional_dashes_and_whitespace(extracted_text)
-        regex = re.compile(pattern, flags = re.IGNORECASE or re.UNICODE )
-        return RegexMatchingRule(regex, family_and_model_len, self.value_func_on_product_desc,
-            self.value_func_on_extra_prod_details, self.must_match_on_product_desc)
+
+
+# --------------------------------------------------------------------------------------------------
+# A class to represent the template for a RegexMatchingRule where the matched text 
+# must end in a single character or certain special characters (e.g. IS or HD):
+# 
+class RegexRuleTemplateFollowedByAnyLetterOrSpecificLetters(RegexRuleBaseTemplate):
+    def generate_regex_pattern(self, text):
+        # Remove all white-space and dashes:
+        escaped_text = re.sub('(\s|\-)+', '', text)
+        is_last_char_numeric = len(escaped_text) > 0 and escaped_text[-1].isdigit()
+        # Insert a dash after every character.
+        # Note: this is just a place-holder for where a regex will be inserted later.
+        escaped_text = '-'.join(escaped_text)
+        escaped_text = re.escape(escaped_text)
+        # Replace the "\-" place-holder with a regex sequence matching whitespace characters and/or a single dash:
+        escaped_text = re.sub(r'\\\-', r'\s*(?:\-\s*)?', escaped_text)
+        # Do negative lookbehind to ensure this is not in the middle of a word:
+        escaped_text = r'(?<!\w)' + escaped_text
+        # Do negative lookahead:
+        escaped_text = escaped_text + r'(?=(?:IS|HD|[A-Za-z])(?!\w))'
+        return escaped_text
 
 # --------------------------------------------------------------------------------------------------
 # A class to represent the template for a ListingMatcher:
