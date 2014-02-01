@@ -1,6 +1,7 @@
 import unittest
 from recordlinker.builder import *
-# from pdb import set_trace
+# 
+from pdb import set_trace
 
 class FamilyAndModelSeparatelyMasterTemplateBuilder(SingleMethodMasterTemplateBuilder):
     def __init__(self, classific):
@@ -505,6 +506,63 @@ class AllOfFamilyAndAlphaModel_MasterTemplateBuilderTestCase(unittest.TestCase):
         
         builder = SingleMethodMasterTemplateBuilder(classification, 
             BaseMasterTemplateBuilder.match_all_of_family_and_alpha_model_with_regex)
+        master_tpl = builder.build()
+        engine = master_tpl.generate(blocks, family_and_model_len)
+        match_result = engine.try_match_listing(product_desc, extra_prod_details)
+        self.assert_(match_result.is_match, 'A match should be found')
+        self.assertEqual(match_result.match_value, expected_match_value)
+        self.assertEqual(match_result.description, expected_description)
+
+
+class WordAndNumberCrossingFamilyAndModel_MasterTemplateBuilderTestCase(unittest.TestCase):
+    def testWordAndNumberCrossingFamilyAndModelWithWordAndNumberOnly(self):
+        classification = 'a+n'
+        blocks = ['FinePix', '+', '1400']
+        family_and_model_len = len('FinePix1400')
+        product_desc = 'Fujifilm FinePix 1400 1.2MP Digital Camera'
+        matched_product_desc_len = len('FinePix 1400')
+        extra_prod_details = ''
+        
+        builder = SingleMethodMasterTemplateBuilder(classification, 
+            BaseMasterTemplateBuilder.match_word_and_number_crossing_family_and_model)
+        master_tpl = builder.build()
+        engine = master_tpl.generate(blocks, family_and_model_len)
+        match_result = engine.try_match_listing(product_desc, extra_prod_details)
+        self.assert_(not match_result.is_match, '"Word And Number Crossing Family And Model" should not match when the classification is only "a+n"')
+    
+    def testWordAndNumberCrossingFamilyAndModelPrecededAndFollowedByASpace(self):
+        classification = 'a_a+n_a'
+        blocks = ['Digital', ' ', 'IXUS', '+', '130', ' ', 'IS']
+        family_and_model_len = len('Digital IXUS130 IS')
+        product_desc = 'Canon - IXUS 130 - Appareil photo numérique - 14,1 Mpix - Gris Argent'
+        matched_product_desc_len = len('IXUS 130')
+        extra_prod_details = ''
+        value_func = BaseMasterTemplateBuilder.word_and_number_crossing_family_and_model_with_regex_value_func_on_prod_desc
+        expected_match_value = 10 * ( value_func.fixed_value + value_func.value_per_char * matched_product_desc_len ) - family_and_model_len
+        expected_description = BaseMasterTemplateBuilder.word_and_number_crossing_family_and_model_with_regex_desc
+        
+        builder = SingleMethodMasterTemplateBuilder(classification, 
+            BaseMasterTemplateBuilder.match_word_and_number_crossing_family_and_model)
+        master_tpl = builder.build()
+        engine = master_tpl.generate(blocks, family_and_model_len)
+        match_result = engine.try_match_listing(product_desc, extra_prod_details)
+        self.assert_(match_result.is_match, 'A match should be found')
+        self.assertEqual(match_result.match_value, expected_match_value)
+        self.assertEqual(match_result.description, expected_description)
+    
+    def testWordAndNumberCrossingFamilyAndModelFollowedByASpace(self):
+        classification = 'a+n_a'
+        blocks = ['FinePix', '+', '4700', ' ', 'Zoom']
+        family_and_model_len = len('FinePix4700 Zoom')
+        product_desc = 'Fujifilm FinePix 4700 2.4MP  Digital Camera'
+        matched_product_desc_len = len('FinePix 4700')
+        extra_prod_details = ''
+        value_func = MasterTemplateBuilder.word_and_number_crossing_family_and_model_with_regex_value_func_on_prod_desc
+        expected_match_value = 10 * ( value_func.fixed_value + value_func.value_per_char * matched_product_desc_len ) - family_and_model_len
+        expected_description = MasterTemplateBuilder.word_and_number_crossing_family_and_model_with_regex_desc
+        
+        builder = SingleMethodMasterTemplateBuilder(classification, 
+            BaseMasterTemplateBuilder.match_word_and_number_crossing_family_and_model)
         master_tpl = builder.build()
         engine = master_tpl.generate(blocks, family_and_model_len)
         match_result = engine.try_match_listing(product_desc, extra_prod_details)

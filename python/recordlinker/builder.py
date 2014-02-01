@@ -1,6 +1,7 @@
 from recordlinker.classification import *
 import re
-# from pdb import set_trace
+# 
+from pdb import set_trace
 
 # --------------------------------------------------------------------------------------------------
 # A base class for classes which build a MasterTemplate from a classification string:
@@ -15,6 +16,7 @@ class BaseMasterTemplateBuilder(object):
     prod_code_having_no_dash_with_regex_desc = 'Prod code without a dash approximately'
     all_of_family_and_alpha_model_with_regex_desc = 'Family and alpha model approximately'
     prod_code_followed_by_a_letter_or_specific_letters_with_regex_desc = 'Prod code excluding last character or IS'
+    word_and_number_crossing_family_and_model_with_regex_desc = 'Word and number crossing family and model'
     
     all_of_family_and_model_with_regex_value_func_on_prod_desc = MatchValueFunction( 1000000000, 10000000)
     all_of_family_and_model_with_regex_value_func_on_prod_details = MatchValueFunction( 10000000, 100000)
@@ -39,6 +41,9 @@ class BaseMasterTemplateBuilder(object):
     # Match values where model is 'a':
     all_of_family_and_alpha_model_with_regex_value_func_on_prod_desc = MatchValueFunction( 1000000, 10000)
     all_of_family_and_alpha_model_with_regex_value_func_on_prod_details = MatchValueFunction( 10000, 100)
+    # Other match patterns:
+    word_and_number_crossing_family_and_model_with_regex_value_func_on_prod_desc = MatchValueFunction( 100000, 1000)
+    word_and_number_crossing_family_and_model_with_regex_value_func_on_prod_details = MatchValueFunction( 1000, 10)
     
     word_regex_pattern = '(?:[can]|\-)+'
     
@@ -50,6 +55,10 @@ class BaseMasterTemplateBuilder(object):
     prod_code_having_dash_pattern = '(?<!\(|a|c|n)[acn]+\-[-acn]*[acn](?!\)|a|c|n)'
     prod_code_having_alpha_and_numeric_pattern = '(?<!\(|a|c)(?:[ac]+n[acn]*|n+[ac][acn]*)(?!\)|a|c|n)'
     alt_prod_code_pattern = '(?<!\(|a|c|n)(?P<prefix>[acn][-acn]*\-)(?:[acn]*[acn])\!(?P<suffix>[acnx]*[acn])(?!\)|a|c|n)'
+    
+    word_and_number_crossing_family_and_model_pattern = '(?:^a|(?<=_)a)\+n(?=$|_)'
+        # was: '(?<=^|_)a\+n(?=$|_)'
+        # but this gives "error: look-behind requires fixed-width pattern"
         
     def __init__(self, classific):
         self.classification = classific
@@ -372,6 +381,36 @@ class BaseMasterTemplateBuilder(object):
             [rule_tpl], [])
         return [listing_tpl]
     
+    def match_word_and_number_crossing_family_and_model(self):
+        # set_trace()
+        if self.classification == 'a+n':
+            return []
+        
+        match_result = re.search( BaseMasterTemplateBuilder.word_and_number_crossing_family_and_model_pattern, 
+            self.classification, re.IGNORECASE | re.UNICODE | re.VERBOSE )
+        if match_result == None:
+            return []
+        
+        start = match_result.start()
+        end = match_result.end()
+        match_len = end - start
+        
+        prod_code_slices = [slice(start, start + 1), slice(end - 1, end)]
+        prod_code_rule_tpl = RegexRuleTemplate( prod_code_slices,
+            BaseMasterTemplateBuilder.word_and_number_crossing_family_and_model_with_regex_value_func_on_prod_desc,
+            BaseMasterTemplateBuilder.word_and_number_crossing_family_and_model_with_regex_value_func_on_prod_details,
+            must_match_on_desc = True)
+        
+        # Replace the product code with spaces to ensure that it doesn't contribute to the word matches as well:
+        family_classification_text = self.family_classification[:start] + '_'
+        model_classification_text = '_' + self.model_classification[1:]
+        word_rule_tpls = self.get_family_and_model_regex_word_templates(family_classification_text, model_classification_text)
+        
+        listing_tpl = ListingMatcherTemplate(
+            BaseMasterTemplateBuilder.word_and_number_crossing_family_and_model_with_regex_desc,
+            [prod_code_rule_tpl], word_rule_tpls)
+        return [listing_tpl]
+
 # --------------------------------------------------------------------------------------------------
 # A derived class which is the standard way to build a MasterTemplate from a classification string:
 # 
@@ -382,7 +421,8 @@ class MasterTemplateBuilder(BaseMasterTemplateBuilder):
         BaseMasterTemplateBuilder.match_model_and_words_in_family_with_regex,
         BaseMasterTemplateBuilder.match_prod_code_with_regex,
         BaseMasterTemplateBuilder.match_all_of_family_and_alpha_model_with_regex,
-        BaseMasterTemplateBuilder.match_prod_code_followed_by_a_letter_or_specific_letters_with_regex
+        BaseMasterTemplateBuilder.match_prod_code_followed_by_a_letter_or_specific_letters_with_regex,
+        BaseMasterTemplateBuilder.match_word_and_number_crossing_family_and_model
     ]
     
     def get_listing_templates(self):
