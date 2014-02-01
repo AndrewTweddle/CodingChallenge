@@ -2554,3 +2554,76 @@ unmatched_listings.sort_index(by=unmatched_listings_cols).to_csv('../data/interm
 # Issue resolved by specifically excluding the EOS 1-Ds in the regular expression for a product code + extra character.
 # 
 # -----------------------------------------------------------------------------
+# ISSUE 2:
+# 
+# Some listings are being missed because the product code is a word followed by a number.
+# In many cases, the word is the last word in the family, and the number is the first part of the model.
+# 
+# CORRECTIVE ACTION:
+#    
+# a. Add a low value rule template based on an 'a+n' pattern, where the 'a' and 'n' must be 
+#    at the boundaries of the classification, or next to an underscore (i.e. whitespace).
+#    
+# RESULT:
+# 
+# 36 new matches found:
+# 
+# index_l,index_p,manufacturer,family,model,productDesc,extraProdDetails,match_result_value,match_result_description
+# 5771,6,Canon,Digital IXUS,130 IS,CANON Digital Ixus 130 - silver,4 GB SDHC Memory Card (ComboKit),11779964,Word and number crossing family and model
+# 6157,258,Canon,Digital IXUS,210 IS,"Canon - IXUS 210 - Appareil photo numérique - 14,1 Mpix - Tactile - Argent",,1079982,Word and number crossing family and model
+# 6174,258,Canon,Digital IXUS,210 IS,"Canon - IXUS 210 - Appareil photo numérique - 14,1 Mpix - Tactile - Doré",,1079982,Word and number crossing family and model
+# 6175,258,Canon,Digital IXUS,210 IS,"Canon - IXUS 210 - Appareil photo numérique - 14,1 Mpix - Tactile - Doré",,1079982,Word and number crossing family and model
+# 6091,258,Canon,Digital IXUS,210 IS,"Canon - IXUS 210 - Appareil photo numérique - 14,1 Mpix - Tactile - Noir",,1079982,Word and number crossing family and model
+# 6092,258,Canon,Digital IXUS,210 IS,"Canon - IXUS 210 - Appareil photo numérique - 14,1 Mpix - Tactile - Noir",,1079982,Word and number crossing family and model
+# 6093,258,Canon,Digital IXUS,210 IS,"Canon - IXUS 210 - Appareil photo numérique - 14,1 Mpix - Tactile - Noir",,1079982,Word and number crossing family and model
+# 6131,258,Canon,Digital IXUS,210 IS,"Canon - IXUS 210 - Appareil photo numérique - 14,1 Mpix - Tactile - Rose",,1079982,Word and number crossing family and model
+# 6132,258,Canon,Digital IXUS,210 IS,"Canon - IXUS 210 - Appareil photo numérique - 14,1 Mpix - Tactile - Rose",,1079982,Word and number crossing family and model
+# 6212,258,Canon,Digital IXUS,210 IS,"Canon - IXUS 210 - Appareil photo numérique - compact - 14.1 Mpix - zoom optique : 5 x - mémoire prise en charge : MMC, SD, SDXC, SDHC, MMCplus - argenté(e)",,1079982,Word and number crossing family and model
+# 5467,258,Canon,Digital IXUS,210 IS,"Canon IXUS 210 Digital Camera - Black (14.1 MP, 5x Optical Zoom) 3.5 Inch PureColor Touch LCD",,11779964,Word and number crossing family and model
+# 5468,258,Canon,Digital IXUS,210 IS,"Canon IXUS 210 Digital Camera - Black (14.1 MP, 5x Optical Zoom) 3.5 Inch PureColor Touch LCD",,11779964,Word and number crossing family and model
+# 5506,258,Canon,Digital IXUS,210 IS,"Canon IXUS 210 Digital Camera - Gold (14.1 MP, 5x Optical Zoom) 3.5 Inch PureColor Touch LCD",,11779964,Word and number crossing family and model
+# 5464,258,Canon,Digital IXUS,210 IS,"Canon IXUS 210 Digital Camera - Pink (14.1 MP, 5x Optical Zoom) 3.5 Inch PureColor Touch LCD",,11779964,Word and number crossing family and model
+# 5465,258,Canon,Digital IXUS,210 IS,"Canon IXUS 210 Digital Camera - Pink (14.1 MP, 5x Optical Zoom) 3.5 Inch PureColor Touch LCD",,11779964,Word and number crossing family and model
+# 5476,258,Canon,Digital IXUS,210 IS,"Canon IXUS 210 Digital Camera - Silver (14.1 MP, 5x Optical Zoom) 3.5 Inch PureColor Touch LCD",,11779964,Word and number crossing family and model
+# 5477,258,Canon,Digital IXUS,210 IS,"Canon IXUS 210 Digital Camera - Silver (14.1 MP, 5x Optical Zoom) 3.5 Inch PureColor Touch LCD",,11779964,Word and number crossing family and model
+# 5478,258,Canon,Digital IXUS,210 IS,"Canon IXUS 210 Digital Camera - Silver (14.1 MP, 5x Optical Zoom) 3.5 Inch PureColor Touch LCD",,11779964,Word and number crossing family and model
+# 5649,258,Canon,Digital IXUS,210 IS,Canon IXUS 210 Digital Camera 14.1MP (Silver) (4196B015),,11779964,Word and number crossing family and model
+# 5904,258,Canon,Digital IXUS,210 IS,"Canon IXUS 210 Digitalkamera (14 Megapixel, 5-fach opt. Zoom, 8.9 cm (3.5 Zoll) Full-Touchscreen, bildstabilisiert) gold",,1079982,Word and number crossing family and model
+# 5905,258,Canon,Digital IXUS,210 IS,"Canon IXUS 210 Digitalkamera (14 Megapixel, 5-fach opt. Zoom, 8.9 cm (3.5 Zoll) Full-Touchscreen, bildstabilisiert) gold",,1079982,Word and number crossing family and model
+# 5906,258,Canon,Digital IXUS,210 IS,"Canon IXUS 210 Digitalkamera (14 Megapixel, 5-fach opt. Zoom, 8.9 cm (3.5 Zoll) Full-Touchscreen, bildstabilisiert) gold",,1079982,Word and number crossing family and model
+# 5871,258,Canon,Digital IXUS,210 IS,"Canon IXUS 210 Digitalkamera (14 Megapixel, 5-fach opt. Zoom, 8.9 cm (3.5 Zoll) Full-Touchscreen, bildstabilisiert) pink",,1079982,Word and number crossing family and model
+# 5872,258,Canon,Digital IXUS,210 IS,"Canon IXUS 210 Digitalkamera (14 Megapixel, 5-fach opt. Zoom, 8.9 cm (3.5 Zoll) Full-Touchscreen, bildstabilisiert) pink",,1079982,Word and number crossing family and model
+# 5873,258,Canon,Digital IXUS,210 IS,"Canon IXUS 210 Digitalkamera (14 Megapixel, 5-fach opt. Zoom, 8.9 cm (3.5 Zoll) Full-Touchscreen, bildstabilisiert) pink",,1079982,Word and number crossing family and model
+# 5890,258,Canon,Digital IXUS,210 IS,"Canon IXUS 210 Digitalkamera (14 Megapixel, 5-fach opt. Zoom, 8.9 cm (3.5 Zoll) Full-Touchscreen, bildstabilisiert) schwarz",,1079982,Word and number crossing family and model
+# 5891,258,Canon,Digital IXUS,210 IS,"Canon IXUS 210 Digitalkamera (14 Megapixel, 5-fach opt. Zoom, 8.9 cm (3.5 Zoll) Full-Touchscreen, bildstabilisiert) schwarz",,1079982,Word and number crossing family and model
+# 5892,258,Canon,Digital IXUS,210 IS,"Canon IXUS 210 Digitalkamera (14 Megapixel, 5-fach opt. Zoom, 8.9 cm (3.5 Zoll) Full-Touchscreen, bildstabilisiert) schwarz",,1079982,Word and number crossing family and model
+# 5913,258,Canon,Digital IXUS,210 IS,"Canon IXUS 210 Digitalkamera (14 Megapixel, 5-fach opt. Zoom, 8.9 cm (3.5 Zoll) Full-Touchscreen, bildstabilisiert) silber",,1079982,Word and number crossing family and model
+# 5914,258,Canon,Digital IXUS,210 IS,"Canon IXUS 210 Digitalkamera (14 Megapixel, 5-fach opt. Zoom, 8.9 cm (3.5 Zoll) Full-Touchscreen, bildstabilisiert) silber",,1079982,Word and number crossing family and model
+# 6218,628,Canon,IXUS,115 HS,IXUS 115,"Hama 60H + 2GB SD + Tripod (Gris, 12MP, Zoom optique 4x, LCD 7,6cm)",1079990,Word and number crossing family and model
+# 16617,479,Fujifilm,FinePix,1400 Zoom,Fujifilm FinePix 1400 1.2MP Digital Camera,3x Optical Zoom,2159968,Word and number crossing family and model
+# 16623,90,Fujifilm,FinePix,2400 Zoom,Fujifilm FinePix 2400 2MP Digital Camera,3x Optical Zoom,2159968,Word and number crossing family and model
+# 16624,90,Fujifilm,FinePix,2400 Zoom,Fujifilm FinePix 2400 2MP Digital Camera,3x Optical Zoom,2159968,Word and number crossing family and model
+# 16626,46,Fujifilm,FinePix,4700 Zoom,Fujifilm FinePix 4700 2.4MP  Digital Camera,3x Optical Zoom,2159968,Word and number crossing family and model
+# 16636,84,Fujifilm,FinePix,4900 Zoom,Fujifilm FinePix 4900 4.3MP Digital Camera,6x Optical Zoom,2159968,Word and number crossing family and model
+# 
+# HOWEVER: A lot more IXUS 130 listings were filtered out based on the Megapixels. Why?
+# 
+# matches_by_product_mp_and_result_value_with_counts[matches_by_product_mp_and_result_value_with_counts.index_p == 6]
+# 
+#     index_p  rounded_MP  match_result_value  group_count
+# 8         6          12          2649999982            4
+# 9         6          14             1079982           18
+# 10        6          14            11779964            8
+# 
+# REASON: 
+# 
+# a. Because the highest match values are used to infer the Megapixel rating, and this happens to be wrong.
+# b. These highest match values are for the following camera: "Canon PowerShot SX 130 IS".
+#    The matching rule was "model and words in family", so these 4 listings match the model ("130 IS") even though the family is wrong.
+# c. And the code to calculate the most likely model is using all possible matches (based on the matching rules) 
+#    between listings and products, not the BEST candidate match found for a listing.
+# 
+# CORRECTIVE ACTION:
+# 
+# a. See whether the results are better if the best candidate matches are used, instead of all matches.
+#    
