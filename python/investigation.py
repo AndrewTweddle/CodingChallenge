@@ -2547,6 +2547,10 @@ unmatched_listings.sort_index(by=unmatched_listings_cols).to_csv('../data/interm
 # 
 # a. Given the large number of correct matches generated, we might just have to live with these 5 errors.
 # b. Alternatively, add logic to ensure that Mark XXX matches, as this will also eliminate these matches.
+# c. Or add a specific rule to exclude the Canon EOS 1Ds.
+# 
+# RESULT:
+# 
+# Issue resolved by specifically excluding the EOS 1-Ds in the regular expression for a product code + extra character.
 # 
 # -----------------------------------------------------------------------------
-
