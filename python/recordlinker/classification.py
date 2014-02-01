@@ -217,8 +217,9 @@ class RegexRuleTemplateFollowedByAnyLetterOrSpecificLetters(RegexRuleBaseTemplat
         escaped_text = re.escape(escaped_text)
         # Replace the "\-" place-holder with a regex sequence matching whitespace characters and/or a single dash:
         escaped_text = re.sub(r'\\\-', r'\s*(?:\-\s*)?', escaped_text)
-        # Do negative lookbehind to ensure this is not in the middle of a word:
-        escaped_text = r'(?<!\w)' + escaped_text
+        # Do negative lookbehind to ensure this is not in the middle of a word.
+        # (Also check this is not an EOS 1-Ds, as that will accidentally match an EOS 1-D):
+        escaped_text = r'(?<!\w)(?!(?:EOS\s+)?1\-?D\-?s)' + escaped_text
         # Do negative lookahead:
         escaped_text = escaped_text + r'(?=(?:IS|HD|[A-Za-z])(?!\w))'
         return escaped_text

@@ -462,6 +462,19 @@ class ProdCodeExcludingLastCharOrIS_MasterTemplateBuilderTestCase(unittest.TestC
         engine = master_tpl.generate(blocks, family_and_model_len)
         match_result = engine.try_match_listing(product_desc, extra_prod_details)
         self.assert_(not match_result.is_match, 'There should be no match to the S20 of a Canon PowerShot S200 listing')
+    
+    def testEOS1DsProdCode(self):
+        classification = '+a-na_a_a'
+        blocks = ['+', 'EOS','-','1','D',' ','Mark',' ','IV']
+        family_and_model_len = len('EOS-1D Mark IV')
+        product_desc = 'Canon EOS 1Ds Mark II 16.7MP Digital SLR Camera (Body Only)'
+        extra_prod_details = ''
+        
+        builder = MasterTemplateBuilder(classification)
+        master_tpl = builder.build()
+        engine = master_tpl.generate(blocks, family_and_model_len)
+        match_result = engine.try_match_listing(product_desc, extra_prod_details)
+        self.assert_(not match_result.is_match, 'There should be no match to the EOS 1-D of a Canon EOS 1Ds listing')
 
 
 class AllOfFamilyAndAlphaModel_MasterTemplateBuilderTestCase(unittest.TestCase):
