@@ -8,6 +8,7 @@ import re
 from string import Template
 from math import floor
 from operator import truediv
+import codecs
 
 folder_data_intermediate = '../data/intermediate'
 
@@ -24,7 +25,8 @@ productData = [json.loads(line) for line in open(inputPath + 'products.txt')]
 
 # Convert input data into Pandas data frames:
 
-listings = DataFrame(listingData)
+listings = DataFrame(listingData).reset_index()
+listings.rename(columns={'index': 'original_listing_index'}, inplace=True)
 products = DataFrame(productData)
 
 # ======================================================================
@@ -211,7 +213,7 @@ lManufMap[possibleMismatches]
 # 
 
 listingsByPManufAll = pd.merge( listings, lManufMap, how='inner', left_on='manufacturer', right_on='lManuf')
-listingsByPManuf = listingsByPManufAll[listingsByPManufAll['pManuf'] != ''].reindex(columns = ['pManuf','lManuf', 'title','currency','price'])
+listingsByPManuf = listingsByPManufAll[listingsByPManufAll['pManuf'] != ''].reindex(columns = ['pManuf','lManuf', 'title','currency','price', 'original_listing_index'])
 listingsByPManuf.to_csv('../data/intermediate/filtered_listings_by_pmanuf.csv', encoding='utf-8')
 
 
@@ -1258,7 +1260,7 @@ products['exact_match_pattern'] = exact_match_patterns
 
 # Perform join between products and listings by product:
 products_to_match = products.reset_index()[['index', 'manufacturer', 'family', 'model', 'exact_match_regex']]
-listings_to_match = listingsByPManuf.reset_index()[['index', 'pManuf', 'productDesc', 'extraProdDetails', 'resolution_in_MP', 'rounded_MP']]
+listings_to_match = listingsByPManuf.reset_index()[['index', 'pManuf', 'productDesc', 'extraProdDetails', 'resolution_in_MP', 'rounded_MP', 'original_listing_index']]
 
 products_and_listings = pd.merge(left=listings_to_match, right=products_to_match, how='inner', left_on='pManuf', right_on='manufacturer', suffixes=('_l','_p'))
 
@@ -2854,3 +2856,66 @@ unmatched_listings_and_products_by_first_number.to_csv(
 # 
 # It is not worth adding this rule for the sake of just 8 new listings.
 # 
+
+
+
+# ==============================================================================
+# 13. Export the resulting matches as a json file:
+#
+
+# -----------------------------------------------------------------------------
+# 13.1 Create output folder:
+# 
+
+folder_data_output = '../data/output'
+
+if not os.path.exists(folder_data_output):
+    os.makedirs(folder_data_output)
+
+# -----------------------------------------------------------------------------
+# 13.2 Generate result objects:
+# 
+
+def generate_json_listings_for_product(prod_grp):
+    original_listing_indices = prod_grp['original_listing_index'].values.tolist()
+    listings = [listingData[oli] for oli in original_listing_indices]
+    return listings
+
+listings_with_matched_products_by_product_name = listings_with_matched_products.groupby('product_name')
+listings_by_product_name = listings_with_matched_products_by_product_name.apply(generate_json_listings_for_product)
+listings_by_product_name_df = DataFrame({'listings' : listings_by_product_name})
+
+listings_by_product_name_df.to_csv('../data/intermediate/listings_by_product_name.csv', encoding='utf-8')
+
+listings_by_all_product_names = pd.merge(
+    products[['product_name']],
+    listings_by_product_name_df,
+    how='left',
+    left_on='product_name',
+    right_index=True
+).sort_index(by='product_name')
+
+def generate_json_product_dict(row):
+    product_name = row['product_name']
+    listings = row['listings']
+    if not (type(listings) is list):
+        listings = []
+    product_dict = {
+        "product_name": product_name,
+        "listings": listings
+    }
+    return json.dumps(product_dict)
+
+results = listings_by_all_product_names.apply(generate_json_product_dict, axis=1).values.tolist()
+
+# -----------------------------------------------------------------------------
+# 13.3 Write result objects to a file:
+# 
+
+results_file_contents = u'\n'.join(results)
+
+results_file = codecs.open(folder_data_output + '/results.txt', 'w', 'utf-8-sig')
+    # based on the hint given at http://stackoverflow.com/questions/934160/write-to-utf-8-file-in-python
+
+with results_file as f:
+    f.write(results_file_contents)
