@@ -2814,3 +2814,43 @@ unmatched_listings.sort_index(by=unmatched_listings_cols).to_csv('../data/interm
 # 
 # It is not worth adding a rule to treat a model classification that starts with 'c_' as a product code.
 # 
+
+
+# -----------------------------------------------------------------------------
+# 12.3 Join unmatched listings to products based on manufacturers 
+#      and numbers extracted from the listings and products:
+# 
+
+unmatched_listing_numbers = unmatched_listings.productDesc.str.findall('(^\d+|(?<=\s)\d+)(?=\s|$)')
+unmatched_listings['first_number'] = unmatched_listing_numbers.str.get(0)
+product_numbers = products.model.str.findall('(^\d+|(?<=\s)\d+)(?=\s|$)')
+products['first_number'] = product_numbers.str.get(0)
+
+unmatched_listings_and_products_by_first_number = pd.merge(
+    left=unmatched_listings,
+    right=products[['manufacturer', 'family', 'model', 'first_number']],
+    how='inner',
+    left_on=['pManuf', 'first_number'],
+    right_on=['manufacturer', 'first_number'],
+    suffixes=('_l', '_r')
+)
+
+unmatched_listings_and_products_by_first_number \
+    = unmatched_listings_and_products_by_first_number[ \
+        unmatched_listings_and_products_by_first_number.first_number.notnull()]
+
+unmatched_listings_and_products_by_first_number.to_csv(
+    '../data/intermediate/unmatched_listings_and_products_by_first_number.csv', 
+    encoding='utf-8')
+
+# POSSIBLE NEW MATCHES:
+# 
+# The only potential new listings found were to the Olympus mju Tough 8010 product.
+# There were 8 unmatched listings similar to the following: OLYMPUS [mju:] Tough 8010 - black
+# 
+# Thus 8 new listings could arise from matching a "..._a_n" product code
+# 
+# CONCLUSION:
+# 
+# It is not worth adding this rule for the sake of just 8 new listings.
+# 
