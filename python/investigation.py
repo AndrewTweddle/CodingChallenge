@@ -2684,6 +2684,36 @@ unmatched_listings.sort_index(by=unmatched_listings_cols).to_csv('../data/interm
 # -----------------------------------------------------------------------------
 # ISSUE 3:
 # 
+# The previous issue looked at product codes which had the "..._a+n_..." classification pattern.
+# See whether there is value in building a rule for "...+a_n_..." patterns.
+# 
+# INVESTIGATION:
+# 
+# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+# a. Classification: a+a_n_a
+# 
+# Products:
+#   manufacturer    family  model
+#   Konica Minolta	DiMAGE	EX 1500 Zoom
+#   Konica Minolta	DiMAGE	EX 1500 Wide
+# 
+# Unmatched listings:
+#
+# index_l,pManuf,productDesc,extraProdDetails
+# 20195,Konica Minolta,Minolta Dimage 1500 1.5MP Digital Camera,3x Optical Zoom
+# 
+# Analysis:
+#
+# There is only one unmatched listing. It won't match a product code of "EX 1500". 
+# And the only clue to distinguish the two products is the "3x Optical Zoom" in the extra product details column.
+# 
+# Conclusion:
+# 
+# It is not worth creating a new rule based on the "...+a_n_..." pattern.
+# 
+# -----------------------------------------------------------------------------
+# ISSUE 4:
+# 
 # Some product codes have neither dashes nor numerics.
 # They can be identified by containing only consonants.
 # See if there is enough value to trying to match these products too.
