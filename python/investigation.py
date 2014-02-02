@@ -2105,11 +2105,25 @@ best_matches[best_match_columns].sort_index(by=best_match_sort_by).to_csv('../da
 #     based on the Megapixel ratings of the highest valued matches:
 # 
 
-matches_grouped_by_product_mp_and_result_value = matched_products_and_listings[
-    matched_products_and_listings.rounded_MP.notnull()].groupby(['index_p', 'rounded_MP', 'match_result_value'])
+CALCULATE_MEGAPIXELS_FROM_BEST_MATCHES_ONLY = True
 
-matches_by_product_mp_and_result_value_with_counts \
-    = DataFrame({'group_count' : matches_grouped_by_product_mp_and_result_value.size()}).reset_index()
+best_matches_grouped_by_product_mp_and_result_value = best_matches[
+    best_matches.rounded_MP.notnull()].groupby(['index_p', 'rounded_MP', 'match_result_value'])
+best_matches_by_product_mp_and_result_value_with_counts \
+    = DataFrame({'group_count' : best_matches_grouped_by_product_mp_and_result_value.size()}).reset_index()
+
+all_matches_grouped_by_product_mp_and_result_value = matched_products_and_listings[
+    matched_products_and_listings.rounded_MP.notnull()].groupby(['index_p', 'rounded_MP', 'match_result_value'])
+all_matches_by_product_mp_and_result_value_with_counts \
+    = DataFrame({'group_count' : all_matches_grouped_by_product_mp_and_result_value.size()}).reset_index()
+
+if CALCULATE_MEGAPIXELS_FROM_BEST_MATCHES_ONLY:
+    matches_grouped_by_product_mp_and_result_value = best_matches_grouped_by_product_mp_and_result_value
+    matches_by_product_mp_and_result_value_with_counts = best_matches_by_product_mp_and_result_value_with_counts
+else:
+    matches_grouped_by_product_mp_and_result_value = all_matches_grouped_by_product_mp_and_result_value
+    matches_by_product_mp_and_result_value_with_counts = all_matches_by_product_mp_and_result_value_with_counts
+
 
 THRESHOLD_FOR_REJECTING_MPS_DUE_TO_DIVERSITY = 0.75
 
@@ -2615,6 +2629,11 @@ unmatched_listings.sort_index(by=unmatched_listings_cols).to_csv('../data/interm
 # 9         6          14             1079982           18
 # 10        6          14            11779964            8
 # 
+#
+# Useful script: 
+# matched_products_and_listings[matched_products_and_listings.index_p = 6]
+# 
+# 
 # REASON: 
 # 
 # a. Because the highest match values are used to infer the Megapixel rating, and this happens to be wrong.
@@ -2627,3 +2646,35 @@ unmatched_listings.sort_index(by=unmatched_listings_cols).to_csv('../data/interm
 # 
 # a. See whether the results are better if the best candidate matches are used, instead of all matches.
 #    
+# RESULT: 
+#
+# The 26 matches which were previously rejected are now included. And no other matches were affected.
+# 
+# index_l,index_p,manufacturer,family,model,productDesc,extraProdDetails,match_result_value,match_result_description
+# 6096,6,Canon,Digital IXUS,130 IS,"Canon - IXUS 130 - Appareil photo numérique - 14,1 Mpix - Gris Argent",,1079982,Word and number crossing family and model
+# 6097,6,Canon,Digital IXUS,130 IS,"Canon - IXUS 130 - Appareil photo numérique - 14,1 Mpix - Gris Argent",,1079982,Word and number crossing family and model
+# 6105,6,Canon,Digital IXUS,130 IS,"Canon - IXUS 130 - Appareil photo numérique - 14,1 Mpix - Noir",,1079982,Word and number crossing family and model
+# 6106,6,Canon,Digital IXUS,130 IS,"Canon - IXUS 130 - Appareil photo numérique - 14,1 Mpix - Noir",,1079982,Word and number crossing family and model
+# 6109,6,Canon,Digital IXUS,130 IS,"Canon - IXUS 130 - Appareil photo numérique - 14,1 Mpix - Orange",,1079982,Word and number crossing family and model
+# 6110,6,Canon,Digital IXUS,130 IS,"Canon - IXUS 130 - Appareil photo numérique - 14,1 Mpix - Orange",,1079982,Word and number crossing family and model
+# 6153,6,Canon,Digital IXUS,130 IS,"Canon - IXUS 130 - Appareil photo numérique - 14,1 Mpix - Rose",,1079982,Word and number crossing family and model
+# 6154,6,Canon,Digital IXUS,130 IS,"Canon - IXUS 130 - Appareil photo numérique - 14,1 Mpix - Rose",,1079982,Word and number crossing family and model
+# 6201,6,Canon,Digital IXUS,130 IS,"Canon - IXUS 130 - Appareil photo numérique - compact - 14.1 Mpix - zoom optique : 4 x - mémoire prise en charge : MMC, SD, SDXC, SDHC, MMCplus - argenté(e)",,1079982,Word and number crossing family and model
+# 6257,6,Canon,Digital IXUS,130 IS,"Canon IXUS 130 - Appareil photo numérique - compact - 14.1 Mpix - zoom optique : 4 x - mémoire prise en charge : MMC, SD, SDXC, SDHC, MMCplus - noir",,1079982,Word and number crossing family and model
+# 5420,6,Canon,Digital IXUS,130 IS,"Canon IXUS 130 Digital Camera - Black (14.1 MP, 4x Optical Zoom) 2.7 Inch PureColor LCD",,11779964,Word and number crossing family and model
+# 5421,6,Canon,Digital IXUS,130 IS,"Canon IXUS 130 Digital Camera - Black (14.1 MP, 4x Optical Zoom) 2.7 Inch PureColor LCD",,11779964,Word and number crossing family and model
+# 5422,6,Canon,Digital IXUS,130 IS,"Canon IXUS 130 Digital Camera - Black (14.1 MP, 4x Optical Zoom) 2.7 Inch PureColor LCD",,11779964,Word and number crossing family and model
+# 5490,6,Canon,Digital IXUS,130 IS,"Canon IXUS 130 Digital Camera - Orange (14.1 MP, 4x Optical Zoom) 2.7 Inch PureColor LCD",,11779964,Word and number crossing family and model
+# 5491,6,Canon,Digital IXUS,130 IS,"Canon IXUS 130 Digital Camera - Orange (14.1 MP, 4x Optical Zoom) 2.7 Inch PureColor LCD",,11779964,Word and number crossing family and model
+# 5492,6,Canon,Digital IXUS,130 IS,"Canon IXUS 130 Digital Camera - Pink (14.1 MP, 4x Optical Zoom) 2.7 Inch PureColor LCD",,11779964,Word and number crossing family and model
+# 5493,6,Canon,Digital IXUS,130 IS,"Canon IXUS 130 Digital Camera - Pink (14.1 MP, 4x Optical Zoom) 2.7 Inch PureColor LCD",,11779964,Word and number crossing family and model
+# 5499,6,Canon,Digital IXUS,130 IS,"Canon IXUS 130 Digital Camera - Silver (14.1 MP, 4x Optical Zoom) 2.7 Inch PureColor LCD",,11779964,Word and number crossing family and model
+# 5844,6,Canon,Digital IXUS,130 IS,"Canon IXUS 130 Digitalkamera (14 Megapixel, 4-fach opt. Zoom, 6.9 cm (2.7 Zoll) Display, HD Video, bildstabilisiert) orange",,1079982,Word and number crossing family and model
+# 5845,6,Canon,Digital IXUS,130 IS,"Canon IXUS 130 Digitalkamera (14 Megapixel, 4-fach opt. Zoom, 6.9 cm (2.7 Zoll) Display, HD Video, bildstabilisiert) orange",,1079982,Word and number crossing family and model
+# 5888,6,Canon,Digital IXUS,130 IS,"Canon IXUS 130 Digitalkamera (14 Megapixel, 4-fach opt. Zoom, 6.9 cm (2.7 Zoll) Display, HD Video, bildstabilisiert) pink",,1079982,Word and number crossing family and model
+# 5889,6,Canon,Digital IXUS,130 IS,"Canon IXUS 130 Digitalkamera (14 Megapixel, 4-fach opt. Zoom, 6.9 cm (2.7 Zoll) Display, HD Video, bildstabilisiert) pink",,1079982,Word and number crossing family and model
+# 5848,6,Canon,Digital IXUS,130 IS,"Canon IXUS 130 Digitalkamera (14 Megapixel, 4-fach opt. Zoom, 6.9 cm (2.7 Zoll) Display, HD Video, bildstabilisiert) schwarz",,1079982,Word and number crossing family and model
+# 5849,6,Canon,Digital IXUS,130 IS,"Canon IXUS 130 Digitalkamera (14 Megapixel, 4-fach opt. Zoom, 6.9 cm (2.7 Zoll) Display, HD Video, bildstabilisiert) schwarz",,1079982,Word and number crossing family and model
+# 5823,6,Canon,Digital IXUS,130 IS,"Canon IXUS 130 Digitalkamera (14 Megapixel, 4-fach opt. Zoom, 6.9 cm (2.7 Zoll) Display, HD Video, bildstabilisiert) silber",,1079982,Word and number crossing family and model
+# 5824,6,Canon,Digital IXUS,130 IS,"Canon IXUS 130 Digitalkamera (14 Megapixel, 4-fach opt. Zoom, 6.9 cm (2.7 Zoll) Display, HD Video, bildstabilisiert) silber",,1079982,Word and number crossing family and model
+# 
