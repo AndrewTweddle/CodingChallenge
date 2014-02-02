@@ -2106,6 +2106,9 @@ best_matches[best_match_columns].sort_index(by=best_match_sort_by).to_csv('../da
 # 
 
 CALCULATE_MEGAPIXELS_FROM_BEST_MATCHES_ONLY = True
+# This was added to address issue of Powershot SX 130 IS mega-pixel ratings being used for the IXUS 130, 
+# leading to rejection of IXUS 130 ratings due to the MP mismatch.
+# Originally the code used all product-listing matches, not just be best matches for each listing.
 
 best_matches_grouped_by_product_mp_and_result_value = best_matches[
     best_matches.rounded_MP.notnull()].groupby(['index_p', 'rounded_MP', 'match_result_value'])
@@ -2677,4 +2680,107 @@ unmatched_listings.sort_index(by=unmatched_listings_cols).to_csv('../data/interm
 # 5849,6,Canon,Digital IXUS,130 IS,"Canon IXUS 130 Digitalkamera (14 Megapixel, 4-fach opt. Zoom, 6.9 cm (2.7 Zoll) Display, HD Video, bildstabilisiert) schwarz",,1079982,Word and number crossing family and model
 # 5823,6,Canon,Digital IXUS,130 IS,"Canon IXUS 130 Digitalkamera (14 Megapixel, 4-fach opt. Zoom, 6.9 cm (2.7 Zoll) Display, HD Video, bildstabilisiert) silber",,1079982,Word and number crossing family and model
 # 5824,6,Canon,Digital IXUS,130 IS,"Canon IXUS 130 Digitalkamera (14 Megapixel, 4-fach opt. Zoom, 6.9 cm (2.7 Zoll) Display, HD Video, bildstabilisiert) silber",,1079982,Word and number crossing family and model
+# 
+# -----------------------------------------------------------------------------
+# ISSUE 3:
+# 
+# Some product codes have neither dashes nor numerics.
+# They can be identified by containing only consonants.
+# See if there is enough value to trying to match these products too.
+# 
+# INVESTIGATION:
+# 
+# Classifications with consonant patterns...
+# 
+# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+# a. Classification: +c(an)
+# 
+# Products:
+#   manufacturer  family  model
+#   Rico                  GXR (A12)
+# 
+# Unmatched listings:
+#
+# index_l,pManuf,productDesc,extraProdDetails
+# 20195,Ricoh,Ricoh - GXR - Appareil photo numérique compact à unités interchangeables - 10 Mpix - Boîtier nu,unité P10 28-300 mm
+# 20195,Ricoh,Ricoh - GXR - Appareil photo numérique compact à unités interchangeables - 10 Mpix - Boîtier nu,unité P10 28-300 mm
+# 20195,Ricoh,Ricoh - GXR - Appareil photo numérique compact à unités interchangeables - 10 Mpix - Boîtier nu,unité P10 28-300 mm
+# 20195,Ricoh,Ricoh - GXR - Appareil photo numérique compact à unités interchangeables - 10 Mpix - Boîtier nu,unité P10 28-300 mm
+# 20195,Ricoh,"Ricoh - GXR - Appareil photo numérique compact à unités interchangeables - 9,2 Mpix - Boîtier nu",
+# 20195,Ricoh,"Ricoh - GXR - Appareil photo numérique compact à unités interchangeables - 9,2 Mpix - Boîtier nu",
+# 20195,Ricoh,"Ricoh - GXR - Appareil photo numérique compact à unités interchangeables - 9,2 Mpix - Boîtier nu",
+# 20195,Ricoh,Ricoh GXR Interchangeable Unit Body,"Ricoh LENS A12 28mm F2.5 Camera Unit, 12 Megapixel"
+# 20195,Ricoh,Ricoh GXR Interchangeable Unit Digital Camera System,3-Inch High-Resolution LCD
+# 20195,Ricoh,Ricoh GXR Interchangeable Unit Digital Camera System,3-Inch High-Resolution LCD
+# 20195,Ricoh,Ricoh GXR Interchangeable Unit Digital Camera System,3-Inch High-Resolution LCD
+# 20195,Ricoh,Ricoh GXR Interchangeable Unit Digital Camera System,3-Inch High-Resolution LCD and P10 28-300mm f/3.5-5.6 VC Lens with 10MP CMOS Sensor
+# 20195,Ricoh,Ricoh GXR Interchangeable Unit Digital Camera System,3-Inch High-Resolution LCD and P10 28-300mm f/3.5-5.6 VC Lens with 10MP CMOS Sensor
+# 20195,Ricoh,Ricoh GXR Systemkamera,"S10 Kit inkl. 1:2,5-4,4/24-72 mm VC Objektiv"
+# 20195,Ricoh,Ricoh GXR Systemkamera,"S10 Kit inkl. 1:2,5-4,4/24-72 mm VC Objektiv"
+# 20195,Ricoh,"Ricoh GXR Systemkamera (10 Megapixel, 10-fach optischer Zoom, 7,6 cm (3 Zoll) Display, HD Video) Gehäuse schwarz",
+# 20195,Ricoh,"Ricoh GXR Systemkamera (10 Megapixel, 10-fach optischer Zoom, 7,6 cm (3 Zoll) Display, HD Video) Gehäuse schwarz",
+# 20195,Ricoh,"Ricoh GXR Systemkamera (10 Megapixel, 10-fach optischer Zoom, 7,6 cm (3 Zoll) Display, HD Video) Gehäuse schwarz",
+# 20195,Ricoh,"Ricoh GXR Systemkamera (10 Megapixel, 10-fach optischer Zoom, 7,6 cm (3 Zoll) Display, HD Video) Kit inkl. P10 28-300mm Objektiv",
+# 20195,Ricoh,"Ricoh GXR Systemkamera (10 Megapixel, 10-fach optischer Zoom, 7,6 cm (3 Zoll) Display, HD Video) Kit inkl. P10 28-300mm Objektiv",
+#
+# Analysis: 
+# 
+# There are 20 listings.
+# However only one of these was specifically for the A12 lens combination (and that could only be determined from the extraProdDetails column).
+# So do these count as 20 potential matches? Or 19 mismatches and 1 match?
+# 
+# Conclusion: 
+# 
+# Since errors are penalized more than correct matches, it is probably not worth it.
+# 
+# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+# b. Classification: +c_a
+# 
+# Products:
+#   manufacturer  family  model
+#   Contax                N Digital
+# 
+# All unmatched listings for Contax:
+# 
+# index_l,pManuf,productDesc,extraProdDetails
+# 20195,Contax,Syntax Vivitar 2 Gb 6MP 3X Optical 4X Digital Zoom,
+# 20195,Contax,Vivitar VIVICAM-8400 8.0 MegaPixel Camera,3x Optical Zoom and 2.0 Inch TFT LCD
+# 20195,Contax,Vivitar VIVICAM-8400 8.0 MegaPixel Camera,3x Optical Zoom and 2.0 Inch TFT LCD
+#
+# Conclusion: No new matches will be found.
+# 
+# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+# c. Classification: +c_a_a
+# 
+# Products:
+#   manufacturer  family  model
+#   Ricoh                 GR Digital III
+# 
+# Unmatched listings that might be relevant:
+# 
+# index_l,pManuf,productDesc,extraProdDetails
+# 20195,Ricoh,Ricoh - GRD III - Appareil photo numerique - 10 Mpix - Noir,
+# 20195,Ricoh,Ricoh - GRD III - Appareil photo numerique - 10 Mpix - Noir,
+# 20195,Ricoh,Ricoh - Objectif GR LENS A12 28 mm F2.5,
+# 20195,Ricoh,Ricoh - Objectif GR LENS A12 28 mm F2.5,
+# 20195,Ricoh,Ricoh A12 GR - Digital camera lens unit - prosumer - 12.3 Mpix,
+# 20195,Ricoh,"Ricoh GR Digital - Digital camera - compact - 8.1 Mpix - supported memory: MMC, SD",
+# 20195,Ricoh,"Ricoh GR Digital - Digital camera - compact - 8.1 Mpix - supported memory: MMC, SD",
+# 20195,Ricoh,"Ricoh GR Digital 2 Digitalkamera (10 Megapixel, 6,9 cm (2,7 Zoll) Display) schwarz",
+# 20195,Ricoh,"Ricoh GR Digital 2 Digitalkamera (10 Megapixel, 6,9 cm (2,7 Zoll) Display) schwarz",
+# 
+# Analysis: 
+# 
+# The "GRD III" listings are probably the only correct matches.
+# They will be a low match, because the rule used will be "Word and number crossing family and model"
+# The other matches have different MP ratings, so will most likely be filtered out.
+# 
+# Conclusion: Not worth it.
+# 
+#
+# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+# 
+# OVERALL CONCLUSION: 
+# 
+# It is not worth adding a rule to treat a model classification that starts with 'c_' as a product code.
 # 
