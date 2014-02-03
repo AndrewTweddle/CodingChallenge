@@ -2904,7 +2904,7 @@ def generate_json_product_dict(row):
         "product_name": product_name,
         "listings": listings
     }
-    return json.dumps(product_dict)
+    return json.dumps(product_dict, encoding='utf-8', ensure_ascii=False)
 
 results = listings_by_all_product_names.apply(generate_json_product_dict, axis=1).values.tolist()
 
@@ -2913,9 +2913,7 @@ results = listings_by_all_product_names.apply(generate_json_product_dict, axis=1
 # 
 
 results_file_contents = u'\n'.join(results)
-
-results_file = codecs.open(folder_data_output + '/results.txt', 'w', 'utf-8-sig')
-    # based on the hint given at http://stackoverflow.com/questions/934160/write-to-utf-8-file-in-python
+results_file = codecs.open(folder_data_output + '/results.txt', 'w', 'utf-8')
 
 with results_file as f:
     f.write(results_file_contents)
