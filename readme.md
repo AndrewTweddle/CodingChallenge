@@ -1,6 +1,6 @@
 # Overview
 
-This was my entry for the [Sortable.com Coding Challenge](http://web.archive.org/web/20131005200452/http://sortable.com/blog/coding-challenge/).
+This was my entry for the [Sortable.com coding challenge](http://web.archive.org/web/20131005200452/http://sortable.com/blog/coding-challenge/).
 
 The goal was to find matches between a master list of products and retailer product listings (despite the data being very dirty).
 Accuracy of matches was very important as false matches were heavily penalized.
@@ -8,11 +8,11 @@ Accuracy of matches was very important as false matches were heavily penalized.
 The Sortable technical team appears to have been disbanded in December 2013.
 So there was no opportunity to see how well I'd done on the challenge.
 
-However this was still an interesting challenge to work on, for the following reasons:
+However this was still an interesting challenge to work on, as it provided:
 * An interesting algorithmic and data munging challenge
 * An opportunity to practise some Python programming
 * An opportunity to apply skills from reading the book ["Python for Data Analysis"](http://shop.oreilly.com/product/0636920023784.do) by Wes McKinney
-* The learning gained from comparing my results with others who had previously uploaded their solutions to GitHub, such as:
+* Learning from comparing my results with others who had previously uploaded their solutions to GitHub, such as:
   * Alex Black, former CTO of Sortable.com - his [succinct Scala solution](https://github.com/alexblack/Sortable) uses the prices of cameras as [a matching criterion](https://github.com/alexblack/Sortable/blob/master/src/main/ProductMatchFilter.scala).
   * Aaron Levin, former employee at Sortable.com - [his Python solution](https://github.com/aaronlevin/sortable) was good enough to land a position at Sortable.
 
@@ -105,7 +105,7 @@ The classes defined in builder.py are as follows:
 A matching product code was particularly important, but this was complicated by issues such as:
 * differing use of dashes, dots and spaces in otherwise identical codes
 * extra characters appended to the product code (such as to indicate colour)
-* specifications that look similar to product codes (e.g. 15.1MPix is a Megapixel rating not a product code)
+* specifications that look similar to product codes (e.g. X4 could be a 4 times zoom, not a product code)
 * model names sometimes being found in the "family" field and sometimes in the "model" field of the listing
 * some product listings are for add-on products (such as batteries or lenses) and the description also contains the product code of the camera which the add-on is for
 
@@ -283,6 +283,7 @@ pythonxy 2.7.5.0, including:
 ### Run unit tests
 
 `python -m recordlinker.test.classification_tests`
+
 `python -m recordlinker.test.builder_tests`
 
 
@@ -290,7 +291,7 @@ pythonxy 2.7.5.0, including:
 
 ## Refactor investigation.py into separate files
 
-investigation.py is over 2 500 lines long (though many of these consist of data snippets and descriptions of issues encountered).
+investigation.py is almost 3 000 lines long (though many of these consist of data snippets and descriptions of issues encountered).
 
 I had originally planned to refactor it into separate files and classes before submitting it.
 However I decided not to do this after the Sortable challenge was discontinued. 
