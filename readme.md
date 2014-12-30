@@ -38,21 +38,21 @@ Each matching rule would create a score based on the number of characters matche
 The various rule classes are defined in [python/recorlinker/classification.py](https://github.com/AndrewTweddle/CodingChallenge/blob/master/python/recordlinker/classification.py):
 
 The following classes are found in classification.py:
-* MatchValueFunction
-* MatchResult
-* MatchingRule
-  * RegexMatchingRule
-* ListingMatcher
-* MatchingEngine
-* MatchingRuleTemplate
-  * RegexRuleBaseTemplate
-    * RegexRuleTemplate
-    * RegexRuleTemplateFollowedByAnyLetterOrSpecificLetters
-* ListingMatcherTemplate
-* MasterTemplate
+* `MatchValueFunction`
+* `MatchResult`
+* `MatchingRule`
+  * `RegexMatchingRule`
+* `ListingMatcher`
+* `MatchingEngine`
+* `MatchingRuleTemplate`
+  * `RegexRuleBaseTemplate`
+    * `RegexRuleTemplate`
+    * `RegexRuleTemplateFollowedByAnyLetterOrSpecificLetters`
+* `ListingMatcherTemplate`
+* `MasterTemplate`
 
-The MatchValueFunction class has a constructor taking the fixed value and a value per matched character as its 2 parameters.
-The set of value functions is configured in the BaseMasterTemplateBuilder class in [python/recorlinker/builder.py](https://github.com/AndrewTweddle/CodingChallenge/blob/master/python/recordlinker/builder.py):
+The `MatchValueFunction` class has a constructor taking the fixed value and a value per matched character as its 2 parameters.
+The set of value functions is configured in the `BaseMasterTemplateBuilder` class in [python/recorlinker/builder.py](https://github.com/AndrewTweddle/CodingChallenge/blob/master/python/recordlinker/builder.py):
 
 ```Python
 class BaseMasterTemplateBuilder(object):
@@ -96,9 +96,9 @@ class BaseMasterTemplateBuilder(object):
 ```
 
 The classes defined in builder.py are as follows:
-* BaseMasterTemplateBuilder
-  * MasterTemplateBuilder
-  * SingleMethodMasterTemplateBuilder (used to unit test a single rule in isolation from the other rules in the hierarchy)
+* `BaseMasterTemplateBuilder`
+  * `MasterTemplateBuilder`
+  * `SingleMethodMasterTemplateBuilder` (used to unit test a single rule in isolation from the other rules in the hierarchy)
 
 ## Matching on product codes
 
