@@ -123,6 +123,7 @@ These classification patterns are defined in step 5.2:
 ```
 # ----------------------------------------------------------------------
 # 5.2 Categorize each block into one of the following:
+#     x = An 'x' on its own (so that an "x4" zoom specification is not seen as a product code)
 #     c = consonants only
 #     a = alphabetic only
 #     n = numeric only
@@ -134,7 +135,7 @@ These classification patterns are defined in step 5.2:
 #     ! = a division symbol (/), possibly with whitespace on either side
 #         Note: an exclamation mark is used since this character can be part of a file name
 #     . = a single dot (no white space)
-#     x = any other non-alphanumeric sequences
+#     # = any other non-alphanumeric sequences
 ```
 
 In step 6.3 you can see the set of classification patterns discovered in the data:
