@@ -14,8 +14,9 @@ However this was still an interesting challenge to work on, as it provided:
 * An opportunity to apply skills from reading the book ["Python for Data Analysis"](http://shop.oreilly.com/product/0636920023784.do) by Wes McKinney
 * Learning from comparing my results with others who had previously uploaded their solutions to GitHub, such as:
   * Alex Black, former CTO of Sortable.com - his [succinct Scala solution](https://github.com/alexblack/Sortable) uses the prices of cameras as [a matching criterion](https://github.com/alexblack/Sortable/blob/master/src/main/ProductMatchFilter.scala).
-  * Aaron Levin, former employee at Sortable.com - [his Python solution](https://github.com/aaronlevin/sortable) was good enough to land a position at Sortable.
+  * Aaron Levin, former employee at Sortable.com - [his Python solution](https://github.com/aaronlevin/sortable) was good enough to earn him a position at Sortable.
 
+In general my algorithm fared very well. There's more detail towards the end of this page.
 
 # My approach
 
@@ -285,6 +286,29 @@ pythonxy 2.7.5.0, including:
 `python -m recordlinker.test.classification_tests`
 
 `python -m recordlinker.test.builder_tests`
+
+
+# Evaluation of success
+
+I compared my code and results against two ex-employees at Sortable, Alex Black and Aaron Levin. 
+
+My code was a lot more complex, covering a variety of edge cases, and was consequently less elegant.
+I also didn't think of Alex's trick of converting prices to a common currency and using price as an approximate matching or filtering criterion.
+However I am very happy with the level of accuracy that I managed to achieve.
+
+The common and unique matches are shown below:
+
+|entrant      | common matches | my unique matches | their unique matches | Notes |
+|---          |---             |---                |---                   |---    |
+| Alex Black  | 2647           | 3295              | 25                   | Alex also used price as a filtering mechanism. Both sets of unique matches appear to be largely correct. |
+| Aaron Levin | 5609           | 333               | 842                  | A fair number of Aaron's unique matches appear to be incorrect. |
+
+I've included csv files with the details of the unique matches found. These can be found in the sub-folders of 
+[/data/comparison](https://github.com/AndrewTweddle/CodingChallenge/blob/master/data/comparison).
+
+Note: Many listings had duplicate titles (though sometimes different prices and currencies).
+So to perform the comparison, I first removed these duplicates, then did a full outer join between my results and a particular entrant's results.
+
 
 
 # Future actions to consider
