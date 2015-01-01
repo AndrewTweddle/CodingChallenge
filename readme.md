@@ -272,6 +272,11 @@ pythonxy 2.7.5.0, including:
       * with a csv file per pattern
     * composite_classifications/
       * classification patterns, as above, but for the composite family + model
+  * output/
+    * results.txt      - the JSON output file produced by my algorithm
+  * comparison/        - sub-folders for the results file of other entrants to the challenge, along with details of the comparison
+    * aaron_levin
+    * alex_black
 
 ### Python scripts and folders
 
