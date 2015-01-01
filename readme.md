@@ -16,7 +16,7 @@ However this was still an interesting challenge to work on, as it provided:
   * Alex Black, former CTO of Sortable.com - his [succinct Scala solution](https://github.com/alexblack/Sortable) uses the prices of cameras as [a matching criterion](https://github.com/alexblack/Sortable/blob/master/src/main/ProductMatchFilter.scala).
   * Aaron Levin, former employee at Sortable.com - [his Python solution](https://github.com/aaronlevin/sortable) was good enough to earn him a position at Sortable.
 
-In general my algorithm fared very well. There's more detail towards the end of this page.
+In general my algorithm fared extremely well. I've included the details of the comparison towards the end of this page.
 
 # My approach
 
@@ -276,7 +276,8 @@ pythonxy 2.7.5.0, including:
 ### Python scripts and folders
 
 * python/                  - assumption: the current directory for running all Python scripts is the python folder
-  * investigation.py    - script built up incrementally with investigations into the problem (ipython used for REPL)
+  * investigation.py    - a script built up incrementally with investigations into the problem (ipython used for REPL)
+  * comparison.py       - a script used to compare my results files with those of other entrants
   * recordlinker/       - the Python module to perform the linking of products with listings
 
 ## Useful commands
@@ -298,7 +299,7 @@ However I am very happy with the level of accuracy that I managed to achieve.
 
 The common and unique matches are shown below:
 
-|entrant      | common matches | my unique matches | their unique matches | Notes |
+| Entrant     | Common matches | My unique matches | Their unique matches | Notes |
 |---          |---             |---                |---                   |---    |
 | Alex Black  | 2647           | 3295              | 25                   | Alex also used price as a filtering mechanism. Both sets of unique matches appear to be largely correct. |
 | Aaron Levin | 5609           | 333               | 842                  | A fair number of Aaron's unique matches appear to be incorrect. |
