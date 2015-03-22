@@ -1,22 +1,39 @@
 # Overview
 
-This was my entry for the [Sortable.com coding challenge](http://web.archive.org/web/20131005200452/http://sortable.com/blog/coding-challenge/).
+This is my entry for the [Sortable.com coding challenge](http://web.archive.org/web/20131005200452/http://sortable.com/blog/coding-challenge/).
 
-The goal was to find matches between a master list of products and retailer product listings (despite the data being very dirty).
-Accuracy of matches was very important as false matches were heavily penalized.
+The goal is to find matches between a master list of products and retailer product listings (despite the data being very dirty).
+Accuracy of matches is very important as false matches are heavily penalized.
 
-The Sortable technical team appears to have been disbanded in December 2013.
-So there was no opportunity to see how well I'd done on the challenge.
+I was originally going to submit this code to Sortable in early 2014. However the Sortable technical team appears to have been down-sized in December 2013, at which time they stopped advertising for new developers. So there was no opportunity to apply to Sortable and possibly find out how well I'd done on the challenge.
 
-However this was still an interesting challenge to work on, as it provided:
+Though Sortable was no longer hiring, I went ahead and finished off the challenge anyway. After all, it still provided:
 * An interesting algorithmic and data munging challenge
-* An opportunity to practise some Python programming
-* An opportunity to apply skills from reading the book ["Python for Data Analysis"](http://shop.oreilly.com/product/0636920023784.do) by Wes McKinney
-* Learning from comparing my results with others who had previously uploaded their solutions to GitHub, such as:
-  * Alex Black, former CTO of Sortable.com - his [succinct Scala solution](https://github.com/alexblack/Sortable) uses the prices of cameras as [a matching criterion](https://github.com/alexblack/Sortable/blob/master/src/main/ProductMatchFilter.scala).
+* Python practice
+* An opportunity to apply knowledge from reading the book ["Python for Data Analysis"](http://shop.oreilly.com/product/0636920023784.do) by Wes McKinney, which I'd recently purchased
+* Learnings from comparing my results with other solutions uploaded to GitHub, such as from:
+  * Alex Black, former CTO of Sortable.com - his [succinct Scala solution](https://github.com/alexblack/Sortable) uses the prices of cameras as [a matching criterion](https://github.com/alexblack/Sortable/blob/master/src/main/ProductMatchFilter.scala). (Disclaimer: I've assumed this is Alex's code, but as co-founder I doubt he would need to pass the test himself, so I wonder if this is really his code or someone else's who wished to submit anonymously)
   * Aaron Levin, former employee at Sortable.com - [his Python solution](https://github.com/aaronlevin/sortable) was good enough to earn him a position at Sortable.
 
-In general my algorithm fared extremely well. I've included the details of the comparison towards the end of this page.
+Generally I think my algorithm compared quite well to these two. I've included the details of the comparison towards the end of this page.
+
+UPDATE: [Sortable are hiring again](https://sortable.recruiterbox.com/jobs/fk0h6hk?referer=simply_hired&referrer=simplyhired&utm_source=simplyhired&utm_medium=jobclick). 
+So I might get to submit my entry after all!
+
+# Running the code
+
+* Install the prerequisites:
+  * Python 2.7.5
+  * NumPy 1.7.1
+  * SciPy 0.12.0
+  * pandas 0.11.0
+  * scikits-learn 0.13.1
+  * nltk 2.0.4
+* Clone the github repo, checking it out to a folder of your choice e.g. coding_challenge
+* Navigate to the python sub-folder of the checkout folder in your CLI e.g. coding_challenge/python
+* Run: python investigation.py
+* Navigate to the data/output/ sub-folder e.g. coding_challenge/data/output/
+* Analyze the results.txt file (each line is in json format)
 
 # My approach
 
@@ -225,7 +242,7 @@ The product's MP specification is inferred if a threshold percentage of the list
 This is then used as an extra filtering criterion on candidate matches.
 
 However certain anomalies with fractional MP ratings needed to be addressed:
-* The rating was often could be rounded down to the nearest integer
+* The rating was often rounded down to the nearest integer
 * In Germany the rating appears to be rounded *up* (so a 10.1 MP camera is rounded to 11 MP)
 
 A match to the next lower or *higher* integer was therefore considered a match.
@@ -296,18 +313,23 @@ pythonxy 2.7.5.0, including:
 
 # Evaluation of success
 
-I compared my code and results against two ex-employees at Sortable, Alex Black and Aaron Levin. 
+I compared my code and results against the challenge repos on GitHub of two ex-employees at Sortable, [Alex Black](https://github.com/alexblack/Sortable) and [Aaron Levin](https://github.com/aaronlevin/sortable).
+
+First a disclaimer... I don't know if this really is Alex's code, since all the check-ins appear to be by a j2stinso.
+I'll keep referring to it as Alex's.
+But it's very likely someone else's code, since Alex was a co-founder of Sortable and presumably wouldn't need to pass the test himself!
+I'd imagine that someone might not have wanted to use their own GitHub account in case their employer saw it.
 
 My code was a lot more complex, covering a variety of edge cases, and was consequently less elegant.
-I also didn't think of Alex's trick of converting prices to a common currency and using price as an approximate matching or filtering criterion.
+I also didn't think of the trick of converting prices to a common currency and using price as a matching or filtering criterion.
 However I am very happy with the level of accuracy that I managed to achieve.
 
 The common and unique matches are shown below:
 
-| Entrant     | Common matches | My unique matches | Their unique matches | Notes |
-|---          |---             |---                |---                   |---    |
-| Alex Black  | 2647           | 3295              | 25                   | Alex also used price as a filtering mechanism. Both sets of unique matches appear to be largely correct. |
-| Aaron Levin | 5609           | 333               | 842                  | A fair number of Aaron's unique matches appear to be incorrect. |
+| Entrant /Host | Common matches | My unique matches | Their unique matches | Notes |
+|---            |---             |---                |---                   |---    |
+| Alex Black    | 2647           | 3295              | 25                   | Price was used as a filtering mechanism. Both sets of unique matches appear to be largely correct. |
+| Aaron Levin   | 5609           | 333               | 842                  | A fair number of Aaron's unique matches appear to be incorrect. |
 
 I've included csv files with the details of the unique matches found. These can be found in the sub-folders of 
 [/data/comparison](https://github.com/AndrewTweddle/CodingChallenge/blob/master/data/comparison).
@@ -326,13 +348,21 @@ investigation.py is almost 3 000 lines long (though many of these consist of dat
 I had originally planned to refactor it into separate files and classes before submitting it.
 However I decided not to do this after the Sortable challenge was discontinued. 
 
-Additionally, the large script has the side-effect that the investigation and thought process behind my solution is more visible.
+Additionally, the large script has the side-effect that the investigation and thought process behind my solution is more visible. It's effectively a log of my thought process!
 
 ## Write a Scala version
 
-While Python and Pandas were both enjoyable to program in, I missed the benefits of type safety.
+While Python and Pandas were both very enjoyable to program in, I missed the benefits of type safety.
 
-[Although a nice side-effect of this was that I used TDD more extensively than usual, as this helped to compensate for the extra guarantees provided by a compiler.]
+[Although a nice side-effect of this was that I used TDD more than usual, as this helped to compensate for the extra guarantees provided by a statically typed language.]
 
 Scala provides many of the benefits of a dynamic language, such as a succinct syntax and the interactivity of a REPL (if desired).
 So I'm curious to see how a Scala port of the code would compare to the Python solution.
+
+## Write a Spark version
+
+As of Spark 1.3, there is [support for data frames](https://databricks.com/blog/2015/02/17/introducing-dataframes-in-spark-for-large-scale-data-science.html).
+
+Since the existing Pandas solution uses data frames, this might make it easier to port (disclaimer: I haven't looked into Spark's data frames API to verify this).
+
+Sure, it's overkill to use Spark for a problem of this size. But it would still be a useful learning exercise.
