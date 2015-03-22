@@ -315,7 +315,7 @@ pythonxy 2.7.5.0, including:
 
 I compared my code and results against the challenge repos on GitHub of two ex-employees at Sortable, [Alex Black](https://github.com/alexblack/Sortable) and [Aaron Levin](https://github.com/aaronlevin/sortable).
 
-First a disclaimer... I don't know if this really is Alex's code, since all the check-ins appear to be by a j2stinso.
+First a disclaimer... I don't know if this really is Alex's code, since all the check-ins appear to be by j2stinso.
 I'll keep referring to it as Alex's.
 But it's very likely someone else's code, since Alex was a co-founder of Sortable and presumably wouldn't need to pass the test himself!
 I'd imagine that someone might not have wanted to use their own GitHub account in case their employer saw it.
@@ -329,14 +329,14 @@ The common and unique matches are shown below:
 | Entrant /Host | Common matches | My unique matches | Their unique matches | Notes |
 |---            |---             |---                |---                   |---    |
 | Alex Black    | 2647           | 3295              | 25                   | Price was used as a filtering mechanism. Both sets of unique matches appear to be largely correct. |
-| Aaron Levin   | 5609           | 333               | 842                  | A fair number of Aaron's unique matches appear to be incorrect. |
+| Aaron Levin   | 5609           | 333               | 842                  | My unique matches appear to be correct. |
 
 I've included csv files with the details of the unique matches found. These can be found in the sub-folders of 
 [/data/comparison](https://github.com/AndrewTweddle/CodingChallenge/blob/master/data/comparison).
 
 Note: Many listings had duplicate titles (though sometimes different prices and currencies).
 So to perform the comparison, I first removed these duplicates, then did a full outer join between my results and a particular entrant's results.
-
+This will skew the comparison, especially compared to the solution on Alex's profile, since the comparison ignores duplicate titles with price differences.
 
 
 # Future actions to consider
@@ -348,13 +348,13 @@ investigation.py is almost 3 000 lines long (though many of these consist of dat
 I had originally planned to refactor it into separate files and classes before submitting it.
 However I decided not to do this after the Sortable challenge was discontinued. 
 
-Additionally, the large script has the side-effect that the investigation and thought process behind my solution is more visible. It's effectively a log of my thought process!
+Additionally, the large script has the useful side-effect that the investigation process is more visible. It serves as a log of my thoughts!
 
 ## Write a Scala version
 
 While Python and Pandas were both very enjoyable to program in, I missed the benefits of type safety.
 
-[Although a nice side-effect of this was that I used TDD more than usual, as this helped to compensate for the extra guarantees provided by a statically typed language.]
+Although a nice side-effect of this was that I used TDD more than usual, as this helped to compensate for the extra guarantees provided by a statically typed language.
 
 Scala provides many of the benefits of a dynamic language, such as a succinct syntax and the interactivity of a REPL (if desired).
 So I'm curious to see how a Scala port of the code would compare to the Python solution.
