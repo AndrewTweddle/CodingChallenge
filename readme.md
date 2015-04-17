@@ -17,8 +17,7 @@ Though Sortable was no longer hiring, I went ahead and finished off the challeng
 
 Generally I think my algorithm compared quite well to these two. I've included the details of the comparison towards the end of this page.
 
-UPDATE: [Sortable are hiring again](https://sortable.recruiterbox.com/jobs/fk0h6hk?referer=simply_hired&referrer=simplyhired&utm_source=simplyhired&utm_medium=jobclick). 
-So I might get to submit my entry after all!
+UPDATE: [Sortable are hiring again](http://sortable.com/challenge/). So I might get to submit my entry after all!
 
 # Running the code
 
