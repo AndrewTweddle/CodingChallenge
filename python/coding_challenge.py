@@ -23,7 +23,7 @@ import codecs
 
 # Get file paths from command line arguments:
 if len(sys.argv) != 4:
-    sys.stderr.write("Usage: python %s productsFilePath listingsFilePath outputFilePath", sys.argv[0])
+    sys.stderr.write("Usage: python %s productsFilePath listingsFilePath outputFilePath" % sys.argv[0])
     raise SystemExit(1)
 
 productsFilePath = sys.argv[1]
@@ -204,13 +204,16 @@ def markDuplicateProductsToBeIgnored(products):
     # Match on family and model if the manufacturer and model are duplicated (but not the family):
     manuf_model_groups = products[products.matchRule.isnull()].groupby(['manufacturer', 'model'])
     manuf_model_group_sizes = manuf_model_groups.size()
-    manuf_model_sizes = DataFrame({'group_count' : manuf_model_group_sizes}).reset_index()  # reset_index() will copy the index into a column named 'index'
+    manuf_model_sizes = DataFrame({'group_count' : manuf_model_group_sizes}).reset_index()
+        # reset_index() will copy the index into a column named 'index'
     manuf_model_dup_groups = manuf_model_sizes[manuf_model_sizes.group_count > 1]
 
     products2 = products.reset_index()  
         # products2 now has its index copied to a column named 'index'
         # This will be useful for matching up to the original index after the merge below...
-    manuf_model_dups = pd.merge(products2, manuf_model_dup_groups, on=['manufacturer','model'], sort=True).set_index('index')[['manufacturer','family','model']]
+    manuf_model_dups = pd.merge(
+        products2, manuf_model_dup_groups, on=['manufacturer','model'], sort=True)\
+        .set_index('index')[['manufacturer','family','model']]
     manuf_model_dups['matchRule'] = 'familyAndModel'
     products = products.combine_first(manuf_model_dups[['matchRule']])  
         # Note: combine_first() is like a vectorized coalesce.
@@ -247,7 +250,7 @@ def splitModelAndFamilyIntoBlocksAndDeriveAClassificationString(products):
     # Set up a regex for splitting the model into an array
     # of alphabetic, numeric and non-alphanumeric sections
     # 
-    alphaNumRegexPattern = '[A-Za-z]+|\d+|\W+'
+    alphaNumRegexPattern = r'[A-Za-z]+|\d+|\W+'
     alphaNumRegex = re.compile( alphaNumRegexPattern, re.IGNORECASE | re.UNICODE | re.VERBOSE )
     def split_into_blocks_by_alpha_num(stringToSplit):
         return alphaNumRegex.findall(stringToSplit)
@@ -270,7 +273,9 @@ def splitModelAndFamilyIntoBlocksAndDeriveAClassificationString(products):
         # A potential issue here is that the regex patterns assume ANSI characters.
         # However it seems that all the products listed are English, so this shouldn't matter.
         
-    blockClassificationRegexes = [(classifier, re.compile(pattern, re.IGNORECASE | re.UNICODE | re.VERBOSE )) for (classifier,pattern) in blockClassifications]
+    blockClassificationRegexes = [
+        (classifier, re.compile(pattern, re.IGNORECASE | re.UNICODE | re.VERBOSE )) 
+        for (classifier,pattern) in blockClassifications]
     
     def derive_classification(blockToClassify):
         for (classifier, regex) in blockClassificationRegexes:
@@ -357,16 +362,16 @@ createACompositeClassificationOfFamilyAndModel(products)
 # In particular, the Canon EOS 1-D cameras share the same product code
 # and are differented by Mark number only.
 def extractMegaPixelRatings(listingsByPManuf):
-    mpPattern = '(\d+(?:[.,]\d+)?)\s*(?:\-\s*)?(?:MP|MPixe?l?s?|(?:(?:mega?|mio\.?)(?:|\-|\s+)pix?e?l?s?))(?:$|\W)'
-
+    mpPattern = r'(\d+(?:[.,]\d+)?)\s*(?:\-\s*)?(?:MP|MPixe?l?s?|(?:(?:mega?|mio\.?)(?:|\-|\s+)pix?e?l?s?))(?:$|\W)'
+    
     def convert_mp_to_float(s):
         if isinstance(s, float):
             return s 
         else:
             return float(s.replace(',','.'))
 
-    listingsByPManuf['resolution_in_MP'] = \
-        listingsByPManuf.productDesc.str.findall(mpPattern, flags=re.IGNORECASE).str.get(0).apply(convert_mp_to_float)
+    listingsByPManuf['resolution_in_MP'] \
+        = listingsByPManuf.productDesc.str.findall(mpPattern, flags=re.IGNORECASE).str.get(0).apply(convert_mp_to_float)
     listingsByPManuf['rounded_MP'] \
         = listingsByPManuf.resolution_in_MP[listingsByPManuf.resolution_in_MP.notnull()].apply(lambda mp: floor(mp))
 
@@ -385,7 +390,7 @@ extractMegaPixelRatings(listingsByPManuf)
 def get_products_and_listings(products, listingsByPManuf):
     def regex_escape_with_optional_dashes_and_whitespace(text):
         # Remove all white-space and dashes:
-        escaped_text = re.sub('(\s|\-)+', '', text)
+        escaped_text = re.sub(r'(\s|\-)+', '', text)
         is_last_char_numeric = len(escaped_text) > 0 and escaped_text[-1].isdigit()
         # Insert a dash after every character.
         # Note: this is just a place-holder for where a regex will be inserted later.
@@ -425,9 +430,12 @@ def get_products_and_listings(products, listingsByPManuf):
     
     # Perform join between products and listings by product:
     products_to_match = products.reset_index()[['index', 'manufacturer', 'family', 'model', 'exact_match_regex']]
-    listings_to_match = listingsByPManuf.reset_index()[['index', 'pManuf', 'productDesc', 'extraProdDetails', 'resolution_in_MP', 'rounded_MP', 'original_listing_index']]
+    listings_to_match_columns \
+        = ['index', 'pManuf', 'productDesc', 'extraProdDetails', 'resolution_in_MP', 'rounded_MP', 'original_listing_index']
+    listings_to_match = listingsByPManuf.reset_index()[listings_to_match_columns]
     
-    return pd.merge(left=listings_to_match, right=products_to_match, how='inner', left_on='pManuf', right_on='manufacturer', suffixes=('_l','_p'))
+    return pd.merge(left=listings_to_match, right=products_to_match, \
+        how='inner', left_on='pManuf', right_on='manufacturer', suffixes=('_l','_p'))
 
 products_and_listings = get_products_and_listings(products, listingsByPManuf)
 
@@ -438,7 +446,8 @@ def get_exact_matches(products_and_listings):
         return regex.search(product_desc) != None
     
     products_and_listings['is_exact_match'] = products_and_listings.apply(is_exact_match, axis=1)
-    exact_match_columns = ['index_l', 'productDesc', 'resolution_in_MP', 'rounded_MP', 'index_p', 'manufacturer', 'family', 'model']
+    exact_match_columns = ['index_l', 'productDesc', 'resolution_in_MP', 
+        'rounded_MP', 'index_p', 'manufacturer', 'family', 'model']
     exact_matches = products_and_listings[products_and_listings.is_exact_match][exact_match_columns]
     return exact_matches
 
@@ -526,8 +535,6 @@ products['matching_engine'] = products.apply(generate_matching_engine, axis=1)
 # 
 # Note: Ideally this should be done when products_and_listings is created.
 #       However we didn't have the matching engine classes then.
-#       
-#       TODO: refactor this into the correct place for the final solution.
 # 
 products_and_listings = pd.merge(products_and_listings, \
     products[products.matchRule != 'ignore'][['matching_engine']], \
@@ -550,9 +557,12 @@ def run_matching_engine_for_all_products_and_listings(products_and_listings):
     match_results = products_and_listings.apply(run_matching_engine, axis=1)
 
     products_and_listings['match_result'] = match_results
-    products_and_listings['match_result_is_match'] = products_and_listings['match_result'].map(lambda mr: mr.is_match)
-    products_and_listings['match_result_value'] = products_and_listings['match_result'].map(lambda mr: mr.match_value)
-    products_and_listings['match_result_description'] = products_and_listings['match_result'].map(lambda mr: mr.description)
+    products_and_listings['match_result_is_match'] \
+        = products_and_listings['match_result'].map(lambda mr: mr.is_match)
+    products_and_listings['match_result_value'] \
+        = products_and_listings['match_result'].map(lambda mr: mr.match_value)
+    products_and_listings['match_result_description'] \
+        = products_and_listings['match_result'].map(lambda mr: mr.description)
 
 run_matching_engine_for_all_products_and_listings(products_and_listings)
 matched_products_and_listings = products_and_listings[products_and_listings.match_result_is_match]
@@ -567,7 +577,8 @@ def get_highest_value_product_for_listing(listing_grp):
 matches_grouped_by_listing = matched_products_and_listings.groupby('index_l')
 best_matches = matches_grouped_by_listing.apply(get_highest_value_product_for_listing)
 
-best_match_columns = ['index_p', 'manufacturer', 'family', 'model', 'productDesc', 'extraProdDetails', 'match_result_value', 'match_result_description']
+best_match_columns = ['index_p', 'manufacturer', 'family', 'model', 'productDesc', \
+    'extraProdDetails', 'match_result_value', 'match_result_description']
 best_match_sort_by = ['manufacturer', 'family', 'model', 'productDesc', 'extraProdDetails']
 
 # ==============================================================================
@@ -599,23 +610,28 @@ def get_products_and_listings_with_rounded_MP_of_best_value_match(best_matches, 
             
             # Check for multiple top-rated mega-pixel ratings:
             if second_best_match_result_value == best_match_result_value:
-                count_of_top_valued_MPs = by_val[by_val.match_result_value == best_match_result_value]['group_count'].count()
+                count_of_top_valued_MPs \
+                    = by_val[by_val.match_result_value == best_match_result_value]['group_count'].count()
                 if count_of_top_valued_MPs > 2 or abs(second_best_rounded_MP - best_rounded_MP) > 1:
-                    number_of_top_valued_MPs = by_val[by_val.match_result_value == best_match_result_value]['group_count'].sum()
+                    number_of_top_valued_MPs \
+                        = by_val[by_val.match_result_value == best_match_result_value]['group_count'].sum()
                     best_match_group_count = by_val.iloc[0]['group_count']
                     proportion_of_best_match = best_match_group_count / number_of_top_valued_MPs
                     if proportion_of_best_match < THRESHOLD_FOR_REJECTING_MPS_DUE_TO_DIVERSITY:
                         return -1
-                        # There is too much ambiguity in the Megapixel ratings, suggesting that something is wrong with the product record.
-                        # So create an invalid MP rating to ensure that all matches (with MP ratings) are rejected:
+                        # There is too much ambiguity in the Megapixel ratings, 
+                        # suggesting that something is wrong with the product record.
+                        # So create an invalid MP rating to ensure that all matches (with MP ratings) are rejected.
         return best_rounded_MP
 
     matches_grouped_by_product = matches_by_product_mp_and_result_value_with_counts.groupby('index_p')
     best_rounded_MP_by_product = matches_grouped_by_product.apply(get_rounded_MP_of_best_value_match)
     best_rounded_MP_by_product_DF = DataFrame({'best_value_rounded_MP' : best_rounded_MP_by_product}).reset_index()
-    return pd.merge(matched_products_and_listings, best_rounded_MP_by_product_DF, left_on='index_p', right_on='index_p', how='left')
+    return pd.merge(matched_products_and_listings, best_rounded_MP_by_product_DF, 
+        left_on='index_p', right_on='index_p', how='left')
 
-matched_products_and_listings = get_products_and_listings_with_rounded_MP_of_best_value_match(best_matches, matched_products_and_listings)
+matched_products_and_listings \
+    = get_products_and_listings_with_rounded_MP_of_best_value_match(best_matches, matched_products_and_listings)
 
 
 # -----------------------------------------------------------------------------
@@ -629,15 +645,18 @@ def get_best_matches_filtered_by_rounded_MP(matched_products_and_listings):
         best_value_rounded_MP = matched_prod_and_listing['best_value_rounded_MP']
         return abs(rounded_MP - best_value_rounded_MP) <= 1
 
-    are_both_MPS_set = pd.notnull(matched_products_and_listings[['rounded_MP', 'best_value_rounded_MP']]).all(axis=1)
+    are_both_MPS_set = pd.notnull(matched_products_and_listings[
+        ['rounded_MP', 'best_value_rounded_MP']]).all(axis=1)
     matched_products_and_listings['is_highest_type_of_match'] = \
-        matched_products_and_listings.match_result_description == BaseMasterTemplateBuilder.all_of_family_and_model_with_regex_desc
+        matched_products_and_listings.match_result_description \
+            == BaseMasterTemplateBuilder.all_of_family_and_model_with_regex_desc
     matched_products_and_listings['is_best_value_rounded_MP_matched'] \
         = matched_products_and_listings[are_both_MPS_set].apply(get_is_rounded_MP_matched, axis=1)
     matched_products_and_listings.is_best_value_rounded_MP_matched \
         = matched_products_and_listings.is_best_value_rounded_MP_matched.fillna(True)
 
-    is_not_filtered_out = matched_products_and_listings[['is_highest_type_of_match', 'is_best_value_rounded_MP_matched']].any(axis = 1)
+    is_not_filtered_out = matched_products_and_listings[
+        ['is_highest_type_of_match', 'is_best_value_rounded_MP_matched']].any(axis = 1)
 
     filtered_matched_products_and_listings = matched_products_and_listings[is_not_filtered_out]
     filtered_matches_grouped_by_listing = filtered_matched_products_and_listings.groupby('index_l')
@@ -653,7 +672,8 @@ filtered_best_matches = get_best_matches_filtered_by_rounded_MP(matched_products
 def get_listings_with_matched_products(listingsByPManuf, filtered_best_matches):
     filtered_columns = ['index_p', 'index_l']
     filtered_prod_columns = ['family', 'model', 'manufacturer', 'product_name', 'announced-date']
-    listings_with_matched_products = pd.merge( listingsByPManuf, filtered_best_matches[filtered_columns], how='left', left_index=True, right_on='index_l')
+    listings_with_matched_products = pd.merge( 
+        listingsByPManuf, filtered_best_matches[filtered_columns], how='left', left_index=True, right_on='index_l')
     listings_with_matched_products = pd.merge( 
         listings_with_matched_products, products[filtered_prod_columns], how='left', left_on='index_p', right_index=True )
     return listings_with_matched_products
