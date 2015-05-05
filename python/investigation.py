@@ -169,7 +169,7 @@ lManufMap[lManufMap['pManuf'] == ''].to_csv('../data/intermediate/unmatched_manu
 lManufMap[lManufMap['pManuf'] != ''].to_csv('../data/intermediate/matched_manufs.csv', encoding='utf-8')
 lManufMap[possibleMismatches].to_csv('../data/intermediate/possible_mismatched_manufs.csv', encoding='utf-8')
 # ASSUMPTION: using utf-8 encodings will be sufficient. 
-# Note that Excel may show some less common letters as a "?". Nut in a text editor they are correct.
+# Note that Excel may show some less common letters as a "?". But in a text editor they are correct.
 
 lManufMap[possibleMismatches]
 
@@ -1866,7 +1866,7 @@ matched_products_and_listings['index_l'].value_counts().sort_index().to_csv('../
 # 
 # ------------------------------------------------------------------------------------
 #
-# Proposal 2c: Multiple the value of a listing if it is before 
+# Proposal 2c: Multiply the value of a listing if it is before 
 #              the separator (slash or bracket) in the productDesc
 # 
 # Result: Success! 
@@ -2111,7 +2111,7 @@ best_matches[best_match_columns].sort_index(by=best_match_sort_by).to_csv('../da
 CALCULATE_MEGAPIXELS_FROM_BEST_MATCHES_ONLY = True
 # This was added to address issue of Powershot SX 130 IS mega-pixel ratings being used for the IXUS 130, 
 # leading to rejection of IXUS 130 ratings due to the MP mismatch.
-# Originally the code used all product-listing matches, not just be best matches for each listing.
+# Originally the code used all product-listing matches, not just the best matches for each listing.
 
 best_matches_grouped_by_product_mp_and_result_value = best_matches[
     best_matches.rounded_MP.notnull()].groupby(['index_p', 'rounded_MP', 'match_result_value'])
