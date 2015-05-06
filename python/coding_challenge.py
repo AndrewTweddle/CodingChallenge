@@ -64,8 +64,8 @@ pManufsSeries = getUniqueManufacturersFromDataFrame(products)
 # ----------------------------------------------------------------------
 # Generate and clean up manufacturer mappings in products data:
 pManufsMapping = DataFrame( 
-    { 'pManuf': pManufsSeries, 'Keyword': pManufsSeries.str.lower() } 
-) # By default map each word to itself
+    { 'pManuf': pManufsSeries, 'Keyword': pManufsSeries.str.lower() }
+)  # By default map each word to itself
 pManufsMapping['Keyword'][pManufsMapping['pManuf'] == 'Konica Minolta'] = 'konica'
 pManufsMapping = pManufsMapping.append( { 'pManuf': 'Konica Minolta', 'Keyword': 'minolta' }, ignore_index = True )
 pManufsMapping = pManufsMapping.append( { 'pManuf': 'HP', 'Keyword': 'hewlett' }, ignore_index = True )
@@ -94,16 +94,18 @@ def matchListingManufsToProductManufs(pManufsMapping, pManufKeywords):
         for pManufKeyword in pManufKeywords:
             if pManufKeyword in splits:
                 return pManufKeyword
-        foundPManufs = [ p for s in splits
-                           for p in pManufKeywords
-                           if s.find(p.lower()) >= 0
+        foundPManufs = [ p
+                         for s in splits
+                         for p in pManufKeywords
+                         if s.find(p.lower()) >= 0
                        ]
         if len(foundPManufs) > 0:
             return foundPManufs[0]
-        levenshteinPManufs = [ p for s in splits
-                                 for p in pManufKeywords
-                                 if len(s) > min_manuf_word_len 
-                                 and edit_distance(s, p.lower()) <= edit_distance_threshold
+        levenshteinPManufs = [ p
+                               for s in splits
+                               for p in pManufKeywords
+                               if len(s) > min_manuf_word_len 
+                               and edit_distance(s, p.lower()) <= edit_distance_threshold
                              ]
         if len(levenshteinPManufs) > 0:
             return levenshteinPManufs[0]
@@ -734,7 +736,7 @@ results = generate_result_objects(listings_with_matched_products)
 
 # -----------------------------------------------------------------------------
 # Create output folder:
-# 
+#
 outputFolderPath = os.path.dirname(outputFilePath)
 
 if outputFolderPath != "" and not os.path.exists(outputFolderPath):
@@ -742,7 +744,7 @@ if outputFolderPath != "" and not os.path.exists(outputFolderPath):
 
 # -----------------------------------------------------------------------------
 # Write result objects to a file:
-# 
+#
 results_file_contents = u'\n'.join(results)
 results_file = codecs.open(outputFilePath, 'w', 'utf-8')
 
