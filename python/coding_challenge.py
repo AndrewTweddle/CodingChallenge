@@ -7,8 +7,28 @@
 # It is a cut-down and refactored version of investigation.py.
 # investigation.py is an exploratory script and contains explanations, examples and tests.
 # Refer to investigation.py to understand the thought processes that led to the algorithm.
+# 
+# pylint has been run on the file, however many warnings have been ignored.
+# For example, there are many warnings about constant versus variable naming conventions.
+# This can be fixed by moving most of the code into a function.
+# However this will remove the ability to be able to run chunks of the code in a REPL,
+# since the indentation level will be wrong.
 
 import sys
+
+# Get file paths from command line arguments:
+if len(sys.argv) != 4:
+    sys.stderr.write("Usage: python %s productsFilePath listingsFilePath outputFilePath" % sys.argv[0])
+    raise SystemExit(1)
+
+productsFilePath = sys.argv[1]
+listingsFilePath = sys.argv[2]
+outputFilePath = sys.argv[3]
+# To test the code in a REPL, set suitable values for these 3 variables,
+# then paste the following code into a REPL...
+
+# ----------------------------------------------------------------------
+# Required imports:
 import os
 import json
 from pandas import DataFrame, Series
@@ -20,15 +40,6 @@ from string import Template
 from math import floor
 from operator import truediv
 import codecs
-
-# Get file paths from command line arguments:
-if len(sys.argv) != 4:
-    sys.stderr.write("Usage: python %s productsFilePath listingsFilePath outputFilePath" % sys.argv[0])
-    raise SystemExit(1)
-
-productsFilePath = sys.argv[1]
-listingsFilePath = sys.argv[2]
-outputFilePath = sys.argv[3]
 
 # Load listings into a data frame:
 listingData = [json.loads(line) for line in open(listingsFilePath)]
