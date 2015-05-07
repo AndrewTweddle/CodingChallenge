@@ -349,14 +349,19 @@ This will skew the comparison, especially compared to the solution on Alex's pro
 
 # Future actions to consider
 
-## Refactor investigation.py into separate files
+## Refactor coding_challenge.py into separate files and classes
 
 investigation.py is almost 3 000 lines long (though many of these consist of data snippets and descriptions of issues encountered).
+
+This large script has the useful side-effect that the investigation process is more visible. It serves as a log of my thoughts!
+However a single large file can become difficult to navigate through, and it can become difficult to unravel the dependencies.
 
 I had originally planned to refactor it into separate files and classes before submitting it.
 However I decided not to do this after the Sortable challenge was discontinued. 
 
-Additionally, the large script has the useful side-effect that the investigation process is more visible. It serves as a log of my thoughts!
+Instead I have refactored investigation.py into a new coding_challenge.py file.
+I used more functions to isolate the logic and give a local scope to temporary variables.
+However I didn't use object-orientation to further separate out the logic.
 
 ## Write a Scala version
 
