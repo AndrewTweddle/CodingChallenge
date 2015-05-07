@@ -17,7 +17,7 @@ Though Sortable was no longer hiring, I went ahead and finished off the challeng
 
 Generally I think my algorithm compared quite well to these two. I've included the details of the comparison towards the end of this page.
 
-UPDATE: [Sortable are hiring again](http://sortable.com/challenge/). So I might get to submit my entry after all!
+UPDATE: It looks like [Sortable are hiring again](http://sortable.com/challenge/) in 2015!
 
 # Running the code
 
@@ -30,7 +30,8 @@ UPDATE: [Sortable are hiring again](http://sortable.com/challenge/). So I might 
   * nltk 2.0.4
 * Clone the github repo, checking it out to a folder of your choice e.g. coding_challenge
 * Navigate to the python sub-folder of the checkout folder in your CLI e.g. coding_challenge/python
-* Run: python investigation.py
+* Run: python python/coding_challenge.py data/input/products.txt data/input/listings.txt data/output/results.txt
+  * NB: Replace the 3 paths with suitable values if you wish to run the algorithm against other data sets (for example)
 * Navigate to the data/output/ sub-folder e.g. coding_challenge/data/output/
 * Analyze the results.txt file (each line is in json format)
 
@@ -46,6 +47,14 @@ So this was a natural choice, and also provided an opportunity to improve my Pyt
 
 The results of the investigations into the data can be found in the [investigation.py](https://github.com/AndrewTweddle/CodingChallenge/blob/master/python/investigation.py) script.
 Successive discoveries and experiments are well documented in the script.
+
+## coding_challenge.py
+
+[coding_challenge.py](https://github.com/AndrewTweddle/CodingChallenge/blob/master/python/coding_challenge.py) is a cleaned up version of investigation.py.
+Investigative and test code has been removed, along with many explanatory comments and data extracts.
+
+It has additional support for running the algorithm against arbitrary data files.
+This is achieved by passing the file paths for the products, listings and results files as parameters to the script.
 
 ## A hierarchy of matching criteria
 
