@@ -28,7 +28,8 @@ UPDATE: It looks like [Sortable are hiring again](http://sortable.com/challenge/
   * pandas 0.11.0
   * scikits-learn 0.13.1
   * nltk 2.0.4
-* Clone the github repo, checking it out to a folder of your choice e.g. coding_challenge
+* NB: Unravelling the chains of Python package dependencies can be time-consuming and tedious. I used Pythonxy 2.7.5.0 to side-step this pain. However it is Windows-only.
+* Clone the github repo (https://github.com/AndrewTweddle/CodingChallenge.git), checking it out to a folder of your choice e.g. coding_challenge. 
 * Navigate to the python sub-folder of the checkout folder in your CLI e.g. coding_challenge/python
 * Run: python python/coding_challenge.py data/input/products.txt data/input/listings.txt data/output/results.txt
   * NB: Replace the 3 paths with suitable values if you wish to run the algorithm against other data sets (for example)
